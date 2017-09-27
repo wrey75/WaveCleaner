@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.oxande</groupId>
+	<artifactId>wavecleaner</artifactId>
+	<version>0.10</version>
+	<packaging>jar</packaging>
+
+	<properties>
+		<jdk.version>1.8</jdk.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<!-- download source code in Eclipse, best practice -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+				</configuration>
+			</plugin>
+
+			<!-- Set a JDK compiler level -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>com.oxande.wavecleaner.WaveCleaner</mainClass>
+							<classpathPrefix>dependency-jars/</classpathPrefix>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<!-- Copy project dependency -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.5.1</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<!-- exclude junit, we need runtime dependency only -->
+							<includeScope>runtime</includeScope>
+							<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>tritonus-share</artifactId>
+			<version>0.3.7.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>tritonus-all</artifactId>
+			<version>0.3.7.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>jlayer</artifactId>
+			<version>1.0.1.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>mp3spi</artifactId>
+			<version>1.9.5.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>jorbis</artifactId>
+			<version>0.0.17.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>vorbisspi</artifactId>
+			<version>1.0.3.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>basicplayer</artifactId>
+			<version>3.0.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.compartmental.code</groupId>
+			<artifactId>minim</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+	</dependencies>
+</project>
+

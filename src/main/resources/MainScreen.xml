@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JFrame rootClass="MainFrame" name="com.oxande.wavecleaner.ui.AbstractMainScreen"
+	coolsize="300,150" title="Wave Cleaner">
+	<menubar>
+		<menu text="_File">
+			<menuitem action="onLoadSound">Load the music</menuitem>
+			<menu text="_Look &amp; Feel">
+				<lookandfeel />
+			</menu>
+			<menuitem action="onExit">E_xit</menuitem>
+		</menu>
+		<menu text="_Help">
+			<menuitem action="showAboutDlg">_About</menuitem>
+		</menu>
+	</menubar>
+
+	<toolbar id="toolbar">
+	</toolbar>
+
+	<splitpane>
+		<tree id="pathTree" vscroll="auto" hscroll="auto" />
+		<component id="song" class="com.oxande.wavecleaner.ui.WaveForm" />
+	</splitpane>
+
+	<statusbar id="statusBar" property="statusMessage" />
+
+</JFrame>
