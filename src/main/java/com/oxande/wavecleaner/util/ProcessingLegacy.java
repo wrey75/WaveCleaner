@@ -13,6 +13,10 @@ import java.io.InputStream;
  */
 public class ProcessingLegacy {
 	 public String sketchPath( String fileName ){
+		 if( fileName.startsWith("~/") ){
+			 String homeDir = System.getProperty("user.home");
+			 return homeDir + fileName.substring(1);
+		 }
 		 return fileName;
 	 }
 	 

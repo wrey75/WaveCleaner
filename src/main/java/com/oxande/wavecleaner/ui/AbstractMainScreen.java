@@ -39,11 +39,12 @@ public class AbstractMainScreen extends JFrame {
    private JMenuBar jmenubar1 = new JMenuBar();
    private JMenu jmenu1 = new JMenu();
    private JMenuItem jmenuitem1 = new JMenuItem();
+   private JMenuItem jmenuitem2 = new JMenuItem();
    private JMenu jmenu2 = new JMenu();
    public ButtonGroup group1 = new ButtonGroup();
-   private JMenuItem jmenuitem2 = new JMenuItem();
-   private JMenu jmenu3 = new JMenu();
    private JMenuItem jmenuitem3 = new JMenuItem();
+   private JMenu jmenu3 = new JMenu();
+   private JMenuItem jmenuitem4 = new JMenuItem();
    protected JLabel statusBar = new JLabel();
    protected JToolBar toolbar = new JToolBar();
    private JSplitPane jsplitpane1 = new JSplitPane();
@@ -69,7 +70,7 @@ private class SetStatusMessageClass implements Runnable {
     */
    protected void showAboutDlg()
    {
-      JOptionPane.showMessageDialog(jmenuitem3, "Not implemented.",jmenuitem3.getText(), JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(jmenuitem4, "Not implemented.",jmenuitem4.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    public void setStatusMessage(String in)
@@ -82,12 +83,20 @@ private class SetStatusMessageClass implements Runnable {
     */
    protected void onExit()
    {
-      JOptionPane.showMessageDialog(jmenuitem2, "Not implemented.",jmenuitem2.getText(), JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(jmenuitem3, "Not implemented.",jmenuitem3.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    public String getStatusMessage()
    {
       return statusBar.getText();
+   }
+
+   /**
+    * Called by the menu item <i>File/Record</i>.
+    */
+   protected void onRecordSound()
+   {
+      JOptionPane.showMessageDialog(jmenuitem2, "Not implemented.",jmenuitem2.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    /**
@@ -126,6 +135,20 @@ private class SetStatusMessageClass implements Runnable {
 
 );
       jmenu1.add(jmenuitem1);
+      jmenuitem2.setText("Record");
+      jmenuitem2.setAction(new AbstractAction()  {
+   {
+      putValue(Action.NAME, "Record");
+   }
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onRecordSound();
+   }
+}
+
+);
+      jmenu1.add(jmenuitem2);
       jmenu2.setText("Look & Feel");
       jmenu2.setMnemonic(java.awt.event.KeyEvent.VK_L);
       jmenu2.setDisplayedMnemonicIndex(0);
@@ -154,10 +177,10 @@ private class SetStatusMessageClass implements Runnable {
          }
       }
       jmenu1.add(jmenu2);
-      jmenuitem2.setText("Exit");
-      jmenuitem2.setMnemonic(java.awt.event.KeyEvent.VK_X);
-      jmenuitem2.setDisplayedMnemonicIndex(1);
-      jmenuitem2.setAction(new AbstractAction()  {
+      jmenuitem3.setText("Exit");
+      jmenuitem3.setMnemonic(java.awt.event.KeyEvent.VK_X);
+      jmenuitem3.setDisplayedMnemonicIndex(1);
+      jmenuitem3.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Exit");
       putValue(Action.MNEMONIC_KEY, java.awt.event.KeyEvent.VK_X);
@@ -171,15 +194,15 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenu1.add(jmenuitem2);
+      jmenu1.add(jmenuitem3);
       jmenubar1.add(jmenu1);
       jmenu3.setText("Help");
       jmenu3.setMnemonic(java.awt.event.KeyEvent.VK_H);
       jmenu3.setDisplayedMnemonicIndex(0);
-      jmenuitem3.setText("About");
-      jmenuitem3.setMnemonic(java.awt.event.KeyEvent.VK_A);
-      jmenuitem3.setDisplayedMnemonicIndex(0);
-      jmenuitem3.setAction(new AbstractAction()  {
+      jmenuitem4.setText("About");
+      jmenuitem4.setMnemonic(java.awt.event.KeyEvent.VK_A);
+      jmenuitem4.setDisplayedMnemonicIndex(0);
+      jmenuitem4.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "About");
       putValue(Action.MNEMONIC_KEY, java.awt.event.KeyEvent.VK_A);
@@ -193,7 +216,7 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenu3.add(jmenuitem3);
+      jmenu3.add(jmenuitem4);
       jmenubar1.add(jmenu3);
       this.setJMenuBar(jmenubar1);
       Border border1 = BorderFactory.createLoweredBevelBorder();

@@ -7,6 +7,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.oxande.wavecleaner.WaveCleaner;
 
+import ddf.minim.AudioRecorder;
 import ddf.minim.AudioSample;
 
 @SuppressWarnings("serial")
@@ -39,6 +40,10 @@ public class MainScreen extends AbstractMainScreen {
 		}
 	}
 	
+	protected void onRecordSound(){
+		app.startRecord();
+		  
+	}
 	
 	/**
 	 * Load the sound file

@@ -4,6 +4,7 @@
 	<menubar>
 		<menu text="_File">
 			<menuitem action="onLoadSound">Load the music</menuitem>
+			<menuitem action="onRecordSound">Record</menuitem>
 			<menu text="_Look &amp; Feel">
 				<lookandfeel />
 			</menu>
