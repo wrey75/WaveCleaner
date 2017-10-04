@@ -64,7 +64,7 @@ public class JListUI extends JComponentUI {
 //		}
 		
 		CONTROLLER.addToMethod(initMethod, root, varName);
-		String scrollName = JTextAreaUI.addScrollPane(varName,jclass,initMethod,root);
+		String scrollName = JPanelUI.addScrollPane(varName,jclass,initMethod,root);
 		return (scrollName == null ? varName : scrollName );
 	}
 

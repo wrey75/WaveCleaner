@@ -41,7 +41,7 @@ public class JTreeUI extends JComponentUI {
 	public String parse(JavaClass jclass, JavaMethod initMethod, Element root ) throws UnexpectedTag{
 		varName = Parser.addDeclaration( jclass, root, JTree.class );
 		CONTROLLER.addToMethod(initMethod, root, varName);
-		String scrollName = JTextAreaUI.addScrollPane(varName,jclass,initMethod,root);
+		String scrollName = JPanelUI.addScrollPane(varName,jclass,initMethod,root);
 		return (scrollName == null ? varName : scrollName );
 	}
 }

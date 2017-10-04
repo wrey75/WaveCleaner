@@ -32,12 +32,13 @@ public class MainScreen extends AbstractMainScreen {
 		System.exit(0);
 	}
 	
-	public void setWaveForm( File f ){
-		AudioSample sample = this.app.getAudioSample(f);
-		if( sample != null ){
-			this.song.loadSound( sample );
-			this.song.repaint();
-		}
+	/**
+	 * Set the wave form based on the audio document.
+	 * 
+	 * @param audio
+	 */
+	public void setWaveForm( AudioDocument audio ){
+		this.song.setDocument(audio);
 	}
 	
 	protected void onRecordSound(){

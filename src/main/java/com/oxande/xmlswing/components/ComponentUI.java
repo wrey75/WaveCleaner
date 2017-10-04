@@ -86,6 +86,9 @@ public class ComponentUI implements IComponent {
 		else if( tagName.equals(JLabelUI.TAGNAME)){
 			component = new JLabelUI();
 		}
+		else if( tagName.equals("panel")){
+			component = new JPanelUI();
+		}
 		else if( tagName.equals("tabs")){
 			component = new JTabbedPaneUI();
 		}

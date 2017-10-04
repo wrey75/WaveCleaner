@@ -141,7 +141,7 @@ public class JTableUI extends JComponentUI {
 			}
 		}
 		
-		String scrollName = JTextAreaUI.addScrollPane(varName,jclass,initMethod,root);
+		String scrollName = JPanelUI.addScrollPane(varName,jclass,initMethod,root);
 		return (scrollName == null ? varName : scrollName );
 	}
 	

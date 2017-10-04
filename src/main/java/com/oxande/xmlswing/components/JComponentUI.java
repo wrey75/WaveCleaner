@@ -224,7 +224,8 @@ public class JComponentUI extends ContainerUI {
 		varName = Parser.addDeclaration(jclass, root, JCheckBox.class);
 		// String text = Parser.getTextContents(root);
 		// CONTROLLER.addToMethod(initMethod, root, varName);
-		return varName;
+		String scrollName = JPanelUI.addScrollPane(varName,jclass,initMethod,root);
+		return (scrollName == null ? varName : scrollName );
 	}
 
 }

@@ -1,23 +1,12 @@
 package com.oxande.wavecleaner;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Mixer;
-import javax.sound.sampled.Port;
-import javax.sound.sampled.TargetDataLine;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import com.oxande.wavecleaner.ui.AudioDocument;
 import com.oxande.wavecleaner.ui.MainScreen;
 import com.oxande.wavecleaner.util.ProcessingLegacy;
 
@@ -28,7 +17,7 @@ import ddf.minim.Minim;
 
 public class WaveCleaner {
 	private MainScreen mainFrame;
-	private Minim minim;
+	public Minim minim;
 
 	public static void main(String[] args) {
 		/*
@@ -116,6 +105,15 @@ public class WaveCleaner {
 		System.exit(0);
 				*/
 		
+		// For Mac users!
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Test");
+        try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException|InstantiationException|IllegalAccessException|UnsupportedLookAndFeelException e) {
+			System.err.println("Does not support the native look and feel");
+		}
+        
 		WaveCleaner app = new WaveCleaner();
 		app.start();
 		for( int i = 0; i < args.length; i++ ){
@@ -129,6 +127,8 @@ public class WaveCleaner {
 				}
 			}
 		}
+
+
 	}
 	
 	public AudioSample getAudioSample( File f ){
@@ -138,7 +138,10 @@ public class WaveCleaner {
 	
 	public void loadSoundFile( String name ){
 		File f = new File(name);
-		mainFrame.setWaveForm(f);
+		if(f.exists()){
+			AudioDocument audio = new AudioDocument(minim, f);
+			mainFrame.setWaveForm(audio);
+		}
 	}
 
 	/**
