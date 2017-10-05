@@ -7,16 +7,20 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.oxande.wavecleaner.WaveCleaner;
 
-import ddf.minim.AudioRecorder;
-import ddf.minim.AudioSample;
+import ddf.minim.AudioOutput;
+import ddf.minim.Minim;
+
 
 @SuppressWarnings("serial")
 public class MainScreen extends AbstractMainScreen {
 
 	private WaveCleaner app;
+	private AudioDocument audio;
+	private AudioOutput lineOut;
 	
 	public void init(WaveCleaner app) {
 		this.app = app;
+		this.lineOut = this.app.getLineOut();
 		
 		// Init the components
 		initComponents();
@@ -38,6 +42,7 @@ public class MainScreen extends AbstractMainScreen {
 	 * @param audio
 	 */
 	public void setWaveForm( AudioDocument audio ){
+		this.audio = audio;
 		this.song.setDocument(audio);
 	}
 	
@@ -59,5 +64,11 @@ public class MainScreen extends AbstractMainScreen {
 	    	String name = chooser.getSelectedFile().getAbsolutePath();
 	    	this.app.loadSoundFile(name);
 	    }
+	}
+	
+	@Override
+	public void onPlay(){
+		AudioOutput out = this.app.minim.getLineOut(Minim.STEREO, 2048, 48000f, 16);
+		this.audio.play(out);
 	}
 }

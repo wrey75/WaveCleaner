@@ -8,25 +8,42 @@ import javax.sound.sampled.AudioFormat;
 
 import com.oxande.wavecleaner.RMSSample;
 
+import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.spi.AudioRecordingStream;
+import ddf.minim.ugens.FilePlayer;
 
 /**
- * Management of an audio file.
+ * Management of an audio file. The audio document can be seen as
+ * the "driver" for its display. I created a listener for the document
+ * as it is the case for mouse events and so on. It is based on
+ * Microsoft MFC management with a <code>CDocument</code> and a
+ * <code>CView</code>. 
  * 
- * @author wrey
+ *   <p>
+ *   When the file is linked to this audio document class, the
+ *   levels are read from the disk at full speed (works also on
+ *   MP3!) and visually updated in the display. We use a thread
+ *   to read the file then the update can be done behind the
+ *   scenes.
+ *   </p>
+ *   
+ *   
+ * 
+ * @author wrey75
  *
  */
 public class AudioDocument {
 	String fileName;
 	AudioRecordingStream stream;
+	FilePlayer filePlayer = null;
 	int bufferSize;
 	int sampleRate;
 	int leftChannel = 0;
 	int rightChannel = 1;
 	int nbChannels = 2;
-	int totalSamples = 0;
+	private int totalSamples = 0;
 	
 	/**
 	 * The listeners
@@ -47,6 +64,13 @@ public class AudioDocument {
 	
 	public int getSampleSize(){
 		return this.bufferSize;
+	}
+	
+	private FilePlayer getFilePlayer(){
+		if( this.filePlayer == null ){
+			this.filePlayer = new FilePlayer( stream );
+		}
+		return this.filePlayer;
 	}
 	
 	/**
@@ -178,5 +202,15 @@ public class AudioDocument {
 		publish(0);
 	}
 
+	public synchronized void stop(){
+		filePlayer.pause();
+	}
+	
+	public synchronized void play(AudioOutput out){
+		FilePlayer player = getFilePlayer();
+		player.patch(out);
+		player.cue(1000 * 30 );
+		player.play();
+	}
 	
 }

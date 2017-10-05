@@ -36,8 +36,9 @@ public class AbstractMainScreen extends JFrame {
    private JMenuItem jmenuitem1 = new JMenuItem();
    private JMenuItem jmenuitem2 = new JMenuItem();
    private JMenuItem jmenuitem3 = new JMenuItem();
-   private JMenu jmenu2 = new JMenu();
    private JMenuItem jmenuitem4 = new JMenuItem();
+   private JMenu jmenu2 = new JMenu();
+   private JMenuItem jmenuitem5 = new JMenuItem();
    protected JLabel statusBar = new JLabel();
    protected JToolBar toolbar = new JToolBar();
    private JSplitPane jsplitpane1 = new JSplitPane();
@@ -63,7 +64,7 @@ private class SetStatusMessageClass implements Runnable {
     */
    protected void showAboutDlg()
    {
-      JOptionPane.showMessageDialog(jmenuitem4, "Not implemented.",jmenuitem4.getText(), JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(jmenuitem5, "Not implemented.",jmenuitem5.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    public void setStatusMessage(String in)
@@ -76,7 +77,7 @@ private class SetStatusMessageClass implements Runnable {
     */
    protected void onExit()
    {
-      JOptionPane.showMessageDialog(jmenuitem3, "Not implemented.",jmenuitem3.getText(), JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(jmenuitem4, "Not implemented.",jmenuitem4.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    public String getStatusMessage()
@@ -106,6 +107,14 @@ private class SetStatusMessageClass implements Runnable {
       appl.initComponents();
       appl.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
       appl.setVisible(true);
+   }
+
+   /**
+    * Called by the menu item <i>File/Play</i>.
+    */
+   protected void onPlay()
+   {
+      JOptionPane.showMessageDialog(jmenuitem3, "Not implemented.",jmenuitem3.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    public void initComponents()
@@ -142,10 +151,24 @@ private class SetStatusMessageClass implements Runnable {
 
 );
       jmenu1.add(jmenuitem2);
-      jmenuitem3.setText("Exit");
-      jmenuitem3.setMnemonic(java.awt.event.KeyEvent.VK_X);
-      jmenuitem3.setDisplayedMnemonicIndex(1);
+      jmenuitem3.setText("Play");
       jmenuitem3.setAction(new AbstractAction()  {
+   {
+      putValue(Action.NAME, "Play");
+   }
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onPlay();
+   }
+}
+
+);
+      jmenu1.add(jmenuitem3);
+      jmenuitem4.setText("Exit");
+      jmenuitem4.setMnemonic(java.awt.event.KeyEvent.VK_X);
+      jmenuitem4.setDisplayedMnemonicIndex(1);
+      jmenuitem4.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Exit");
       putValue(Action.MNEMONIC_KEY, java.awt.event.KeyEvent.VK_X);
@@ -159,15 +182,15 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenu1.add(jmenuitem3);
+      jmenu1.add(jmenuitem4);
       jmenubar1.add(jmenu1);
       jmenu2.setText("Help");
       jmenu2.setMnemonic(java.awt.event.KeyEvent.VK_H);
       jmenu2.setDisplayedMnemonicIndex(0);
-      jmenuitem4.setText("About");
-      jmenuitem4.setMnemonic(java.awt.event.KeyEvent.VK_A);
-      jmenuitem4.setDisplayedMnemonicIndex(0);
-      jmenuitem4.setAction(new AbstractAction()  {
+      jmenuitem5.setText("About");
+      jmenuitem5.setMnemonic(java.awt.event.KeyEvent.VK_A);
+      jmenuitem5.setDisplayedMnemonicIndex(0);
+      jmenuitem5.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "About");
       putValue(Action.MNEMONIC_KEY, java.awt.event.KeyEvent.VK_A);
@@ -181,7 +204,7 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenu2.add(jmenuitem4);
+      jmenu2.add(jmenuitem5);
       jmenubar1.add(jmenu2);
       this.setJMenuBar(jmenubar1);
       Border border1 = BorderFactory.createLoweredBevelBorder();

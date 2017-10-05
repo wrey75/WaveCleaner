@@ -1,6 +1,5 @@
 package com.oxande.wavecleaner.ui;
 
-import com.oxande.wavecleaner.RMSSample;
 
 public interface AudioDocumentListener {
 	

@@ -11,6 +11,7 @@ import com.oxande.wavecleaner.ui.MainScreen;
 import com.oxande.wavecleaner.util.ProcessingLegacy;
 
 import ddf.minim.AudioInput;
+import ddf.minim.AudioOutput;
 import ddf.minim.AudioRecorder;
 import ddf.minim.AudioSample;
 import ddf.minim.Minim;
@@ -154,14 +155,20 @@ public class WaveCleaner {
 	public void start(){
 		// Initialize the main screen
 		mainFrame = new MainScreen();
-		mainFrame.init(this);
 		minim = new Minim(new ProcessingLegacy());
+		mainFrame.init(this);
 	}
 
 	public void startRecord(){
 		AudioInput in = minim.getLineIn(Minim.STEREO, 2048, 48000f, 16);
 		AudioRecorder recorder = minim.createRecorder(in, "~/myrecording.wav");
 		recorder.beginRecord();
+	}
+
+
+	
+	public AudioOutput getLineOut(){
+		return this.minim.getLineOut(Minim.STEREO);
 	}
 
 }

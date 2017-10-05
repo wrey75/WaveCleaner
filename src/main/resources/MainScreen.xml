@@ -5,6 +5,7 @@
 		<menu text="_File">
 			<menuitem action="onLoadSound">Load the music</menuitem>
 			<menuitem action="onRecordSound">Record</menuitem>
+			<menuitem action="onPlay">Play</menuitem>
 			<!-- <menu text="_Look &amp; Feel"> <lookandfeel /> </menu> -->
 			<menuitem action="onExit">E_xit</menuitem>
 		</menu>

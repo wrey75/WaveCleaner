@@ -13,18 +13,52 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.KeyStroke;
 import javax.swing.event.MouseInputListener;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.spi.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
 
+/**
+ * The waveform component is the central part of the software in terms of graphics.
+ * 
+ * The curve is displayed in ONLY one bar: the upper part is the left channel and the
+ * bottom is the right channel. I found it simpler and clearer than having two
+ * separate graphics. As for Audacity, I kept the RMS level in a color and the peaks
+ * in the same but brighter (I used some tables for the colors).
+ * 
+ * <p>
+ * The scrollbar is directly attached at the bottom of the window and always visible
+ * (as far as I can). To zoom inside the sound, you can use the wheel of the mouse. For
+ * Mac users (also having an horizontal wheel), I just used a trick found on StackOverflow.
+ * </p>
+ * <p>
+ * The main problem is to synchronize the scrollbar to the wave form.
+ * </p>
+ * 
+ * TODO: next paragraph not implemented.
+ * <p>
+ *  If the zoom is very a big one, you are not interested in the RMS curves but in the
+ *  waveform. This component will display the waveform when you scroll at the maximum. 
+ * </p>
+ * 
+ * 
+ * @author wrey75
+ *
+ */
 @SuppressWarnings("serial")
 public class WaveFormComponent extends JPanel
-		implements MouseInputListener ,MouseWheelListener, AdjustmentListener, AudioDocumentListener {
+		implements MouseInputListener, MouseWheelListener, AdjustmentListener, AudioDocumentListener {
+	private static Logger LOG = LogManager.getLogger();
 	AudioDocument audio = null;
-	double zoom = 1.0;
 	private JScrollBar scroll = new JScrollBar();
 	private WaveComponent wave = new WaveComponent();
 	private int mousePosition = -1;
@@ -37,7 +71,7 @@ public class WaveFormComponent extends JPanel
 
 		private void setStroke(Graphics g, double width) {
 			if (g instanceof Graphics2D) {
-				Stroke stroke = new BasicStroke((float) width );
+				Stroke stroke = new BasicStroke((float) width);
 				((Graphics2D) g).setStroke(stroke);
 			}
 		}
@@ -46,17 +80,18 @@ public class WaveFormComponent extends JPanel
 			Rectangle rect = g.getClipBounds();
 			int y = rect.height / 2;
 			float h = rect.height / 2 - 10;
-			double zoom = getZoomLevel();
+			// double zoom = getExtent() / audio.getSampleSize();
 			float scrollPos = getScrollPosition() / audio.getSampleSize();
 
-			double strokeWidth = rect.width * zoom / samples.length;
-			
+			double strokeWidth = 1.0; // rect.width * zoom / samples.length;
 			setStroke(g, strokeWidth);
 
+			double zoom = (double)audio.getNumberOfSamples() / getExtent();
+			LOG.debug("ZOOM: {}, ext = {}", zoom, getExtent() );
 			for (int i = 0; i < samples.length; i++) {
 				RMSSample s = samples[i];
 				if (s != null) {
-					int x = (int) ((i - scrollPos) * (float) rect.width * zoom / samples.length);
+					int x = (int) ((i - scrollPos) * (float) rect.width *zoom / samples.length);
 					g.setColor(peakColor);
 					g.drawLine(x, (int) (y - s.peakL * h), x, (int) (y - s.levelL * h));
 					g.setColor(rmsColor);
@@ -88,11 +123,11 @@ public class WaveFormComponent extends JPanel
 					g.drawString("Farme rate: " + audio.getFormat().getFrameRate(), 10, 40);
 				}
 			}
-			
-			setStroke(g,1.0);
+
+			setStroke(g, 1.0);
 			g.setColor(Color.LIGHT_GRAY);
 			g.drawLine(mousePosition, 0, mousePosition, rect.height);
-			
+
 			g.setColor(Color.GREEN.brighter());
 			g.drawLine(mouseSelected, 0, mouseSelected, rect.height);
 		}
@@ -109,9 +144,12 @@ public class WaveFormComponent extends JPanel
 		this.addMouseMotionListener(this);
 		this.addMouseWheelListener(this);
 		this.addMouseListener(this);
+//		this.wave.addKeyListener(this);
 		this.setLayout(new BorderLayout());
 		this.add(scroll, BorderLayout.SOUTH);
 		this.add(wave, BorderLayout.CENTER);
+//		this.wave.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "play");
+//		this.wave.getActionMap().put("play", new Action (){
 	}
 
 	/**
@@ -124,6 +162,7 @@ public class WaveFormComponent extends JPanel
 	public void setDocument(AudioDocument doc) {
 		this.audio = doc;
 		this.audio.register(this);
+		setExtent(this.audio.getNumberOfSamples());
 		this.repaint();
 	}
 
@@ -134,16 +173,21 @@ public class WaveFormComponent extends JPanel
 	 * @param newValue
 	 *            the new value
 	 */
-	public void setZoom(double newValue) {
-		this.zoom = (newValue > 1.0 ? newValue : 1.0);
+	public void setExtent(int extent) {
 		int max = audio.getNumberOfSamples();
+		if( extent > max ){
+			extent = max;
+		}
 		int current = this.scroll.getValue();
-		this.scroll.setValues(current, (int) (max / zoom), 0, max);
+		this.scroll.setValues(current, extent, 0, max);
+		this.scrollExtend = extent;
 		this.repaint();
 	}
 
-	public double getZoomLevel() {
-		return this.zoom;
+	private int scrollExtend;
+	
+	public int getExtent() {
+		return this.scrollExtend;
 	}
 
 	@Override
@@ -155,24 +199,22 @@ public class WaveFormComponent extends JPanel
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO: LOAD THE FILE DRAGGED (IF POSSIBLE)
-		
+		System.out.println("Dragging..");
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if (!e.isShiftDown()) {
 			int rotation = e.getWheelRotation();
-			this.setZoom(this.getZoomLevel() + rotation / 10.0);
+			this.setExtent(this.getExtent() + rotation * 10000);
 		}
 	}
 
 	@Override
 	public void audioChanged() {
-		System.out.println("Audio " + this.audio + " changed.");
-		int nbChunks = audio.getNumberOfChunks();
 		int max = audio.getNumberOfSamples();
 		int current = this.scroll.getValue();
-		this.scroll.setValues(current, (int) (max / zoom), 0, max);
+		this.scroll.setValues(current, this.getExtent(), 0, max);
 		repaint();
 	}
 
@@ -184,30 +226,32 @@ public class WaveFormComponent extends JPanel
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		mouseSelected = e.getX();
+		repaint();
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
+
 
 }
