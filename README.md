@@ -30,6 +30,11 @@ There is a excellent software called [Wave Repair](http://www.delback.co.uk/wavr
 working on Windows and it is a shareware. In addition it takes a long time to get excellent
 results (but you should buy it, it is really amazing).
 
+There is another one called [ClickRepair](http://www.clickrepair.net/), it works under
+JAVA and it is NOT open sourced. As a surprise, only Audacity and GNU Wave Cleaner seems
+to have open sourced the algorithms.
+
+
 ## Why a GNU Licence?
 
 Well, I suppose i'm forced to use it mainly because I would like to take piece of code from
