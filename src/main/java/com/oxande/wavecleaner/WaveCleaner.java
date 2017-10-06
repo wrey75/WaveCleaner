@@ -2,7 +2,7 @@ package com.oxande.wavecleaner;
 
 import java.io.File;
 
-
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -142,6 +142,9 @@ public class WaveCleaner {
 		if(f.exists()){
 			AudioDocument audio = new AudioDocument(minim, f);
 			mainFrame.setWaveForm(audio);
+		}
+		else {
+			JOptionPane.showMessageDialog(this.mainFrame, "Can not load the file " + name, "Can not load", JOptionPane.WARNING_MESSAGE);
 		}
 	}
 
