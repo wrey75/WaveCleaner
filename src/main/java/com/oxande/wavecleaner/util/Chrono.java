@@ -1,12 +1,13 @@
 package com.oxande.wavecleaner.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicInteger;
 
 public class Chrono {
-	private static Logger LOG = LogManager.getLogger();
+	private static Log LOG = LogFactory.getLog(Chrono.class);
 	private static AtomicInteger count = new AtomicInteger(0);
 	
 	private long started;

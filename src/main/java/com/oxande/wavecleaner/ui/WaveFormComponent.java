@@ -20,12 +20,10 @@ import javax.swing.JScrollBar;
 import javax.swing.KeyStroke;
 import javax.swing.event.MouseInputListener;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.spi.LoggerFactory;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.util.logging.LogFactory;
 
 /**
  * The waveform component is the central part of the software in terms of graphics.
@@ -57,15 +55,15 @@ import com.oxande.wavecleaner.RMSSample;
 @SuppressWarnings("serial")
 public class WaveFormComponent extends JPanel
 		implements MouseInputListener, MouseWheelListener, AdjustmentListener, AudioDocumentListener {
-	private static Logger LOG = LogManager.getLogger();
+	private static Logger LOG = LogFactory.getLog(WaveComponent.class);
 	AudioDocument audio = null;
 	private JScrollBar scroll = new JScrollBar();
 	private WaveComponent wave = new WaveComponent();
 	private int mousePosition = -1;
 	private int mouseSelected = -1;
 
-	public static final Color peakColor = new Color(52, 152, 219, 100).brighter();
-	public static final Color rmsColor = new Color(41, 128, 185, 100);
+	public static final Color peakColor = new Color(52, 152, 219).brighter();
+	public static final Color rmsColor = new Color(41, 128, 185);
 
 	private class WaveComponent extends JComponent {
 
@@ -87,7 +85,6 @@ public class WaveFormComponent extends JPanel
 			setStroke(g, strokeWidth);
 
 			double zoom = (double)audio.getNumberOfSamples() / getExtent();
-			LOG.debug("ZOOM: {}, ext = {}", zoom, getExtent() );
 			for (int i = 0; i < samples.length; i++) {
 				RMSSample s = samples[i];
 				if (s != null) {

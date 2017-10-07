@@ -6,9 +6,12 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.apache.logging.log4j.Logger;
+
 import com.oxande.wavecleaner.ui.AudioDocument;
 import com.oxande.wavecleaner.ui.MainScreen;
 import com.oxande.wavecleaner.util.ProcessingLegacy;
+import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.AudioInput;
 import ddf.minim.AudioOutput;
@@ -17,10 +20,12 @@ import ddf.minim.AudioSample;
 import ddf.minim.Minim;
 
 public class WaveCleaner {
+	private static Logger LOG = LogFactory.getLog(WaveCleaner.class);
 	private MainScreen mainFrame;
 	public Minim minim;
 
 	public static void main(String[] args) {
+		LOG.debug("Program started.");
 		/*
 		//AudioFormat(float sampleRate, int sampleSizeInBits,
 		// int channels, boolean signed, boolean bigEndian)
