@@ -13,11 +13,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
-import javax.swing.KeyStroke;
 import javax.swing.event.MouseInputListener;
 
 import org.apache.logging.log4j.Logger;
@@ -26,17 +24,20 @@ import com.oxande.wavecleaner.RMSSample;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 /**
- * The waveform component is the central part of the software in terms of graphics.
+ * The waveform component is the central part of the software in terms of
+ * graphics.
  * 
- * The curve is displayed in ONLY one bar: the upper part is the left channel and the
- * bottom is the right channel. I found it simpler and clearer than having two
- * separate graphics. As for Audacity, I kept the RMS level in a color and the peaks
- * in the same but brighter (I used some tables for the colors).
+ * The curve is displayed in ONLY one bar: the upper part is the left channel
+ * and the bottom is the right channel. I found it simpler and clearer than
+ * having two separate graphics. As for Audacity, I kept the RMS level in a
+ * color and the peaks in the same but brighter (I used some tables for the
+ * colors).
  * 
  * <p>
- * The scrollbar is directly attached at the bottom of the window and always visible
- * (as far as I can). To zoom inside the sound, you can use the wheel of the mouse. For
- * Mac users (also having an horizontal wheel), I just used a trick found on StackOverflow.
+ * The scrollbar is directly attached at the bottom of the window and always
+ * visible (as far as I can). To zoom inside the sound, you can use the wheel of
+ * the mouse. For Mac users (also having an horizontal wheel), I just used a
+ * trick found on StackOverflow.
  * </p>
  * <p>
  * The main problem is to synchronize the scrollbar to the wave form.
@@ -44,10 +45,10 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  * 
  * TODO: next paragraph not implemented.
  * <p>
- *  If the zoom is very a big one, you are not interested in the RMS curves but in the
- *  waveform. This component will display the waveform when you scroll at the maximum. 
+ * If the zoom is very a big one, you are not interested in the RMS curves but
+ * in the waveform. This component will display the waveform when you scroll at
+ * the maximum.
  * </p>
- * 
  * 
  * @author wrey75
  *
@@ -59,12 +60,42 @@ public class WaveFormComponent extends JPanel
 	AudioDocument audio = null;
 	private JScrollBar scroll = new JScrollBar();
 	private WaveComponent wave = new WaveComponent();
-	private int mousePosition = -1;
-	private int mouseSelected = -1;
 
+	/** mousePosition in samples */
+	private int mousePosition = -1;
+
+	/** player head in samples */
+	private int playHead = -1;
+	
+	/**
+	 * Return the play head expressed in samples.
+	 * 
+	 * @return the play head sample.
+	 */
+	public int getPlayHead(){
+		return this.playHead;
+	}
+
+	/** The first visible sample */
+	private int firstVisibleSample = 0;
+
+	/** The last visible sample */
+	private int lastVisibleSample = Integer.MAX_VALUE;
+
+	private int numberOfSamples = 0;
+
+	// Colors to be used. Note alpha must NOT be set
+	// for Windows (because the platform is too lengthly
+	// for repainting).
 	public static final Color peakColor = new Color(52, 152, 219).brighter();
 	public static final Color rmsColor = new Color(41, 128, 185);
 
+	/**
+	 * The component which is in charge of the display.
+	 * 
+	 * @author wrey75
+	 *
+	 */
 	private class WaveComponent extends JComponent {
 
 		private void setStroke(Graphics g, double width) {
@@ -74,21 +105,40 @@ public class WaveFormComponent extends JPanel
 			}
 		}
 
+		/**
+		 * Draw the levels for the sond.
+		 * 
+		 * @param g
+		 *            the graphics where to render the wave
+		 * @param samples
+		 *            the samples of the song.
+		 */
 		private void drawLevels(Graphics g, RMSSample[] samples) {
 			Rectangle rect = g.getClipBounds();
 			int y = rect.height / 2;
 			float h = rect.height / 2 - 10;
-			// double zoom = getExtent() / audio.getSampleSize();
-			float scrollPos = getScrollPosition() / audio.getSampleSize();
+
+			int ratio = audio.getSampleSize();
+			// float scrollPos = getScrollPosition() / audio.getSampleSize();
 
 			double strokeWidth = 1.0; // rect.width * zoom / samples.length;
 			setStroke(g, strokeWidth);
 
-			double zoom = (double)audio.getNumberOfSamples() / getExtent();
-			for (int i = 0; i < samples.length; i++) {
+			// double zoom = (double)audio.getNumberOfSamples() / getExtent();
+			int first = firstVisibleSample / ratio; // first visible
+			int last = lastVisibleSample / ratio; // last visible
+			if (last >= samples.length) {
+				LOG.warn("Last is {} but a maximum of {} was expected. Fixing the issue.", last, samples.length);
+				last = samples.length - 1;
+				if (lastVisibleSample > numberOfSamples) {
+					LOG.error("BAD LAST VISIBLE: {} but maximum is {}", lastVisibleSample, numberOfSamples);
+				}
+			}
+			double width = (0.0 + rect.width) / (double) (last - first);
+			for (int i = first; i < last; i++) {
 				RMSSample s = samples[i];
 				if (s != null) {
-					int x = (int) ((i - scrollPos) * (float) rect.width *zoom / samples.length);
+					int x = (int) ((i - first) * width);
 					g.setColor(peakColor);
 					g.drawLine(x, (int) (y - s.peakL * h), x, (int) (y - s.levelL * h));
 					g.setColor(rmsColor);
@@ -123,10 +173,33 @@ public class WaveFormComponent extends JPanel
 
 			setStroke(g, 1.0);
 			g.setColor(Color.LIGHT_GRAY);
-			g.drawLine(mousePosition, 0, mousePosition, rect.height);
+			g.drawLine(mousePosition - firstVisibleSample, 0, mousePosition - firstVisibleSample, rect.height);
 
 			g.setColor(Color.GREEN.brighter());
-			g.drawLine(mouseSelected, 0, mouseSelected, rect.height);
+			g.drawLine(sampleToX(playHead), 0, sampleToX(playHead), rect.height);
+		}
+
+		/**
+		 * Return the position x in the visible window. Returns -1 in case the
+		 * position is outside.
+		 * 
+		 * @param pos
+		 *            the sample
+		 * @return the horizontal position in pixels.
+		 */
+		protected int sampleToX(int pos) {
+			int winWidth = this.getWidth();
+			if (pos < firstVisibleSample || winWidth < 1) {
+				return -1;
+			}
+			if (pos > lastVisibleSample) {
+				return winWidth + 1;
+			}
+			int visiblePos = pos - firstVisibleSample;
+			double ratio = winWidth / (double) (lastVisibleSample - firstVisibleSample);
+			int x = (int) (visiblePos * ratio);
+			// LOG.debug("sampleToX( {} ) = {}", pos, x);
+			return x;
 		}
 	}
 
@@ -141,12 +214,13 @@ public class WaveFormComponent extends JPanel
 		this.addMouseMotionListener(this);
 		this.addMouseWheelListener(this);
 		this.addMouseListener(this);
-//		this.wave.addKeyListener(this);
+		// this.wave.addKeyListener(this);
 		this.setLayout(new BorderLayout());
 		this.add(scroll, BorderLayout.SOUTH);
 		this.add(wave, BorderLayout.CENTER);
-//		this.wave.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "play");
-//		this.wave.getActionMap().put("play", new Action (){
+		// this.wave.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
+		// 0), "play");
+		// this.wave.getActionMap().put("play", new Action (){
 	}
 
 	/**
@@ -159,9 +233,36 @@ public class WaveFormComponent extends JPanel
 	public void setDocument(AudioDocument doc) {
 		this.audio = doc;
 		this.audio.register(this);
-		setExtent(this.audio.getNumberOfSamples());
-		this.repaint();
+		updateAudio();
 	}
+	
+	protected void scrollTo(int first, int last){
+		if( first != this.firstVisibleSample || last != this.lastVisibleSample ){
+			if( first != -1 ) this.firstVisibleSample = first;
+			if( last != -1 ) this.lastVisibleSample = last;
+			this.scroll.setValues(this.firstVisibleSample, this.lastVisibleSample - this.firstVisibleSample, 0, this.numberOfSamples);
+			this.wave.invalidate();
+		}
+	}
+
+	/**
+	 * If the audio changed, update the values linked to it.
+	 */
+	protected void updateAudio() {
+		if (numberOfSamples != audio.getNumberOfSamples()) {
+			this.numberOfSamples = audio.getNumberOfSamples();
+			this.lastVisibleSample = Math.min(this.lastVisibleSample, this.numberOfSamples);
+			if (this.lastVisibleSample < this.firstVisibleSample) {
+				this.firstVisibleSample = 0;
+			}
+			scrollTo(-1, -1);
+		}
+		repaint();
+	}
+
+	// protected void updateScrollBar(){
+	//
+	// }
 
 	/**
 	 * Modify the zoom level for this wave. Note the change in the zoom level
@@ -170,26 +271,32 @@ public class WaveFormComponent extends JPanel
 	 * @param newValue
 	 *            the new value
 	 */
-	public void setExtent(int extent) {
-		int max = audio.getNumberOfSamples();
-		if( extent > max ){
-			extent = max;
+	public void setExtent(int newExtent) {
+		int first, last;
+		int max = numberOfSamples;
+		if (newExtent >= max) {
+			first = 0;
+			last = numberOfSamples;
+		} else {
+			int extend = this.getExtent();
+			int diff = (newExtent - extend) / 2;
+			last = this.lastVisibleSample + diff;
+			first = this.firstVisibleSample - diff;
 		}
-		int current = this.scroll.getValue();
-		this.scroll.setValues(current, extent, 0, max);
-		this.scrollExtend = extent;
+		int unit = this.numberOfSamples / audio.getSampleSize();
+		this.scroll.setUnitIncrement(unit);
+		this.scroll.setBlockIncrement(unit * 10);
+		this.scrollTo(first, last);
 		this.repaint();
 	}
 
-	private int scrollExtend;
-	
 	public int getExtent() {
-		return this.scrollExtend;
+		return this.lastVisibleSample + this.firstVisibleSample;
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		mousePosition = e.getPoint().x;
+		mousePosition = e.getPoint().x + firstVisibleSample;
 		repaint();
 	}
 
@@ -209,27 +316,45 @@ public class WaveFormComponent extends JPanel
 
 	@Override
 	public void audioChanged() {
-		int max = audio.getNumberOfSamples();
-		int current = this.scroll.getValue();
-		this.scroll.setValues(current, this.getExtent(), 0, max);
-		repaint();
+		// int max = audio.getNumberOfSamples();
+		// if( max != numberOfSamples ){
+		this.updateAudio();
+		// }
+		// repaint();
 	}
 
 	@Override
 	public void adjustmentValueChanged(AdjustmentEvent e) {
+		int diff = (e.getValue() - firstVisibleSample);
+		lastVisibleSample += diff;
+		firstVisibleSample += diff;
 		repaint();
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		mouseSelected = e.getX();
+		playHead = sampleFrom(e.getX());
 		repaint();
+	}
+
+	/**
+	 * Get the sample position from the x position from the visible window.
+	 * 
+	 * @param x
+	 *            the x position
+	 * @return
+	 */
+	protected int sampleFrom(int x) {
+		int visibleSamples = (lastVisibleSample - firstVisibleSample);
+		double samplePos = ((double) x * visibleSamples / this.wave.getWidth());
+		int pos = (int) samplePos + firstVisibleSample;
+		LOG.debug("sampleFrom({})={}", x, pos);
+		return pos;
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-
+		// TODO Store the position for selection...
 	}
 
 	@Override
@@ -250,5 +375,18 @@ public class WaveFormComponent extends JPanel
 
 	}
 
+	@Override
+	public void audioPlayed(int sample) {
+		playHead = sample;
+		if( playHead > this.lastVisibleSample ){
+			scroll.setValue( playHead );
+		}
+		repaint();
+	}
+
+	@Override
+	public void audioPaused() {
+		// TODO - Update the "PLAY/RECORD BUTTONS"
+	}
 
 }

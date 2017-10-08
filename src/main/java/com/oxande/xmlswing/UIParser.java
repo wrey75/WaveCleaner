@@ -41,11 +41,10 @@ import com.oxande.xmlswing.jcode.JavaType;
  *
  */
 public class UIParser {
-
-	private static String currentDir = "." + File.separator;
+	String currentDir = "." + File.separator;
 	private JavaClass jclass;
 	private Document doc;
-	private boolean includeVersion = false;
+	boolean includeVersion = false;
 
 	public Document parse( File f ) throws ParserConfigurationException, SAXException, IOException{
 		return parseXML( new FileInputStream(f) );
@@ -282,53 +281,6 @@ public class UIParser {
 		System.out.println("Written [" + classFileName +"]" );
 	}
 
-	/**
-	 * The main class for the parser. Note the parser generates JAVA
-	 * classes then you have to run this before you test your application.
-	 * 
-	 * @param args the arguments
-	 * @throws Exception if an exception ocured.
-	 */
-	public static void main( String[] args ) throws Exception {
-		UIParser ui = new UIParser();
-
-		for(int i = 0; i < args.length; i++ ){
-			if( args[i].charAt(0) == '-' ){
-				if(args[i].length() == 1){
-					// Following the UNIX convention, if the file
-					// is "-", the standard input is used.
-					ui.parseInput(System.in);
-				}
-				else {
-					char opt = args[i].charAt(1);
-					switch(opt){
-					case 'd' :
-						// The directory
-						currentDir = args[++i];
-						if( currentDir.endsWith( File.separator )){
-							currentDir += File.separator;
-						}
-						break;
-
-					case 'V' :
-						// Include th version.
-						ui.includeVersion = true;
-						break;
-
-					default :
-						System.err.println("Option " + args[i] + " unkown. Please read the documentation.");
-						System.exit(1);
-					}
-				}
-			}
-			else {
-				// Parse the specified file.
-				File f = new File( args[i] );
-				ui.parseInput( new BufferedInputStream( new FileInputStream(f)));
-			}
-		}
-	}
-	
 
 	
 	public static String capitalizeFirst( String str ){

@@ -30,7 +30,6 @@ import com.oxande.xmlswing.jcode.JavaMethod;
  * 
  */
 public class AttributeDefinition {
-
 	
 	public final static Map<String, String> ALIGNS = new HashMap<String, String>();
 	public final static Map<String, String> CLOSE_OPERATIONS = new HashMap<String, String>();

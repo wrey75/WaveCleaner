@@ -20,7 +20,12 @@ import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaMethod;
 
 
-
+/**
+ * Used for {@link JFrame} creation.
+ * 
+ * @author wrey75
+ *
+ */
 public class JFrameUI extends FrameUI {
 
 	public static final AttributeDefinition[] PROPERTIES = {

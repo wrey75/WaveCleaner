@@ -39,6 +39,9 @@ public class AbstractMainScreen extends JFrame {
    private JMenuItem jmenuitem4 = new JMenuItem();
    private JMenu jmenu2 = new JMenu();
    private JMenuItem jmenuitem5 = new JMenuItem();
+   private JMenuItem jmenuitem6 = new JMenuItem();
+   private JMenu jmenu3 = new JMenu();
+   private JMenuItem jmenuitem7 = new JMenuItem();
    protected JLabel statusBar = new JLabel();
    protected JToolBar toolbar = new JToolBar();
    private JSplitPane jsplitpane1 = new JSplitPane();
@@ -64,12 +67,20 @@ private class SetStatusMessageClass implements Runnable {
     */
    protected void showAboutDlg()
    {
-      JOptionPane.showMessageDialog(jmenuitem5, "Not implemented.",jmenuitem5.getText(), JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(jmenuitem7, "Not implemented.",jmenuitem7.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    public void setStatusMessage(String in)
    {
       SwingUtilities.invokeLater(new SetStatusMessageClass(in));
+   }
+
+   /**
+    * Called by the menu item <i>Edit/Zoom In</i>.
+    */
+   protected void onZoomIn()
+   {
+      JOptionPane.showMessageDialog(jmenuitem5, "Not implemented.",jmenuitem5.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    /**
@@ -107,6 +118,14 @@ private class SetStatusMessageClass implements Runnable {
       appl.initComponents();
       appl.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
       appl.setVisible(true);
+   }
+
+   /**
+    * Called by the menu item <i>Edit/Zoom Out</i>.
+    */
+   protected void onZoomOut()
+   {
+      JOptionPane.showMessageDialog(jmenuitem6, "Not implemented.",jmenuitem6.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    /**
@@ -184,13 +203,47 @@ private class SetStatusMessageClass implements Runnable {
 );
       jmenu1.add(jmenuitem4);
       jmenubar1.add(jmenu1);
-      jmenu2.setText("Help");
-      jmenu2.setMnemonic(java.awt.event.KeyEvent.VK_H);
+      jmenu2.setText("Edit");
+      jmenu2.setMnemonic(java.awt.event.KeyEvent.VK_E);
       jmenu2.setDisplayedMnemonicIndex(0);
-      jmenuitem5.setText("About");
-      jmenuitem5.setMnemonic(java.awt.event.KeyEvent.VK_A);
-      jmenuitem5.setDisplayedMnemonicIndex(0);
+      jmenuitem5.setName("zoomIn");
+      jmenuitem5.setText("Zoom In");
       jmenuitem5.setAction(new AbstractAction()  {
+   {
+      putValue(Action.NAME, "Zoom In");
+   }
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onZoomIn();
+   }
+}
+
+);
+      jmenu2.add(jmenuitem5);
+      jmenuitem6.setName("zoomOut");
+      jmenuitem6.setText("Zoom Out");
+      jmenuitem6.setAction(new AbstractAction()  {
+   {
+      putValue(Action.NAME, "Zoom Out");
+   }
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onZoomOut();
+   }
+}
+
+);
+      jmenu2.add(jmenuitem6);
+      jmenubar1.add(jmenu2);
+      jmenu3.setText("Help");
+      jmenu3.setMnemonic(java.awt.event.KeyEvent.VK_H);
+      jmenu3.setDisplayedMnemonicIndex(0);
+      jmenuitem7.setText("About");
+      jmenuitem7.setMnemonic(java.awt.event.KeyEvent.VK_A);
+      jmenuitem7.setDisplayedMnemonicIndex(0);
+      jmenuitem7.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "About");
       putValue(Action.MNEMONIC_KEY, java.awt.event.KeyEvent.VK_A);
@@ -204,8 +257,8 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenu2.add(jmenuitem5);
-      jmenubar1.add(jmenu2);
+      jmenu3.add(jmenuitem7);
+      jmenubar1.add(jmenu3);
       this.setJMenuBar(jmenubar1);
       Border border1 = BorderFactory.createLoweredBevelBorder();
       statusBar.setBorder(border1);

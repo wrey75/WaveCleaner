@@ -42,7 +42,9 @@ public class MainScreen extends AbstractMainScreen {
 	 * @param audio
 	 */
 	public void setWaveForm( AudioDocument audio ){
-		this.audio = audio;
+    	AudioOutput out = this.app.minim.getLineOut(Minim.STEREO, 2048, 48000f, 16);
+		audio.attachLineOut(out);
+    	this.audio = audio;
 		this.song.setDocument(audio);
 	}
 	
@@ -63,12 +65,24 @@ public class MainScreen extends AbstractMainScreen {
 	    if(returnVal == JFileChooser.APPROVE_OPTION) {
 	    	String name = chooser.getSelectedFile().getAbsolutePath();
 	    	this.app.loadSoundFile(name);
+			
 	    }
 	}
 	
 	@Override
 	public void onPlay(){
-		AudioOutput out = this.app.minim.getLineOut(Minim.STEREO, 2048, 48000f, 16);
-		this.audio.play(out);
+		this.audio.play(song.getPlayHead());
+	}
+	
+	
+	protected void onZoomIn(){
+		int nb = this.song.getExtent() - this.audio.getNumberOfSamples() / 20;
+		this.song.setExtent(nb);
+	}
+	
+	
+	protected void onZoomOut(){
+		int nb = this.song.getExtent() + this.audio.getNumberOfSamples() / 20;
+		this.song.setExtent(nb);
 	}
 }

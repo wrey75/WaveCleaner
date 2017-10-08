@@ -6,13 +6,18 @@ import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 
-import com.oxande.wavecleaner.RMSSample;
+import org.apache.logging.log4j.Logger;
 
+import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.util.logging.LogFactory;
+
+import ddf.minim.AudioListener;
 import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.spi.AudioRecordingStream;
 import ddf.minim.ugens.FilePlayer;
+import javazoom.jl.player.Player;
 
 /**
  * Management of an audio file. The audio document can be seen as
@@ -34,10 +39,13 @@ import ddf.minim.ugens.FilePlayer;
  * @author wrey75
  *
  */
-public class AudioDocument {
+public class AudioDocument implements AudioListener {
+	private Logger LOG = LogFactory.getLog(AudioDocument.class);
+	
 	String fileName;
 	AudioRecordingStream stream;
 	FilePlayer filePlayer = null;
+	AudioOutput lineOut = null;
 	int bufferSize;
 	int sampleRate;
 	int leftChannel = 0;
@@ -71,6 +79,10 @@ public class AudioDocument {
 			this.filePlayer = new FilePlayer( stream );
 		}
 		return this.filePlayer;
+	}
+
+	public void attachLineOut(AudioOutput out){
+		this.lineOut = out;
 	}
 	
 	/**
@@ -204,13 +216,38 @@ public class AudioDocument {
 
 	public synchronized void stop(){
 		filePlayer.pause();
+		lineOut.removeListener(this);
+		filePlayer.unpatch(lineOut);
+		LOG.info("PAUSED");
+		for(AudioDocumentListener listener : listeners){
+			listener.audioPaused();
+		}
 	}
 	
-	public synchronized void play(AudioOutput out){
+	public synchronized void play(int pos){
 		FilePlayer player = getFilePlayer();
-		player.patch(out);
-		player.cue(1000 * 30 );
+		player.patch(lineOut);
+		lineOut.addListener(this);
+		player.cue((int)(pos * 1000.0 / this.getFormat().getSampleRate()) );
 		player.play();
+		LOG.info("PLAY (from sample {})", pos );
+	}
+
+	@Override
+	public void samples(float[] samp) {
+		samples(samp, samp);
+	}
+
+	@Override
+	public void samples(float[] sampL, float[] sampR) {
+		int sample = (int)(filePlayer.position() / 1_000.0 * this.getFormat().getSampleRate());
+		if( sample > this.getNumberOfSamples() - 200 ){
+			/** Stop if we have heard all the file */
+			this.stop();
+		}
+		for(AudioDocumentListener listener : listeners){
+			listener.audioPlayed(sample);
+		}
 	}
 	
 }
