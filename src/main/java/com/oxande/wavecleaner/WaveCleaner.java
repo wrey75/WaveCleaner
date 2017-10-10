@@ -1,6 +1,7 @@
 package com.oxande.wavecleaner;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -8,7 +9,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.logging.log4j.Logger;
 
-import com.oxande.wavecleaner.ui.AudioDocument;
+import com.oxande.wavecleaner.audio.AudioDocument;
 import com.oxande.wavecleaner.ui.MainScreen;
 import com.oxande.wavecleaner.util.ProcessingLegacy;
 import com.oxande.wavecleaner.util.logging.LogFactory;
@@ -145,11 +146,16 @@ public class WaveCleaner {
 	public void loadSoundFile( String name ){
 		File f = new File(name);
 		if(f.exists()){
-			AudioDocument audio = new AudioDocument(minim, f);
-			mainFrame.setWaveForm(audio);
+			try {
+				AudioDocument audio = new AudioDocument(minim, f);
+				mainFrame.setWaveForm(audio);
+			}
+			catch(IOException ex){
+				JOptionPane.showMessageDialog(this.mainFrame, "Can not load the file " + name, ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
+			}
 		}
 		else {
-			JOptionPane.showMessageDialog(this.mainFrame, "Can not load the file " + name, "Can not load", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(this.mainFrame, "File " + name, "File does not exists", JOptionPane.WARNING_MESSAGE);
 		}
 	}
 

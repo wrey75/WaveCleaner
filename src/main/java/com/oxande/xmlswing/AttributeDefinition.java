@@ -245,7 +245,7 @@ public class AttributeDefinition {
 			String orientation = Parser.getAttribute(e, attrName);
 			if( orientation != null ){
 				if( orientation.equalsIgnoreCase("horizontal") ){
-					params = new String[] { "JSplitPane.VERTICAL_SPLIT" };
+					params = new String[] { "JSplitPane.HORIZONTAL_SPLIT" };
 				}
 				else if( orientation.equalsIgnoreCase("vertical") ){
 					params = new String[] { "JSplitPane.VERTICAL_SPLIT" };

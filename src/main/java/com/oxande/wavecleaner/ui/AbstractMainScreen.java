@@ -29,7 +29,7 @@ import javax.swing.border.Border;
  * be extended by your own code. The following code only
  * provide an easy way to obtain a basic GUI.
  */
-public class AbstractMainScreen extends JFrame {
+public class AbstractMainScreen extends JFrame  {
    private JPanel jpanel1 = new JPanel();
    private JMenuBar jmenubar1 = new JMenuBar();
    private JMenu jmenu1 = new JMenu();
@@ -45,6 +45,8 @@ public class AbstractMainScreen extends JFrame {
    protected JLabel statusBar = new JLabel();
    protected JToolBar toolbar = new JToolBar();
    private JSplitPane jsplitpane1 = new JSplitPane();
+   private JSplitPane jsplitpane2 = new JSplitPane();
+   protected WaveComponent instant = new WaveComponent();
    protected JTree pathTree = new JTree();
    protected com.oxande.wavecleaner.ui.WaveFormComponent song = new com.oxande.wavecleaner.ui.WaveFormComponent();
 private class SetStatusMessageClass implements Runnable {
@@ -105,6 +107,14 @@ private class SetStatusMessageClass implements Runnable {
    }
 
    /**
+    * Called by the menu item <i>File/Play/Pause</i>.
+    */
+   protected void onPlayPause()
+   {
+      JOptionPane.showMessageDialog(jmenuitem3, "Not implemented.",jmenuitem3.getText(), JOptionPane.INFORMATION_MESSAGE);
+   }
+
+   /**
     * Called by the menu item <i>File/Load the music</i>.
     */
    protected void onLoadSound()
@@ -126,14 +136,6 @@ private class SetStatusMessageClass implements Runnable {
    protected void onZoomOut()
    {
       JOptionPane.showMessageDialog(jmenuitem6, "Not implemented.",jmenuitem6.getText(), JOptionPane.INFORMATION_MESSAGE);
-   }
-
-   /**
-    * Called by the menu item <i>File/Play</i>.
-    */
-   protected void onPlay()
-   {
-      JOptionPane.showMessageDialog(jmenuitem3, "Not implemented.",jmenuitem3.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    public void initComponents()
@@ -170,15 +172,17 @@ private class SetStatusMessageClass implements Runnable {
 
 );
       jmenu1.add(jmenuitem2);
-      jmenuitem3.setText("Play");
+      jmenuitem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke("SPACE"));
+      jmenuitem3.setText("Play/Pause");
       jmenuitem3.setAction(new AbstractAction()  {
    {
-      putValue(Action.NAME, "Play");
+      putValue(Action.NAME, "Play/Pause");
+      putValue(Action.ACCELERATOR_KEY, jmenuitem3.getAccelerator());
    }
 
    public void actionPerformed(ActionEvent e)
    {
-      onPlay();
+      onPlayPause();
    }
 }
 
@@ -267,8 +271,11 @@ private class SetStatusMessageClass implements Runnable {
       jpanel1.add(statusBar, BorderLayout.SOUTH);
       toolbar.setOrientation(JToolBar.HORIZONTAL);
       jpanel1.add(toolbar, "North");
+      jsplitpane2.setOrientation(JSplitPane.VERTICAL_SPLIT);
+      jsplitpane2.setTopComponent(instant);
       JScrollPane pathTreeScroll = new JScrollPane(pathTree,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-      jsplitpane1.setTopComponent(pathTreeScroll);
+      jsplitpane2.setBottomComponent(pathTreeScroll);
+      jsplitpane1.setTopComponent(jsplitpane2);
       jsplitpane1.setBottomComponent(song);
       jpanel1.add(jsplitpane1, BorderLayout.CENTER);
       this.setContentPane(jpanel1);

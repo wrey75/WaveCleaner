@@ -1,18 +1,18 @@
 package com.oxande.wavecleaner.ui;
 
-import java.io.File;
-
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.oxande.wavecleaner.WaveCleaner;
+import com.oxande.wavecleaner.audio.AudioDocument;
+import com.oxande.wavecleaner.audio.AudioDocumentListener;
 
 import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
 
 
 @SuppressWarnings("serial")
-public class MainScreen extends AbstractMainScreen {
+public class MainScreen extends AbstractMainScreen implements AudioDocumentListener {
 
 	private WaveCleaner app;
 	private AudioDocument audio;
@@ -42,15 +42,16 @@ public class MainScreen extends AbstractMainScreen {
 	 * @param audio
 	 */
 	public void setWaveForm( AudioDocument audio ){
-    	AudioOutput out = this.app.minim.getLineOut(Minim.STEREO, 2048, 48000f, 16);
-		audio.attachLineOut(out);
+    	this.lineOut = this.app.minim.getLineOut(Minim.STEREO, 512, 48000f, 16);
+		audio.attachLineOut(lineOut);
     	this.audio = audio;
-		this.song.setDocument(audio);
+		this.song.setAudioDocument(audio);
+		this.instant.setAudioDocument(audio);
+		this.audio.register(this);
 	}
 	
 	protected void onRecordSound(){
 		app.startRecord();
-		  
 	}
 	
 	/**
@@ -65,13 +66,18 @@ public class MainScreen extends AbstractMainScreen {
 	    if(returnVal == JFileChooser.APPROVE_OPTION) {
 	    	String name = chooser.getSelectedFile().getAbsolutePath();
 	    	this.app.loadSoundFile(name);
-			
 	    }
 	}
 	
 	@Override
-	public void onPlay(){
-		this.audio.play(song.getPlayHead());
+	public void onPlayPause(){
+		int pos = song.getPlayHead();
+		if(this.audio.isPlaying()){
+			this.audio.stop();
+		}
+		else {
+			this.audio.play(pos);
+		}
 	}
 	
 	
@@ -84,5 +90,28 @@ public class MainScreen extends AbstractMainScreen {
 	protected void onZoomOut(){
 		int nb = this.song.getExtent() + this.audio.getNumberOfSamples() / 20;
 		this.song.setExtent(nb);
+	}
+	
+	
+	@Override
+	public void audioChanged() {
+		// int max = audio.getNumberOfSamples();
+		// if( max != numberOfSamples ){
+		this.song.updateAudio();
+		// }
+		// repaint();
+	}
+	
+	@Override
+	public void audioPlayed(int sample) {
+		this.song.setPlayHead(sample, true);
+		this.instant.mode = WaveComponent.WAVE_MODE;
+		this.instant.setVisibleWindow(sample, sample + audio.getChunkSize());
+		repaint();
+	}
+
+	@Override
+	public void audioPaused() {
+		// TODO - Update the "PLAY/RECORD BUTTONS"
 	}
 }

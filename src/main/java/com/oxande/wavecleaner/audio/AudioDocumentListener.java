@@ -1,6 +1,11 @@
-package com.oxande.wavecleaner.ui;
+package com.oxande.wavecleaner.audio;
 
-
+/**
+ * A listener interface to implement.
+ * 
+ * @author wrey75
+ *
+ */
 public interface AudioDocumentListener {
 	
 	/**

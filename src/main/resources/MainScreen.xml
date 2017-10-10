@@ -5,7 +5,7 @@
 		<menu text="_File">
 			<menuitem action="onLoadSound">Load the music</menuitem>
 			<menuitem action="onRecordSound">Record</menuitem>
-			<menuitem action="onPlay">Play</menuitem>
+			<menuitem shortcut="SPACE" action="onPlayPause">Play/Pause</menuitem>
 			<!-- <menu text="_Look &amp; Feel"> <lookandfeel /> </menu> -->
 			<menuitem action="onExit">E_xit</menuitem>
 		</menu>
@@ -23,7 +23,11 @@
 	</toolbar>
 
 	<splitpane>
-		<tree id="pathTree" vscroll="auto" hscroll="auto" />
+		<splitpane orientation="vertical">
+			<component id="instant" class="WaveComponent"></component>
+			<tree id="pathTree" vscroll="auto" hscroll="auto" />
+		</splitpane>
+		
 		<component id="song" class="com.oxande.wavecleaner.ui.WaveFormComponent" />
 	</splitpane>
 

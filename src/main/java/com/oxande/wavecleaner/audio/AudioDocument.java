@@ -1,6 +1,7 @@
-package com.oxande.wavecleaner.ui;
+package com.oxande.wavecleaner.audio;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import javax.sound.sampled.AudioFormat;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.ui.WaveFormComponent;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.AudioListener;
@@ -17,7 +19,6 @@ import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.spi.AudioRecordingStream;
 import ddf.minim.ugens.FilePlayer;
-import javazoom.jl.player.Player;
 
 /**
  * Management of an audio file. The audio document can be seen as
@@ -44,6 +45,7 @@ public class AudioDocument implements AudioListener {
 	
 	String fileName;
 	AudioRecordingStream stream;
+	AudioCache cache;
 	FilePlayer filePlayer = null;
 	AudioOutput lineOut = null;
 	int bufferSize;
@@ -70,7 +72,15 @@ public class AudioDocument implements AudioListener {
 		return this.samples;
 	}
 	
-	public int getSampleSize(){
+	public float getSampleRate(){
+		return this.stream.getFormat().getSampleRate();
+	}
+	
+	/**
+	 * Return the size of the buffer.
+	 * 
+	 */
+	public int getChunkSize(){
 		return this.bufferSize;
 	}
 	
@@ -81,17 +91,27 @@ public class AudioDocument implements AudioListener {
 		return this.filePlayer;
 	}
 
+	/**
+	 * Attach a line out for playing directly
+	 * 
+	 * @param out the line out (usually speakers)
+	 */
 	public void attachLineOut(AudioOutput out){
 		this.lineOut = out;
+	}
+	
+	public boolean isPlaying(){
+		return getFilePlayer().isPlaying();
 	}
 	
 	/**
 	 * Create an audio document.
 	 * 
-	 * @param minim
-	 * @param f
+	 * @param minim the minim object.
+	 * @param f the file
+	 * @throws IOException 
 	 */
-	public AudioDocument(Minim minim, File f) {
+	public AudioDocument(Minim minim, File f) throws IOException {
 		this.fileName = f.getAbsolutePath();
 		// construct a new MultiChannelBuffer with 2 channels and 1024 sample
 		// frames.
@@ -107,6 +127,7 @@ public class AudioDocument implements AudioListener {
 		// with
 		// loading it, the function will return 0 as the sample rate.
 		this.stream = minim.loadFileStream(f.getAbsolutePath());
+		this.filePlayer = new FilePlayer( stream );
 		this.sampleRate = (int)this.stream.getFormat().getSampleRate();
 		switch( sampleRate ){
 		case 44100:
@@ -130,11 +151,19 @@ public class AudioDocument implements AudioListener {
 		
 		int streamDuration = stream.getMillisecondLength();
 		totalSamples = (int)( ( streamDuration * 0.001 * sampleRate )  ) + 1;
+		int nbChunks = (int)(totalSamples / bufferSize) + 1;
+		this.cache = new AudioCache(bufferSize, nbChunks);
 		new Thread(() -> loadWaveSamples()).start();
 	}
 	
-	public void register( WaveFormComponent component ){
-		this.listeners.add(component);
+	/**
+	 * Register a new listener. Used at the beginning for the {@link WaveFormComponent}
+	 * but any object can listen.
+	 * 
+	 * @param listener an audio listener.
+	 */
+	public void register( AudioDocumentListener listener ){
+		this.listeners.add(listener);
 	}
 	
 	public static long lastPublish = 0;
@@ -163,7 +192,7 @@ public class AudioDocument implements AudioListener {
 		return totalChunks;
 	}
 	
-	protected int getNumberOfSamples() {
+	public int getNumberOfSamples() {
 		return totalSamples;
 	}
 	
@@ -187,16 +216,27 @@ public class AudioDocument implements AudioListener {
 	
 	
 	
-//	protected void stop(){
-//		stream.pause();
-//	}
+	public float[][] getAudioSamples( int chunk ){
+		float[][] samples = null;
+		try {
+			samples = this.cache.getSamples(chunk);
+		}
+		catch(IOException ex ){
+			LOG.error("I/O Error: {}. Returns blank", ex.getMessage());
+			samples = new float[2][];
+			samples[0] = new float[this.getChunkSize()];
+			samples[1] = new float[this.getChunkSize()];
+		}
+		return samples;
+	}
 
 	/**
 	 * Load the samples of the audio file. This method should be
 	 * called in a different thread.
+	 * @throws IOException 
 	 * 
 	 */
-	public synchronized void loadWaveSamples(){
+	public synchronized void loadWaveSamples() {
 		int nbChunks = this.getNumberOfChunks();
 		stream.play();
 		MultiChannelBuffer buf = new MultiChannelBuffer(bufferSize, stream.getFormat().getChannels());
@@ -206,6 +246,11 @@ public class AudioDocument implements AudioListener {
 			float left[] = buf.getChannel(leftChannel);
 			float right[] = buf.getChannel(rightChannel);
 			samples[i] = RMSSample.create(left, right);
+			try {
+				this.cache.saveSamples(i, left, right);
+			} catch (IOException e) {
+				LOG.error("Can not save into the cache.");
+			}
 			if (i % 100 == 0){
 				publish(100);
 			}

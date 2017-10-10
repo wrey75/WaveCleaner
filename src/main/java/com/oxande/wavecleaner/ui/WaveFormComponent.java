@@ -1,26 +1,19 @@
 package com.oxande.wavecleaner.ui;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Stroke;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.event.MouseInputListener;
 
 import org.apache.logging.log4j.Logger;
 
-import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.audio.AudioDocument;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 /**
@@ -50,22 +43,28 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  * the maximum.
  * </p>
  * 
+ * 
  * @author wrey75
  *
  */
 @SuppressWarnings("serial")
 public class WaveFormComponent extends JPanel
-		implements MouseInputListener, MouseWheelListener, AdjustmentListener, AudioDocumentListener {
-	private static Logger LOG = LogFactory.getLog(WaveComponent.class);
+		implements MouseInputListener, MouseWheelListener, AdjustmentListener {
+	private static Logger LOG = LogFactory.getLog(WaveFormComponent.class);
 	AudioDocument audio = null;
 	private JScrollBar scroll = new JScrollBar();
 	private WaveComponent wave = new WaveComponent();
 
-	/** mousePosition in samples */
-	private int mousePosition = -1;
 
-	/** player head in samples */
-	private int playHead = -1;
+//		RIGHT CHANNEL :
+//		-       TURQUOISE : #1abc9c -- rgb(26, 188, 156)
+//		-       GREEN SEA : #16a085 -- rgb(22, 160, 133)
+//		 
+//		LEFT CHANNEL :
+//		-       EMERALD : #2ecc71  -- rgb(46, 204, 113)
+//		-       NEPHRITIS : #27ae60 -- rgb(39, 174, 96)
+		
+
 	
 	/**
 	 * Return the play head expressed in samples.
@@ -73,7 +72,15 @@ public class WaveFormComponent extends JPanel
 	 * @return the play head sample.
 	 */
 	public int getPlayHead(){
-		return this.playHead;
+		return this.wave.playHead;
+	}
+	
+	public void setPlayHead(int pos, boolean sync ){
+		this.wave.playHead = pos;
+		if( sync && (pos > this.wave.lastVisibleSample) ){
+			this.scroll.setValue( this.wave.playHead );
+		}
+		repaint();
 	}
 
 	/** The first visible sample */
@@ -84,125 +91,11 @@ public class WaveFormComponent extends JPanel
 
 	private int numberOfSamples = 0;
 
-	// Colors to be used. Note alpha must NOT be set
-	// for Windows (because the platform is too lengthly
-	// for repainting).
-	public static final Color peakColor = new Color(52, 152, 219).brighter();
-	public static final Color rmsColor = new Color(41, 128, 185);
-
 	/**
-	 * The component which is in charge of the display.
+	 * Get the scroll position
 	 * 
-	 * @author wrey75
-	 *
+	 * @return
 	 */
-	private class WaveComponent extends JComponent {
-
-		private void setStroke(Graphics g, double width) {
-			if (g instanceof Graphics2D) {
-				Stroke stroke = new BasicStroke((float) width);
-				((Graphics2D) g).setStroke(stroke);
-			}
-		}
-
-		/**
-		 * Draw the levels for the sond.
-		 * 
-		 * @param g
-		 *            the graphics where to render the wave
-		 * @param samples
-		 *            the samples of the song.
-		 */
-		private void drawLevels(Graphics g, RMSSample[] samples) {
-			Rectangle rect = g.getClipBounds();
-			int y = rect.height / 2;
-			float h = rect.height / 2 - 10;
-
-			int ratio = audio.getSampleSize();
-			// float scrollPos = getScrollPosition() / audio.getSampleSize();
-
-			double strokeWidth = 1.0; // rect.width * zoom / samples.length;
-			setStroke(g, strokeWidth);
-
-			// double zoom = (double)audio.getNumberOfSamples() / getExtent();
-			int first = firstVisibleSample / ratio; // first visible
-			int last = lastVisibleSample / ratio; // last visible
-			if (last >= samples.length) {
-				LOG.warn("Last is {} but a maximum of {} was expected. Fixing the issue.", last, samples.length);
-				last = samples.length - 1;
-				if (lastVisibleSample > numberOfSamples) {
-					LOG.error("BAD LAST VISIBLE: {} but maximum is {}", lastVisibleSample, numberOfSamples);
-				}
-			}
-			double width = (0.0 + rect.width) / (double) (last - first);
-			for (int i = first; i < last; i++) {
-				RMSSample s = samples[i];
-				if (s != null) {
-					int x = (int) ((i - first) * width);
-					g.setColor(peakColor);
-					g.drawLine(x, (int) (y - s.peakL * h), x, (int) (y - s.levelL * h));
-					g.setColor(rmsColor);
-					g.drawLine(x, (int) (y - s.levelL * h), x, (int) (y + s.levelR * h));
-					g.setColor(peakColor);
-					g.drawLine(x, (int) (y + s.levelR * h), x, (int) (y + s.peakR * h));
-				}
-			}
-		}
-
-		@Override
-		public void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			Rectangle rect = g.getClipBounds();
-			if (audio != null) {
-				RMSSample[] samples = audio.getLevels();
-
-				g.setColor(new Color(44, 62, 80).darker());
-				g.fillRect(rect.x, rect.y, rect.width, rect.height);
-				if (samples != null) {
-					drawLevels(g, samples);
-					// int imgWidth = this.wave.getWidth();
-					// int imgHeight = this.wave.getHeight();
-					// g.drawImage(this.wave, rect.x, rect.y, rect.x +
-					// rect.width, rect.y + rect.height,
-					// 0, 0, imgWidth, imgHeight, null);
-					g.setColor(Color.WHITE);
-					g.drawString("Number of samples: " + samples.length, 10, 20);
-					g.drawString("Farme rate: " + audio.getFormat().getFrameRate(), 10, 40);
-				}
-			}
-
-			setStroke(g, 1.0);
-			g.setColor(Color.LIGHT_GRAY);
-			g.drawLine(mousePosition - firstVisibleSample, 0, mousePosition - firstVisibleSample, rect.height);
-
-			g.setColor(Color.GREEN.brighter());
-			g.drawLine(sampleToX(playHead), 0, sampleToX(playHead), rect.height);
-		}
-
-		/**
-		 * Return the position x in the visible window. Returns -1 in case the
-		 * position is outside.
-		 * 
-		 * @param pos
-		 *            the sample
-		 * @return the horizontal position in pixels.
-		 */
-		protected int sampleToX(int pos) {
-			int winWidth = this.getWidth();
-			if (pos < firstVisibleSample || winWidth < 1) {
-				return -1;
-			}
-			if (pos > lastVisibleSample) {
-				return winWidth + 1;
-			}
-			int visiblePos = pos - firstVisibleSample;
-			double ratio = winWidth / (double) (lastVisibleSample - firstVisibleSample);
-			int x = (int) (visiblePos * ratio);
-			// LOG.debug("sampleToX( {} ) = {}", pos, x);
-			return x;
-		}
-	}
-
 	int getScrollPosition() {
 		return scroll.getValue();
 	}
@@ -230,9 +123,9 @@ public class WaveFormComponent extends JPanel
 	 * @param doc
 	 *            the audio document.
 	 */
-	public void setDocument(AudioDocument doc) {
+	public void setAudioDocument(AudioDocument doc) {
 		this.audio = doc;
-		this.audio.register(this);
+		this.wave.setAudioDocument(doc);
 		updateAudio();
 	}
 	
@@ -241,7 +134,8 @@ public class WaveFormComponent extends JPanel
 			if( first != -1 ) this.firstVisibleSample = first;
 			if( last != -1 ) this.lastVisibleSample = last;
 			this.scroll.setValues(this.firstVisibleSample, this.lastVisibleSample - this.firstVisibleSample, 0, this.numberOfSamples);
-			this.wave.invalidate();
+			this.wave.setVisibleWindow(this.firstVisibleSample, this.lastVisibleSample);
+			repaint();
 		}
 	}
 
@@ -255,6 +149,9 @@ public class WaveFormComponent extends JPanel
 			if (this.lastVisibleSample < this.firstVisibleSample) {
 				this.firstVisibleSample = 0;
 			}
+			int unit = this.numberOfSamples / audio.getChunkSize();
+			this.scroll.setUnitIncrement(unit); // 1 buffer size (about 20 ms)
+			this.scroll.setBlockIncrement(unit * 10); // 10 buffers (about 200 ms)
 			scrollTo(-1, -1);
 		}
 		repaint();
@@ -272,31 +169,32 @@ public class WaveFormComponent extends JPanel
 	 *            the new value
 	 */
 	public void setExtent(int newExtent) {
-		int first, last;
-		int max = numberOfSamples;
-		if (newExtent >= max) {
-			first = 0;
-			last = numberOfSamples;
-		} else {
+		if( newExtent <= 0 ){
+			return;
+		}
+		else if (newExtent >= numberOfSamples) {
+			this.firstVisibleSample = 0;
+			this.lastVisibleSample = numberOfSamples;
+		} 
+		else {
 			int extend = this.getExtent();
 			int diff = (newExtent - extend) / 2;
-			last = this.lastVisibleSample + diff;
-			first = this.firstVisibleSample - diff;
+			this.lastVisibleSample += diff;
+			this.firstVisibleSample -= diff;
 		}
-		int unit = this.numberOfSamples / audio.getSampleSize();
-		this.scroll.setUnitIncrement(unit);
-		this.scroll.setBlockIncrement(unit * 10);
-		this.scrollTo(first, last);
+		this.scrollTo(-1, -1);
 		this.repaint();
 	}
 
 	public int getExtent() {
-		return this.lastVisibleSample + this.firstVisibleSample;
+		int val = this.lastVisibleSample - this.firstVisibleSample;
+		// LOG.debug("getExtend() = {} ({} - {})", val, this.firstVisibleSample, this.lastVisibleSample);
+		return val;
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		mousePosition = e.getPoint().x + firstVisibleSample;
+		this.wave.mousePosition = e.getPoint().x + firstVisibleSample;
 		repaint();
 	}
 
@@ -309,31 +207,26 @@ public class WaveFormComponent extends JPanel
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if (!e.isShiftDown()) {
-			int rotation = e.getWheelRotation();
-			this.setExtent(this.getExtent() + rotation * 10000);
+			double rotation = e.getWheelRotation();
+			double newExtent = (this.getExtent() + rotation * 10000.0);
+			// LOG.debug("Rotation: {}, newExtent: {}", rotation, newExtent);
+			this.setExtent((int)newExtent);
 		}
 	}
 
-	@Override
-	public void audioChanged() {
-		// int max = audio.getNumberOfSamples();
-		// if( max != numberOfSamples ){
-		this.updateAudio();
-		// }
-		// repaint();
-	}
+
 
 	@Override
 	public void adjustmentValueChanged(AdjustmentEvent e) {
-		int diff = (e.getValue() - firstVisibleSample);
+		int diff = e.getValue() - firstVisibleSample;
 		lastVisibleSample += diff;
 		firstVisibleSample += diff;
-		repaint();
+		scrollTo(-1,-1);
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		playHead = sampleFrom(e.getX());
+		this.wave.playHead = sampleFrom(e.getX());
 		repaint();
 	}
 
@@ -360,7 +253,6 @@ public class WaveFormComponent extends JPanel
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -375,18 +267,6 @@ public class WaveFormComponent extends JPanel
 
 	}
 
-	@Override
-	public void audioPlayed(int sample) {
-		playHead = sample;
-		if( playHead > this.lastVisibleSample ){
-			scroll.setValue( playHead );
-		}
-		repaint();
-	}
 
-	@Override
-	public void audioPaused() {
-		// TODO - Update the "PLAY/RECORD BUTTONS"
-	}
 
 }
