@@ -7,6 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JComponent;
 
@@ -52,10 +54,42 @@ public class WaveComponent extends JComponent {
 	private Color leftColor = new Color(46, 204, 113);
 	private Color peakColor = new Color(52, 152, 219).brighter();
 	private Color rmsColor = new Color(41, 128, 185);
-
+	private Color backgroundColor = new Color(44, 62, 80).darker();
+	
+	private List<RegionSelected> regions = new ArrayList<RegionSelected>();
+	
 	public WaveComponent(){
 		this.audio = null;
+		this.setBackground( backgroundColor );
 	}
+	
+	/**
+	 * Clear the current selection.
+	 * 
+	 */
+	public synchronized void addSelection(RegionSelected region){
+		this.removeSelection(region.name); // avoid duplicates!
+		this.regions.add(region);
+		this.repaint();
+	}
+	
+	/**
+	 * Remove a region based on its name.
+	 * 
+	 * @param name name of the region (case-insensitive).
+	 */
+	public void removeSelection(String name){
+		synchronized( regions ){
+			for(int i = 0; i < regions.size(); i++ ){
+				RegionSelected r = regions.get(i);
+				if( r.name.equalsIgnoreCase(name) ){
+					regions.remove(i);
+					repaint();
+				}
+			}
+		}
+	}
+	
 	
 	public void setAudioDocument(AudioDocument doc){
 		this.audio = doc;
@@ -173,21 +207,46 @@ public class WaveComponent extends JComponent {
 		int firstChunk = first / chunkSize;
 		int lastChunk = (last / chunkSize) + 1;
 		
-		setStroke(g, 2.0);
+		setStroke(g, (factor > 0.15 ? 2.0 : 1.0));
+		// LOG.debug("FACTOR = {}",  factor);
 		for( int j = 0; j < 2; j++){
 			int y_middle = (int)(rect.height / 2 + (rect.height * 0.15) * (j == 0 ? -1.0 : +1.0));
-			int x_old = -100;
-			int y_old = y_middle;
 			g.setColor(j == 0 ? leftColor : rightColor);
-			for(int i = firstChunk; i < lastChunk; i++){
-				long begin_x = (i * chunkSize) - first;
-				float[][] samples = audio.getAudioSamples(i);
-				for(int k = 0; k < samples[j].length; k++){
-					int x = (int)((begin_x + k) * factor);
-					int y = (int)(samples[j][k] * h) + y_middle;
-					g.drawLine(x_old, y_old, x, y);
-					x_old = x;
-					y_old = y;
+			if( factor < 0.02 ){
+				LOG.debug("FACTOR = {}", factor);
+				int x_prev = -100;
+				int y = 0;
+				for(int i = firstChunk; i < lastChunk; i++){
+					long begin_x = (i * chunkSize) - first;
+					float[][] samples = audio.getAudioSamples(i);
+					for(int k = 0; k < samples[j].length; k++){
+						int x = (int)((begin_x + k) * factor);
+						if( x > x_prev ){
+							g.drawLine((int)x, y_middle - y, (int)x, y_middle + y);
+							y = 0; // Rest the value
+							x_prev = x;
+						}
+						else {
+							// Keep samples
+							y = Math.max(y, Math.abs((int)(samples[j][k] * h)));
+						}
+					}
+				}
+			}
+			else {
+				double x_old = -100;
+				int y_old = y_middle;
+				for(int i = firstChunk; i < lastChunk; i++){
+					long begin_x = (i * chunkSize) - first;
+					float[][] samples = audio.getAudioSamples(i);
+					for(int k = 0; k < samples[j].length; k++){
+						double x = ((begin_x + k) * factor);
+						int y = (int)(samples[j][k] * h);
+						// Optimization: draw as less as possible 
+						g.drawLine((int)x_old, y_old + y_middle, (int)x, y + y_middle);
+						x_old = x;
+						y_old = y;
+					}
 				}
 			}
 		}
@@ -239,13 +298,16 @@ public class WaveComponent extends JComponent {
 
 	@Override
 	public void paintComponent(Graphics g) {
+		Graphics2D g2 = ((Graphics2D) g);
 		super.paintComponent(g);
-		Rectangle rect = g.getClipBounds();
+		
+		int height = getHeight();
+		g.setColor(getBackground());
+		g.fillRect(0, 0, getWidth(), getHeight());
+		
 		if (audio != null) {
-			g.setColor(new Color(44, 62, 80).darker());
-			g.fillRect(rect.x, rect.y, rect.width, rect.height);
 			RMSSample[] samples = audio.getLevels();
-			
+	
 			if (samples != null) {
 				switch( mode ){
 					case WAVE_MODE:
@@ -261,7 +323,7 @@ public class WaveComponent extends JComponent {
 						break;
 						
 					default :
-						if( rect.width * audio.getChunkSize() < lastVisibleSample - firstVisibleSample){
+						if( getWidth() * audio.getChunkSize() < (lastVisibleSample - firstVisibleSample) ){
 							drawLevels(g, samples);
 						}
 						else {
@@ -271,19 +333,32 @@ public class WaveComponent extends JComponent {
 				}
 
 
-				g.setColor(Color.WHITE);
+//				g.setColor(Color.WHITE);
 //				g.drawString("Number of samples: " + samples.length, 10, 20);
 //				g.drawString("Farme rate: " + audio.getFormat().getFrameRate(), 10, 40);
 			}
 		
+			synchronized(regions){
+				for( RegionSelected r : regions ){
+					if( r.active ){
+						int x1 = this.sampleToX(r.begin);
+						int x2 = this.sampleToX(r.end);
+						Color c = new Color( r.color.getRed(), r.color.getGreen(), r.color.getBlue(), 150 ); 
+						g.setColor(c);
+						g.fillRect(Math.min(x1, x2), 0, Math.abs(x2 - x1), getHeight());
+					}
+				}
+			}
 		}
 
 		setStroke(g, 1.0);
 		g.setColor(Color.LIGHT_GRAY);
-		g.drawLine(sampleToX(mousePosition), 0, sampleToX(mousePosition), rect.height);
+		g.drawLine(sampleToX(mousePosition), 0, sampleToX(mousePosition), height);
 
 		g.setColor(Color.GREEN.brighter());
-		g.drawLine(sampleToX(playHead), 0, sampleToX(playHead), rect.height);
+		g.drawLine(sampleToX(playHead), 0, sampleToX(playHead), height);
+		
+
 	}
 
 	/**

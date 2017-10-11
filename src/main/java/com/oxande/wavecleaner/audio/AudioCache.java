@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
+import java.nio.BufferUnderflowException;
 import java.nio.FloatBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -33,7 +34,7 @@ public class AudioCache implements AutoCloseable {
 
     public AudioCache( int sampleSize, int numberOfChunks ) throws IOException {
         this.bufferSize = sampleSize;
-        this.lastSample = numberOfChunks * sampleSize;
+        this.lastSample = (numberOfChunks+1) * sampleSize;
         this.blockSize = this.bufferSize * Float.BYTES * 2;
 
         // Create file object
@@ -59,16 +60,22 @@ public class AudioCache implements AutoCloseable {
      * channel at index 1.
      *
      */
-    float[][] getSamples(int block) throws IOException {
+    float[][] getSamples(int block) {
         float[][] array = new float[2][];
         array[0] = new float[bufferSize];
         array[1] = new float[bufferSize];
 
-        FloatBuffer fBuf = buffer.asFloatBuffer();
-        fBuf.position( block * 2  * bufferSize );
-        fBuf.get(array[0]); // left channel
-        fBuf.position( (block * 2 + 1) *bufferSize );
-        fBuf.get(array[1]); // right channel
+        try {
+	        FloatBuffer fBuf = buffer.asFloatBuffer();
+	        fBuf.position( block * 2  * bufferSize );
+	        fBuf.get(array[0]); // left channel
+	        fBuf.position( (block * 2 + 1) *bufferSize );
+	        fBuf.get(array[1]); // right channel
+        }
+        catch( BufferUnderflowException ex){
+        	LOG.error("Buffer Underflow: block {} not available, requested up to position {} but the capacity is {}.",
+        			block,  (block+1) * 2 * bufferSize * Float.BYTES, buffer.capacity() );
+        }
 
         return array;
     }

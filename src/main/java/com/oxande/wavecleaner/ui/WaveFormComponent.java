@@ -1,6 +1,10 @@
 package com.oxande.wavecleaner.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseEvent;
@@ -15,6 +19,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.audio.AudioDocument;
 import com.oxande.wavecleaner.util.logging.LogFactory;
+
+import ddf.minim.AudioListener;
 
 /**
  * The waveform component is the central part of the software in terms of
@@ -54,8 +60,8 @@ public class WaveFormComponent extends JPanel
 	AudioDocument audio = null;
 	private JScrollBar scroll = new JScrollBar();
 	private WaveComponent wave = new WaveComponent();
-
-
+	private RegionSelected selection = null;
+	
 //		RIGHT CHANNEL :
 //		-       TURQUOISE : #1abc9c -- rgb(26, 188, 156)
 //		-       GREEN SEA : #16a085 -- rgb(22, 160, 133)
@@ -75,12 +81,25 @@ public class WaveFormComponent extends JPanel
 		return this.wave.playHead;
 	}
 	
+	/**
+	 * Move the play head. If the synchronization flag, we follow the play head
+	 * (this is cool during playback). We follow the play head if and only if the
+	 * play head was visible and goes to the next page. This method will avoid issues
+	 * when you scroll the window or other operations.
+	 * 
+	 * @param pos the new position (in samples)
+	 * @param sync if we have to sync the play head (set to true when the message comes
+	 * from the {@link AudioListener}).
+	 */
 	public void setPlayHead(int pos, boolean sync ){
-		this.wave.playHead = pos;
-		if( sync && (pos > this.wave.lastVisibleSample) ){
-			this.scroll.setValue( this.wave.playHead );
+		if( pos != this.wave.playHead ){
+			// Only if the play head has moved!
+			if( sync && (this.wave.playHead < this.wave.lastVisibleSample) && (pos >= this.wave.lastVisibleSample) ){
+				this.scroll.setValue( this.wave.playHead );
+			}
+			this.wave.playHead = pos;
+			repaint();
 		}
-		repaint();
 	}
 
 	/** The first visible sample */
@@ -199,18 +218,34 @@ public class WaveFormComponent extends JPanel
 	}
 
 	@Override
+	public void mousePressed(MouseEvent e) {
+		this.selection = new RegionSelected("loop", sampleFrom(e.getX()));
+		this.wave.addSelection(this.selection);
+		LOG.debug("Pressed at: {}", this.selection.begin );
+	}
+	
+	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO: LOAD THE FILE DRAGGED (IF POSSIBLE)
-		System.out.println("Dragging..");
+		if( this.selection == null ){
+			LOG.error("Mouse dragging while no selection!?!");
+			this.mousePressed(e);
+		}
+		LOG.debug("Dragging..");
+		this.selection.end = sampleFrom(e.getX());
+		this.repaint();
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if (!e.isShiftDown()) {
-			double rotation = e.getWheelRotation();
+			double rotation = e.getPreciseWheelRotation();
 			double newExtent = (this.getExtent() + rotation * 10000.0);
 			// LOG.debug("Rotation: {}, newExtent: {}", rotation, newExtent);
 			this.setExtent((int)newExtent);
+		}
+		else {
+            LOG.debug("mouseWheelMoved() dispatched.");
+            e.getComponent().getParent().dispatchEvent(e);
 		}
 	}
 
@@ -226,7 +261,17 @@ public class WaveFormComponent extends JPanel
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		this.wave.playHead = sampleFrom(e.getX());
+		if( e.getClickCount() > 1) {
+			LOG.info("Double-clicked at x={}", e.getX());
+			int sample = sampleFrom(e.getX());
+			audio.play(sample);
+		}
+		else if( audio.isPlaying() ){
+			LOG.info("Click ignored when playing.");
+		}
+		else {
+			this.wave.playHead = sampleFrom(e.getX());
+		}
 		repaint();
 	}
 
@@ -245,10 +290,7 @@ public class WaveFormComponent extends JPanel
 		return pos;
 	}
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Store the position for selection...
-	}
+
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
@@ -266,7 +308,5 @@ public class WaveFormComponent extends JPanel
 		// TODO Auto-generated method stub
 
 	}
-
-
-
+	
 }

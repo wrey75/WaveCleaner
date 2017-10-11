@@ -218,15 +218,7 @@ public class AudioDocument implements AudioListener {
 	
 	public float[][] getAudioSamples( int chunk ){
 		float[][] samples = null;
-		try {
-			samples = this.cache.getSamples(chunk);
-		}
-		catch(IOException ex ){
-			LOG.error("I/O Error: {}. Returns blank", ex.getMessage());
-			samples = new float[2][];
-			samples[0] = new float[this.getChunkSize()];
-			samples[1] = new float[this.getChunkSize()];
-		}
+		samples = this.cache.getSamples(chunk);
 		return samples;
 	}
 
@@ -270,12 +262,18 @@ public class AudioDocument implements AudioListener {
 	}
 	
 	public synchronized void play(int pos){
+		int ms = (int)(pos * 1000.0 / this.getFormat().getSampleRate());
 		FilePlayer player = getFilePlayer();
+		if(player.isPlaying()){
+			LOG.info("MOVED PLAY TO {}", pos );
+			player.cue(ms);
+			return;
+		}
 		player.patch(lineOut);
 		lineOut.addListener(this);
-		player.cue((int)(pos * 1000.0 / this.getFormat().getSampleRate()) );
+		player.cue(ms);
 		player.play();
-		LOG.info("PLAY (from sample {})", pos );
+		LOG.info("START PLAY (from sample {})", pos );
 	}
 
 	@Override
