@@ -15,11 +15,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
-import javax.swing.JTree;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
@@ -29,7 +26,7 @@ import javax.swing.border.Border;
  * be extended by your own code. The following code only
  * provide an easy way to obtain a basic GUI.
  */
-public class AbstractMainScreen extends JFrame  {
+public class AbstractMainScreen extends JFrame {
    private JPanel jpanel1 = new JPanel();
    private JMenuBar jmenubar1 = new JMenuBar();
    private JMenu jmenu1 = new JMenu();
@@ -47,7 +44,7 @@ public class AbstractMainScreen extends JFrame  {
    private JSplitPane jsplitpane1 = new JSplitPane();
    private JSplitPane jsplitpane2 = new JSplitPane();
    protected WaveComponent instant = new WaveComponent();
-   protected JTree pathTree = new JTree();
+   protected AudioInfoComponent infos = new AudioInfoComponent();
    protected com.oxande.wavecleaner.ui.WaveFormComponent song = new com.oxande.wavecleaner.ui.WaveFormComponent();
 private class SetStatusMessageClass implements Runnable {
       private String input;
@@ -211,10 +208,12 @@ private class SetStatusMessageClass implements Runnable {
       jmenu2.setMnemonic(java.awt.event.KeyEvent.VK_E);
       jmenu2.setDisplayedMnemonicIndex(0);
       jmenuitem5.setName("zoomIn");
+      jmenuitem5.setAccelerator(javax.swing.KeyStroke.getKeyStroke("ctrl L"));
       jmenuitem5.setText("Zoom In");
       jmenuitem5.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Zoom In");
+      putValue(Action.ACCELERATOR_KEY, jmenuitem5.getAccelerator());
    }
 
    public void actionPerformed(ActionEvent e)
@@ -226,10 +225,12 @@ private class SetStatusMessageClass implements Runnable {
 );
       jmenu2.add(jmenuitem5);
       jmenuitem6.setName("zoomOut");
+      jmenuitem6.setAccelerator(javax.swing.KeyStroke.getKeyStroke("ctrl K"));
       jmenuitem6.setText("Zoom Out");
       jmenuitem6.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Zoom Out");
+      putValue(Action.ACCELERATOR_KEY, jmenuitem6.getAccelerator());
    }
 
    public void actionPerformed(ActionEvent e)
@@ -271,10 +272,11 @@ private class SetStatusMessageClass implements Runnable {
       jpanel1.add(statusBar, BorderLayout.SOUTH);
       toolbar.setOrientation(JToolBar.HORIZONTAL);
       jpanel1.add(toolbar, "North");
+      jsplitpane2.setPreferredSize(new java.awt.Dimension(100,400));
+      jsplitpane2.setDividerLocation(0.25);
       jsplitpane2.setOrientation(JSplitPane.VERTICAL_SPLIT);
       jsplitpane2.setTopComponent(instant);
-      JScrollPane pathTreeScroll = new JScrollPane(pathTree,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-      jsplitpane2.setBottomComponent(pathTreeScroll);
+      jsplitpane2.setBottomComponent(infos);
       jsplitpane1.setTopComponent(jsplitpane2);
       jsplitpane1.setBottomComponent(song);
       jpanel1.add(jsplitpane1, BorderLayout.CENTER);

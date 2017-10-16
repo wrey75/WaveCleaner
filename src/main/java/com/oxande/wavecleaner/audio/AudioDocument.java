@@ -10,6 +10,8 @@ import javax.sound.sampled.AudioFormat;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.filters.MonauralFilter;
+import com.oxande.wavecleaner.filters.TestFilter;
 import com.oxande.wavecleaner.ui.WaveFormComponent;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -157,6 +159,15 @@ public class AudioDocument implements AudioListener {
 	}
 	
 	/**
+	 * Returns the audio file (a reference to the).
+	 * 
+	 * @return the file
+	 */
+	public File getFile(){
+		File f = new File(this.fileName);
+		return f;
+	}
+	/**
 	 * Register a new listener. Used at the beginning for the {@link WaveFormComponent}
 	 * but any object can listen.
 	 * 
@@ -251,6 +262,10 @@ public class AudioDocument implements AudioListener {
 		publish(0);
 	}
 
+	/**
+	 * Stop to play. Basically a mute but we unpatch the line out!
+	 * 
+	 */
 	public synchronized void stop(){
 		filePlayer.pause();
 		lineOut.removeListener(this);
@@ -269,10 +284,16 @@ public class AudioDocument implements AudioListener {
 			player.cue(ms);
 			return;
 		}
-		player.patch(lineOut);
+		TestFilter testF = new TestFilter(this.stream);
+		MonauralFilter mFilter = new MonauralFilter(this.stream);
+		
+		// TODO: remove the line below...
+		player.patch(mFilter).patch(lineOut);
+		// REAL VERSION player.patch(lineOut);
 		lineOut.addListener(this);
-		player.cue(ms);
+		player.rewind();
 		player.play();
+		player.cue(ms);
 		LOG.info("START PLAY (from sample {})", pos );
 	}
 

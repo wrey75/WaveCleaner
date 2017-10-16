@@ -1,10 +1,6 @@
 package com.oxande.wavecleaner.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseEvent;
@@ -261,6 +257,7 @@ public class WaveFormComponent extends JPanel
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		if( audio == null ) return;
 		if( e.getClickCount() > 1) {
 			LOG.info("Double-clicked at x={}", e.getX());
 			int sample = sampleFrom(e.getX());

@@ -21,12 +21,41 @@ import ddf.minim.AudioSample;
 import ddf.minim.Minim;
 
 public class WaveCleaner {
+	public static final String SOFTWARE_ID = "waveclean"; 
+	public static String workingDir = ".";
+	
 	private static Logger LOG = LogFactory.getLog(WaveCleaner.class);
 	private MainScreen mainFrame;
 	public Minim minim;
+	
+	/**
+	 * Looking for a working directory
+	 * 
+	 * @return the working directory
+	 */
+	protected File lookingForWorkingDirectory(){
+		File workingDir = new File(".");
+		String value = System.getenv( (SOFTWARE_ID + "_data").toUpperCase() );
+		if(value == null){
+			String homeDir = System.getProperty("home.dir");
+			File f = new File(homeDir);
+			if( !f.exists() ){
+				JOptionPane.showMessageDialog(null, "No user directory specified!");
+				f = new File(".");
+			}
+			String workingDirName = f.getAbsolutePath() + File.pathSeparator + SOFTWARE_ID.toLowerCase();
+			workingDir = new File(workingDirName);
+			if(!workingDir.exists()){
+				workingDir.mkdirs();
+			}
+		}
+		return workingDir;
+	}
 
 	public static void main(String[] args) {
 		LOG.debug("Program started.");
+		
+		
 		/*
 		//AudioFormat(float sampleRate, int sampleSizeInBits,
 		// int channels, boolean signed, boolean bigEndian)

@@ -10,8 +10,10 @@
 			<menuitem action="onExit">E_xit</menuitem>
 		</menu>
 		<menu text="_Edit">
-			<menuitem name="zoomIn" action="onZoomIn">Zoom In</menuitem>
-			<menuitem name="zoomOut" action="onZoomOut">Zoom Out</menuitem>
+			<menuitem name="zoomIn" action="onZoomIn"
+			shortcut="ctrl L">Zoom In</menuitem>
+			<menuitem name="zoomOut" action="onZoomOut"
+			shortcut="ctrl K">Zoom Out</menuitem>
 		</menu>
 		<menu text="_Help">
 			<menuitem action="showAboutDlg">_About</menuitem>
@@ -19,13 +21,16 @@
 	</menubar>
 
 	<toolbar id="toolbar">
-		<jbutton action="onZoomIn"></jbutton> 
+		<jbutton action="onZoomIn">hello</jbutton> 
 	</toolbar>
 
 	<splitpane>
-		<splitpane orientation="vertical">
-			<component id="instant" class="WaveComponent"></component>
+		<splitpane coolsize="100,400" orientation="vertical" dividerLocation="0.25">
+			<component coolsize="100,100" id="instant" class="WaveComponent"></component>
+			<!-- 
 			<tree id="pathTree" vscroll="auto" hscroll="auto" />
+			 -->
+			 <component coolsize="100,300" id="infos" class="AudioInfoComponent"></component>
 		</splitpane>
 		
 		<component id="song" class="com.oxande.wavecleaner.ui.WaveFormComponent" />

@@ -7,22 +7,20 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 import ddf.minim.AudioMetaData;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.spi.AudioRecordingStream;
+import ddf.minim.spi.AudioStream;
 
 /**
- * The monaural filter will take the STEREO SOUND and will add the 2 bands then
- * substracting the differences. This is exactly the pending of "Remove vocals".
- * 
+ * The basic filter is the base of an audio filter.
  * @author wrey75
  *
  */
-public class MonauralFilter extends AudioFilter {
-	private static Logger LOG = LogFactory.getLog(MonauralFilter.class);
-	private AudioRecordingStream mFileStream;
-	// private boolean isPaused;
-	// buffer we use to read from the stream
+public class BasicFilter extends AudioFilter {
+	private static Logger LOG = LogFactory.getLog(BasicFilter.class);
+	private static final int BUFFER_SIZE = 1024;
+	private AudioStream mFileStream;
 	private MultiChannelBuffer buffer;
-	// where in the buffer we should read the next sample from
 	private int bufferOutIndex;
+	private int bufferSize;
 
 	/**
 	 * Construct a FilePlayer that will read from iFileStream.
@@ -32,25 +30,29 @@ public class MonauralFilter extends AudioFilter {
 	 * 
 	 * @example Synthesis/filePlayerExample
 	 */
-	public MonauralFilter(AudioRecordingStream iFileStream) {
+	public BasicFilter(AudioRecordingStream iFileStream, int bufferSize) {
+		if(bufferSize == 0){
+			bufferSize = BUFFER_SIZE;
+		}
+		this.bufferSize = bufferSize;
 		mFileStream = iFileStream;
-		buffer = new MultiChannelBuffer(1024, mFileStream.getFormat().getChannels());
+		int nbChannels = mFileStream.getFormat().getChannels();
+		buffer = new MultiChannelBuffer(bufferSize, nbChannels);
 		bufferOutIndex = 0;
-
 	}
 
-	/**
-	 * Returns the underlying AudioRecordingStream.
-	 * 
-	 * @return AudioRecordingStream: the underlying stream
-	 * 
-	 * @related Minim
-	 * @related AudioRecordingStream
-	 * @related FilePlayer
-	 */
-	public AudioRecordingStream getStream() {
-		return mFileStream;
-	}
+//	/**
+//	 * Returns the underlying AudioRecordingStream.
+//	 * 
+//	 * @return AudioRecordingStream: the underlying stream
+//	 * 
+//	 * @related Minim
+//	 * @related AudioRecordingStream
+//	 * @related FilePlayer
+//	 */
+//	public AudioRecordingStream getStream() {
+//		return mFileStream;
+//	}
 
 	// /**
 	// * Starts playback from the current position.
@@ -169,32 +171,32 @@ public class MonauralFilter extends AudioFilter {
 	// return mFileStream.getLoopCount();
 	// }
 
-	/**
-	 * Returns the length of the sound in milliseconds. If for any reason the
-	 * length could not be determined, this will return -1. However, an unknown
-	 * length should not impact playback.
-	 * 
-	 * @shortdesc Returns the length of the sound in milliseconds.
-	 * 
-	 * @return int: the length of the sound in milliseconds
-	 * 
-	 * @related FilePlayer
-	 */
-	public int length() {
-		return mFileStream.getMillisecondLength();
-	}
+//	/**
+//	 * Returns the length of the sound in milliseconds. If for any reason the
+//	 * length could not be determined, this will return -1. However, an unknown
+//	 * length should not impact playback.
+//	 * 
+//	 * @shortdesc Returns the length of the sound in milliseconds.
+//	 * 
+//	 * @return int: the length of the sound in milliseconds
+//	 * 
+//	 * @related FilePlayer
+//	 */
+//	public int length() {
+//		return mFileStream.getMillisecondLength();
+//	}
 
-	/**
-	 * Returns the current position of the "playhead" (ie how much of the sound
-	 * has already been played)
-	 * 
-	 * @return int: the current position of the "playhead", in milliseconds
-	 * 
-	 * @related FilePlayer
-	 */
-	public int position() {
-		return mFileStream.getMillisecondPosition();
-	}
+//	/**
+//	 * Returns the current position of the "playhead" (ie how much of the sound
+//	 * has already been played)
+//	 * 
+//	 * @return int: the current position of the "playhead", in milliseconds
+//	 * 
+//	 * @related FilePlayer
+//	 */
+//	public int position() {
+//		return mFileStream.getMillisecondPosition();
+//	}
 
 	// /**
 	// * Sets the position to <code>millis</code> milliseconds from
@@ -290,17 +292,17 @@ public class MonauralFilter extends AudioFilter {
 	// return mFileStream.isPlaying();
 	// }
 
-	/**
-	 * Returns the meta data for the recording being played by this player.
-	 * 
-	 * @return AudioMetaData: the meta data for this player's recording
-	 * 
-	 * @related AudioMetaData
-	 * @related FilePlayer
-	 */
-	public AudioMetaData getMetaData() {
-		return mFileStream.getMetaData();
-	}
+//	/**
+//	 * Returns the meta data for the recording being played by this player.
+//	 * 
+//	 * @return AudioMetaData: the meta data for this player's recording
+//	 * 
+//	 * @related AudioMetaData
+//	 * @related FilePlayer
+//	 */
+//	public AudioMetaData getMetaData() {
+//		return mFileStream.getMetaData();
+//	}
 
 	// /**
 	// * Sets the loop points used when looping.
@@ -328,52 +330,36 @@ public class MonauralFilter extends AudioFilter {
 		mFileStream.close();
 	}
 
-	private void fillBuffer() {
+	/**
+	 * Read the next buffer.
+	 * 
+	 */
+	private void nextBuffer() {
 		mFileStream.read(buffer);
+		// float left[] = buffer.getChannel(0);
+		// float right[] = buffer.getChannel(1);
 		bufferOutIndex = 0;
+		process(buffer);
 	}
 
+	public void process( MultiChannelBuffer buff ){
+		
+	}
+	
 	@Override
-	protected void uGenerate(float[] channels) {
-
-		// if ( mFileStream.isPlaying() )
-		// {
-		// // special case: mono expands out to all channels.
-		// if ( buffer.getChannelCount() == 1 )
-		// {
-		// Arrays.fill( channels, buffer.getSample( 0, bufferOutIndex ) );
-		// }
-		// we have more than one channel, don't try to fill larger channel
-		// requests
-		if (buffer.getChannelCount() != channels.length) {
+	final protected void uGenerate(float[] channels) {
+		if (channels.length != 2) {
 			// This error should be thrown elsewhere!
 			throw new IllegalStateException("Expected 2 channels everywhere!");
-			// for(int i = 0 ; i < channels.length; ++i)
-			// {
-			// channels[i] = buffer.getSample( i, bufferOutIndex );
-			// }
 		}
 
-		// FILTER STARTS
-		float left = buffer.getSample(0, bufferOutIndex);
-		float right = buffer.getSample(1, bufferOutIndex);
-		float diff = left - right;
-		
-		// float mono = ((left + diff) + (right + diff)) * 0.5f;
-		float mono = (left + right) * 0.5f;
-		channels[0] = right + diff * 0;
-		channels[1] = left + diff * 0;
-		// FILTER END
+		// Copy from the calculated
+		channels[0] = buffer.getSample(0, bufferOutIndex);
+		channels[1] = buffer.getSample(1, bufferOutIndex);
 
-		// }
-		// else
-		// {
-		// Arrays.fill( channels, 0 );
-		// }
 		++bufferOutIndex;
-		if (bufferOutIndex == buffer.getBufferSize()) {
-			fillBuffer();
-			// LOG.debug("filling buffer with {} samples.", buffer.getBufferSize());
+		if (bufferOutIndex == bufferSize) {
+			nextBuffer(); // and process!
 		}
 	}
 

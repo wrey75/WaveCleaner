@@ -48,6 +48,7 @@ public class MainScreen extends AbstractMainScreen implements AudioDocumentListe
 		this.song.setAudioDocument(audio);
 		this.instant.setAudioDocument(audio);
 		this.audio.register(this);
+		this.infos.setAudioDocument(audio);
 	}
 	
 	protected void onRecordSound(){
@@ -58,7 +59,7 @@ public class MainScreen extends AbstractMainScreen implements AudioDocumentListe
 	 * Load the sound file
 	 * 
 	 */
-	protected void onLoadSound(){
+	protected synchronized void onLoadSound(){
 		JFileChooser chooser = new JFileChooser();
 	    FileNameExtensionFilter filter = new FileNameExtensionFilter("Sound files", "aiff", "wav", "mp3" );
 	    chooser.setFileFilter(filter);
@@ -82,13 +83,15 @@ public class MainScreen extends AbstractMainScreen implements AudioDocumentListe
 	
 	
 	protected void onZoomIn(){
-		int nb = this.song.getExtent() - this.audio.getNumberOfSamples() / 20;
+		// int nb = this.song.getExtent() - this.audio.getNumberOfSamples() / 20;
+		int nb = (int)(this.song.getExtent() * 1.10);
 		this.song.setExtent(nb);
 	}
 	
 	
 	protected void onZoomOut(){
-		int nb = this.song.getExtent() + this.audio.getNumberOfSamples() / 20;
+		// int nb = this.song.getExtent() + this.audio.getNumberOfSamples() / 20;
+		int nb = (int)(this.song.getExtent() * 0.90);
 		this.song.setExtent(nb);
 	}
 	
