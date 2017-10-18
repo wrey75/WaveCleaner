@@ -6,15 +6,17 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.AudioMetaData;
 import ddf.minim.MultiChannelBuffer;
+import ddf.minim.UGen;
 import ddf.minim.spi.AudioRecordingStream;
 import ddf.minim.spi.AudioStream;
 
 /**
  * The basic filter is the base of an audio filter.
  * @author wrey75
- *
+ * @deprecated used for testing purposes.
  */
-public class BasicFilter extends AudioFilter {
+@Deprecated
+public class BasicFilter extends UGen {
 	private static Logger LOG = LogFactory.getLog(BasicFilter.class);
 	private static final int BUFFER_SIZE = 1024;
 	private AudioStream mFileStream;

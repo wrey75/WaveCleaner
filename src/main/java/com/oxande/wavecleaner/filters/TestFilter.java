@@ -6,6 +6,7 @@ import ddf.minim.AudioMetaData;
 import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
+import ddf.minim.UGen;
 import ddf.minim.spi.AudioRecordingStream;
 import ddf.minim.ugens.FilePlayer;
 
@@ -18,7 +19,7 @@ import ddf.minim.ugens.FilePlayer;
  * @author wrey75
  *
  */
-public class TestFilter extends AudioFilter {
+public class TestFilter extends UGen {
 
 	private AudioRecordingStream mFileStream;
 	private boolean 			 isPaused;

@@ -13,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
+import ddf.minim.Minim;
+
 
 /**
  * The audio cache is a very simple clas sto store the audio sample in
@@ -57,7 +59,7 @@ public class AudioCache implements AutoCloseable {
      *
      * @param block the block.
      * @return an array that contains the left channel in index 0 and right
-     * channel at index 1.
+     * channel at index 1. Always {@link Minim#STEREO}.
      *
      */
     float[][] getSamples(int block) {

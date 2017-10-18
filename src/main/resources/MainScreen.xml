@@ -25,7 +25,7 @@
 	</toolbar>
 
 	<splitpane>
-		<splitpane coolsize="100,400" orientation="vertical" dividerLocation="0.25">
+		<splitpane coolsize="100,400" orientation="vertical" dividerLocation="0.50">
 			<component coolsize="100,100" id="instant" class="WaveComponent"></component>
 			<!-- 
 			<tree id="pathTree" vscroll="auto" hscroll="auto" />

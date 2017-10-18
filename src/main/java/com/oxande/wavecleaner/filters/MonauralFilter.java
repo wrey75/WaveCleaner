@@ -6,16 +6,16 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.AudioMetaData;
 import ddf.minim.MultiChannelBuffer;
+import ddf.minim.UGen;
 import ddf.minim.spi.AudioRecordingStream;
 
 /**
- * The monaural filter will take the STEREO SOUND and will add the 2 bands then
- * substracting the differences. This is exactly the pending of "Remove vocals".
+ * The monaural filter is intended as a test. DO NOT SUPPOSE IT IS WORKING.
  * 
  * @author wrey75
  *
  */
-public class MonauralFilter extends AudioFilter {
+public class MonauralFilter extends UGen {
 	private static Logger LOG = LogFactory.getLog(MonauralFilter.class);
 	private AudioRecordingStream mFileStream;
 	// private boolean isPaused;

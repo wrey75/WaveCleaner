@@ -10,6 +10,8 @@ import javax.sound.sampled.AudioFormat;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.filters.AudioFilter;
+import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.filters.MonauralFilter;
 import com.oxande.wavecleaner.filters.TestFilter;
 import com.oxande.wavecleaner.ui.WaveFormComponent;
@@ -225,8 +227,14 @@ public class AudioDocument implements AudioListener {
 //		return WaveSample.create(left, right);
 //	}
 	
-	
-	
+	/**
+	 * Get the audio samples in a chunk. Use a mapped
+	 * memory to load the samples inside the chunk. 
+	 * 
+	 * @param chunk the chunk. The size of a chunk is depending of
+	 * the window size (basically a chunk is about 20 milliseconds).
+	 * @return the array of samples (always stereo expected).
+	 */
 	public float[][] getAudioSamples( int chunk ){
 		float[][] samples = null;
 		samples = this.cache.getSamples(chunk);
@@ -284,11 +292,12 @@ public class AudioDocument implements AudioListener {
 			player.cue(ms);
 			return;
 		}
-		TestFilter testF = new TestFilter(this.stream);
-		MonauralFilter mFilter = new MonauralFilter(this.stream);
-		
+		// TestFilter testF = new TestFilter(this.stream);
+		// MonauralFilter mFilter = new MonauralFilter(this.stream);
+		AudioFilter nullFilter = new AudioFilter( this.stream );
+		DecrackleFilter decrackFilter = new DecrackleFilter( this.stream );
 		// TODO: remove the line below...
-		player.patch(mFilter).patch(lineOut);
+		player.patch(decrackFilter).patch(lineOut);
 		// REAL VERSION player.patch(lineOut);
 		lineOut.addListener(this);
 		player.rewind();
