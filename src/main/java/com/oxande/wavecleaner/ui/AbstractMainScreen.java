@@ -3,7 +3,10 @@ package com.oxande.wavecleaner.ui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.lang.Runnable;
+import java.lang.UnsupportedOperationException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -48,6 +51,14 @@ public class AbstractMainScreen extends JFrame {
    private JSplitPane jsplitpane3 = new JSplitPane();
    protected com.oxande.wavecleaner.ui.WaveFormComponent song = new com.oxande.wavecleaner.ui.WaveFormComponent();
    protected com.oxande.wavecleaner.ui.ControllerComponent controller = new com.oxande.wavecleaner.ui.ControllerComponent();
+public class WindowAdapter1 extends java.awt.event.WindowAdapter {
+
+      public void windowClosing(WindowEvent e)
+      {
+         onExit();
+      }
+}
+
 private class SetStatusMessageClass implements Runnable {
       private String input;
 
@@ -274,6 +285,7 @@ private class SetStatusMessageClass implements Runnable {
       jpanel1.add(statusBar, BorderLayout.SOUTH);
       toolbar.setOrientation(JToolBar.HORIZONTAL);
       jpanel1.add(toolbar, "North");
+      this.addWindowListener(new WindowAdapter1());
       jsplitpane2.setOrientation(JSplitPane.VERTICAL_SPLIT);
       jsplitpane2.setDividerLocation(0.5);
       jsplitpane2.setTopComponent(instant);

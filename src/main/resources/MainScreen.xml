@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JFrame rootClass="MainFrame" name="com.oxande.wavecleaner.ui.AbstractMainScreen"
-	coolsize="600,400" title="Wave Cleaner" onClosing="onExit">
+	coolsize="600,400" title="Wave Cleaner" onClose="onExit">
 	<menubar>
 		<menu text="_File">
 			<menuitem action="onLoadSound">Load the music</menuitem>

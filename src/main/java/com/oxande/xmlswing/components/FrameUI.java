@@ -22,7 +22,6 @@ import com.oxande.xmlswing.jcode.JavaMethod;
  * comes from the {@link JFrameUI} class.
  * 
  * @author wrey75
- * @version $Rev: 48 $
  *
  */
 public class FrameUI extends WindowUI {
@@ -41,16 +40,13 @@ public class FrameUI extends WindowUI {
 		return varName;
 	}
 	
-	
-	
 	public static void addIconImage(JavaClass jclass, JavaMethod initMethod, Element root, String varName){
 		String icon = Parser.getAttribute(root, "icon");
 		if( icon != null ){
 			jclass.addImport(ImageIcon.class);
 			String theIcon = "(new ImageIcon(getClass().getResource(" + JavaCode.toParam(icon) + "))).getImage()";
 			initMethod.addCall(varName + ".setIconImage", theIcon );
-		}
-				
+		}			
 	}
 
 }
