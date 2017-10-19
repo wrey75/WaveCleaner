@@ -24,6 +24,7 @@ public class MainScreen extends AbstractMainScreen implements AudioDocumentListe
 		
 		// Init the components
 		initComponents();
+		this.pack();
 		this.setVisible(true);
 	}
 

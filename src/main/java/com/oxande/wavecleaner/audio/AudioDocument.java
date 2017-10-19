@@ -55,6 +55,7 @@ public class AudioDocument implements AudioListener {
 	int rightChannel = 1;
 	int nbChannels = 2;
 	private int totalSamples = 0;
+	DecrackleFilter decrackFilter = new DecrackleFilter();
 	
 	/**
 	 * The listeners
@@ -280,7 +281,8 @@ public class AudioDocument implements AudioListener {
 	public synchronized void stop(){
 		filePlayer.pause();
 		lineOut.removeListener(this);
-		filePlayer.unpatch(lineOut);
+		filePlayer.unpatch(decrackFilter);
+		decrackFilter.unpatch(lineOut);
 		LOG.info("PAUSED");
 		for(AudioDocumentListener listener : listeners){
 			listener.audioPaused();
@@ -297,11 +299,6 @@ public class AudioDocument implements AudioListener {
 		}
 
 		this.lineOut.addListener(this);
-		
-		// TestFilter testF = new TestFilter(this.stream);
-		// MonauralFilter mFilter = new MonauralFilter(this.stream);
-		// AudioFilter nullFilter = new AudioFilter( this.stream );
-		DecrackleFilter decrackFilter = new DecrackleFilter();
 		player.patch(decrackFilter).patch(lineOut);
 		// REAL VERSION player.patch(lineOut);
 		player.rewind();

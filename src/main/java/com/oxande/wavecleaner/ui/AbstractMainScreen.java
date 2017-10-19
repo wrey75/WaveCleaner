@@ -45,7 +45,9 @@ public class AbstractMainScreen extends JFrame {
    private JSplitPane jsplitpane2 = new JSplitPane();
    protected WaveComponent instant = new WaveComponent();
    protected AudioInfoComponent infos = new AudioInfoComponent();
+   private JSplitPane jsplitpane3 = new JSplitPane();
    protected com.oxande.wavecleaner.ui.WaveFormComponent song = new com.oxande.wavecleaner.ui.WaveFormComponent();
+   protected com.oxande.wavecleaner.ui.ControllerComponent controller = new com.oxande.wavecleaner.ui.ControllerComponent();
 private class SetStatusMessageClass implements Runnable {
       private String input;
 
@@ -272,13 +274,16 @@ private class SetStatusMessageClass implements Runnable {
       jpanel1.add(statusBar, BorderLayout.SOUTH);
       toolbar.setOrientation(JToolBar.HORIZONTAL);
       jpanel1.add(toolbar, "North");
-      jsplitpane2.setPreferredSize(new java.awt.Dimension(100,400));
-      jsplitpane2.setDividerLocation(0.25);
       jsplitpane2.setOrientation(JSplitPane.VERTICAL_SPLIT);
+      jsplitpane2.setDividerLocation(0.5);
       jsplitpane2.setTopComponent(instant);
       jsplitpane2.setBottomComponent(infos);
       jsplitpane1.setTopComponent(jsplitpane2);
-      jsplitpane1.setBottomComponent(song);
+      jsplitpane3.setMinimumSize(new java.awt.Dimension(100,200));
+      jsplitpane3.setOrientation(JSplitPane.VERTICAL_SPLIT);
+      jsplitpane3.setTopComponent(song);
+      jsplitpane3.setBottomComponent(controller);
+      jsplitpane1.setBottomComponent(jsplitpane3);
       jpanel1.add(jsplitpane1, BorderLayout.CENTER);
       this.setContentPane(jpanel1);
       this.setPreferredSize(new java.awt.Dimension(600,400));

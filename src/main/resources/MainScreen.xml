@@ -25,15 +25,20 @@
 	</toolbar>
 
 	<splitpane>
-		<splitpane coolsize="100,400" orientation="vertical" dividerLocation="0.50">
-			<component coolsize="100,100" id="instant" class="WaveComponent"></component>
+		<splitpane orientation="vertical" dividerLocation="0.50">
+			<component minsize="50,100" id="instant" class="WaveComponent"></component>
 			<!-- 
 			<tree id="pathTree" vscroll="auto" hscroll="auto" />
 			 -->
-			 <component coolsize="100,300" id="infos" class="AudioInfoComponent"></component>
+			 <component minsize="50,100" id="infos" class="AudioInfoComponent"></component>
 		</splitpane>
+
+		<splitpane  minsize="100,200" orientation="vertical" >
 		
-		<component id="song" class="com.oxande.wavecleaner.ui.WaveFormComponent" />
+		<component minsize="100,100" id="song" class="com.oxande.wavecleaner.ui.WaveFormComponent" />
+		
+		<component minsize="100,100" id="controller" class="com.oxande.wavecleaner.ui.ControllerComponent" />
+		</splitpane>
 	</splitpane>
 
 	<statusbar id="statusBar" property="statusMessage" />

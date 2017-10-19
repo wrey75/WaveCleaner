@@ -1,5 +1,6 @@
 package com.oxande.xmlswing.components;
 
+import java.awt.Container;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JCheckBox;
@@ -221,7 +222,7 @@ public class JComponentUI extends ContainerUI {
 	}
 	
 	public String parse(JavaClass jclass, JavaMethod initMethod, Element root) throws UnexpectedTag {
-		varName = Parser.addDeclaration(jclass, root, JCheckBox.class);
+		varName = Parser.addDeclaration(jclass, root, Container.class);
 		// String text = Parser.getTextContents(root);
 		// CONTROLLER.addToMethod(initMethod, root, varName);
 		String scrollName = JPanelUI.addScrollPane(varName,jclass,initMethod,root);

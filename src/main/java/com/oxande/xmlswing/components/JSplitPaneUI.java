@@ -23,10 +23,10 @@ import com.oxande.xmlswing.jcode.JavaMethod;
 public class JSplitPaneUI extends JComponentUI {
 
 	public static final AttributeDefinition[] PROPERTIES = {
-		new AttributeDefinition( "continuousLayout", "setContinuousLayout", ClassType.BOOLEAN ),
-		new AttributeDefinition( "dividerLocation", "setDividerLocation", ClassType.PERCENT ),
-		new AttributeDefinition( "oneTouchExpandable", "setOneTouchExpandable", ClassType.BOOLEAN ),
 		new AttributeDefinition( "orientation", "setOrientation", ClassType.JSPLITPANE_ORIENTATION ),
+		new AttributeDefinition( "continuousLayout", "setContinuousLayout", ClassType.BOOLEAN ),
+		new AttributeDefinition( "oneTouchExpandable", "setOneTouchExpandable", ClassType.BOOLEAN ),
+		new AttributeDefinition( "dividerLocation", "setDividerLocation", ClassType.PERCENT ),
 	};
 
 	public static final AttributesController CONTROLLER = new AttributesController( ContainerUI.CONTROLLER, PROPERTIES );

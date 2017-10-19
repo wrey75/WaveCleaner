@@ -2,6 +2,7 @@ package com.oxande.wavecleaner.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -61,6 +62,8 @@ public class WaveComponent extends JComponent {
 	public WaveComponent(){
 		this.audio = null;
 		this.setBackground( backgroundColor );
+		this.setMinimumSize(new Dimension(50, 50));
+		this.setPreferredSize(new Dimension(100, 100));
 	}
 	
 	/**
