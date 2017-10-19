@@ -10,10 +10,7 @@ import javax.sound.sampled.AudioFormat;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
-import com.oxande.wavecleaner.filters.AudioFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
-import com.oxande.wavecleaner.filters.MonauralFilter;
-import com.oxande.wavecleaner.filters.TestFilter;
 import com.oxande.wavecleaner.ui.WaveFormComponent;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -88,6 +85,12 @@ public class AudioDocument implements AudioListener {
 		return this.bufferSize;
 	}
 	
+	/**
+	 * Get the file player. If there was no file player,
+	 * a new one is created.
+	 * 
+	 * @return the file player.
+	 */
 	private FilePlayer getFilePlayer(){
 		if( this.filePlayer == null ){
 			this.filePlayer = new FilePlayer( stream );
@@ -96,7 +99,7 @@ public class AudioDocument implements AudioListener {
 	}
 
 	/**
-	 * Attach a line out for playing directly
+	 * Attach a line out for playing directly.
 	 * 
 	 * @param out the line out (usually speakers)
 	 */
@@ -292,14 +295,15 @@ public class AudioDocument implements AudioListener {
 			player.cue(ms);
 			return;
 		}
+
+		this.lineOut.addListener(this);
+		
 		// TestFilter testF = new TestFilter(this.stream);
 		// MonauralFilter mFilter = new MonauralFilter(this.stream);
-		AudioFilter nullFilter = new AudioFilter( this.stream );
-		DecrackleFilter decrackFilter = new DecrackleFilter( this.stream );
-		// TODO: remove the line below...
+		// AudioFilter nullFilter = new AudioFilter( this.stream );
+		DecrackleFilter decrackFilter = new DecrackleFilter();
 		player.patch(decrackFilter).patch(lineOut);
 		// REAL VERSION player.patch(lineOut);
-		lineOut.addListener(this);
 		player.rewind();
 		player.play();
 		player.cue(ms);

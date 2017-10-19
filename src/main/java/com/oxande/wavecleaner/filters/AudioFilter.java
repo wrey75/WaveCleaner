@@ -1,11 +1,8 @@
 package com.oxande.wavecleaner.filters;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.wavecleaner.util.StereoSampleQueue;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.Minim;
@@ -33,7 +30,7 @@ import ddf.minim.spi.AudioStream;
  * <li>In inherited classes, you have to declare <code>synchronized</code> all
  * the methods which modifies a parameter of your filter. This is needed to
  * avoid issues during the processing of the buffer.</li>
- * <li>The audio filters from "gwc" are based on a slected number of samples
+ * <li>The audio filters from "gwc" are based on a selected number of samples
  * that can span all the file. In this software, we are working on "live", then
  * on buffers.</li>
  * </ul>
@@ -43,103 +40,73 @@ import ddf.minim.spi.AudioStream;
  */
 public class AudioFilter extends UGen {
 	private static Logger LOG = LogFactory.getLog(AudioFilter.class);
-	private AudioStream mStream;
-
+	private StereoSampleQueue queue;
+	private UGen audio;
+	// private UGenInput input; // The main input
+	
 	/** buffer we use to read from the stream */
 	private MultiChannelBuffer buffer;
-	private int currBuff = 0;
 
 	/** where in the buffer we should read the next sample from */
-
-	private LinkedList<Float> extraLeft = new LinkedList<>();
-	private LinkedList<Float> extraRight = new LinkedList<>();
 	private float[][] samples = new float[2][];
 	private int sampleIndex;
-	private int bufferSize;
+	
+	private UGenInput enabled = new UGenInput(InputType.CONTROL, 1);
 
-	/**
-	 * We load the requested number of samples. This method ensures the quantity
-	 * of samples read will be correct in any case. We keep an eye to the
-	 * position in the {@link MultiChannelBuffer} used in the class. This is the
-	 * best method to load packets of data because there is no need to have the
-	 * same number of samples sent back by the {@link AudioFilter#nextSamples()}
-	 * method.
-	 * 
-	 * @param len
-	 *            the number of samples to read.
-	 * @return the samples read. The buffer is updated with fresh data if
-	 *         needed.
-	 */
-	protected float[][] loadSamples(int len, int prefetch) {
-		int pos = 0;
-		float[][] ret = new float[2][len + prefetch];
-
-		while (pos < len) {
-			int load = Math.min(len - pos, this.getBufferSize() - currBuff);
-			for (int ch = 0; ch < 2; ch++) {
-				System.arraycopy(buffer.getChannel(ch), currBuff, ret[ch], pos, load);
-			}
-			pos += load;
-			currBuff += load;
-			if (currBuff == this.getBufferSize()) {
-				// Read the next buffer
-				this.buffer.setBufferSize(bufferSize);
-				this.mStream.read(this.buffer);
-				currBuff = 0;
-			}
-		}
-		
-		if( prefetch > 0 ){
-			if( currBuff + prefetch >= this.getBufferSize() ) {
-				// Add some space in the buffer
-				int extra = Math.max(prefetch * 2, this.bufferSize);
-				this.buffer.setBufferSize(bufferSize + extra);
-				MultiChannelBuffer buf2 = new MultiChannelBuffer(extra, Minim.STEREO);
-				this.mStream.read(buf2);
-				for( int j = 0; j < extra; j++ ){
-					this.buffer.setSample(0, bufferSize+j, buf2.getSample(0, j));
-					this.buffer.setSample(1, bufferSize+j, buf2.getSample(1, j));
-				}
-			}
-		
-			// Load the prefetch
-			while( pos < len + prefetch ){
-				for (int ch = 0; ch < 2; ch++) {
-					ret[ch][pos] = buffer.getSample(ch, currBuff + pos - len );
-				}
-				pos++;
-			}
-		}
-
-		return ret;
+	public void setEnable(boolean e){
+		this.enabled.setLastValue(e ? 0 : 1);
+	}
+	
+	public boolean isEnabled(){
+		return enabled.getLastValue() > 0;
 	}
 	
 	protected float[][] loadSamples(int len) {
-		float[][] ret = loadSamples(len, 0);
-		return ret;
+		return loadSamples(len,0);
 	}
 
-	/**
-	 * Push back samples. Because if can be interesting
-	 * 
-	 * @param samples
-	 *            an array of samples to push back.
-	 */
-	protected void pushSamples(float[][] samples) {
+	protected float[][] loadSamples(int len, int extra) {
+		return queue.getSamples(len, extra);
+	}
 
+	
+	@Override
+	protected void addInput(UGen input) {
+		audio = input;
+		if( audio != null ){
+			this.queue = new StereoSampleQueue(this.audio);
+		}
+	}
+	
+	@Override
+	protected void removeInput(UGen input)
+	{
+		if ( audio == input )
+		{
+			audio = null;
+			this.queue = null;
+		}
 	}
 
 	@Override
 	final protected void uGenerate(float[] channels) {
 		++sampleIndex;
 		if (sampleIndex >= samples[0].length) {
-			// We have to synchronize here because the
-			// synchronization is not inherited in JAVA
-			// (see
-			// https://stackoverflow.com/questions/15998335/is-synchronized-inherited-in-java)
-			synchronized (this) {
-				samples = nextSamples();
-				sampleIndex = 0; // Reset.
+			// We have to consume ALL the audio before switching off the filter.
+			if( isEnabled() ){
+				// We have to synchronize here because the
+				// synchronization is not inherited in JAVA
+				// (see
+				// https://stackoverflow.com/questions/15998335/is-synchronized-inherited-in-java)
+				synchronized (this) {
+					samples = nextSamples();
+					sampleIndex = 0; // Reset.
+				}
+			}
+			else {
+				// Just copy from input!
+				this.audio.tick(channels);
+				return;
 			}
 		}
 		channels[0] = samples[0][sampleIndex];
@@ -153,22 +120,25 @@ public class AudioFilter extends UGen {
 	 * @param iStream
 	 *            the input stream.
 	 */
-	public AudioFilter(AudioStream iStream) {
-		int nbChannels = iStream.getFormat().getChannels();
-		if (nbChannels != Minim.STEREO) {
-			throw new IllegalArgumentException("The input stream must be STEREO.");
-		}
-		this.mStream = iStream;
-		this.bufferSize = 512;
-		this.buffer = new MultiChannelBuffer(this.bufferSize, 2);
-		this.sampleIndex = 0;
+	public AudioFilter() {
+//		int nbChannels = iStream.getFormat().getChannels();
+//		if (nbChannels != Minim.STEREO) {
+//			throw new IllegalArgumentException("The input stream must be STEREO.");
+//		}
+//		this.mStream = iStream;
+		
+//		this.input = new UGenInput(InputType.AUDIO);
+//		this.input.setChannelCount(2);
+		// this.queue = new StereoSampleQueue(stream);
 
-
-		// Create empty
+		// Create empty samples array
 		this.samples = new float[2][];
 		this.samples[0] = new float[0];
 		this.samples[1] = new float[0];
+		this.sampleIndex = 0;
 	}
+	
+
 
 	/**
 	 * Construct a FilePlayer that will read from iFileStream.
@@ -184,7 +154,6 @@ public class AudioFilter extends UGen {
 	 */
 	public void init(int bufferSize) {
 		this.buffer = new MultiChannelBuffer(bufferSize, 2);
-		this.bufferSize = bufferSize;
 	}
 
 	/**
@@ -196,28 +165,6 @@ public class AudioFilter extends UGen {
 		return this.buffer.getBufferSize();
 	}
 
-	/**
-	 * Returns the underlying AudioRecordingStream.
-	 * 
-	 * @return AudioRecordingStream: the underlying stream
-	 * 
-	 * @related Minim
-	 * @related AudioRecordingStream
-	 * @related FilePlayer
-	 */
-	final protected AudioStream getStream() {
-		return this.mStream;
-	}
-
-	/**
-	 * Calling close will close the AudioStream that this wraps, which is proper
-	 * cleanup for using the stream.
-	 * 
-	 * @related FilePlayer
-	 */
-	public void close() {
-		mStream.close();
-	}
 
 	/**
 	 * Overwrite this method if you want to work with the current buffer. This
@@ -231,7 +178,7 @@ public class AudioFilter extends UGen {
 	 *            the buffer to modify.
 	 */
 	protected void process(MultiChannelBuffer buff) {
-		LOG.debug("No filtering apply.");
+		LOG.debug("process() MUST BE IMPLEMENTED.");
 	}
 
 	/**
@@ -257,8 +204,10 @@ public class AudioFilter extends UGen {
 	 *         read the next samples.
 	 * 
 	 */
-	protected MultiChannelBuffer processNext(AudioStream stream, MultiChannelBuffer buff) {
-		mStream.read(buffer);
+	protected MultiChannelBuffer processNext(MultiChannelBuffer buff) {
+		float[][] samples = loadSamples(this.buffer.getBufferSize());
+		this.buffer.setChannel(0, samples[0]);
+		this.buffer.setChannel(1, samples[1]);
 		process(buffer);
 		return buffer;
 	}
@@ -275,7 +224,7 @@ public class AudioFilter extends UGen {
 	 */
 	protected float[][] nextSamples() {
 		// Generally return the same buffer but not a requirement.
-		this.buffer = processNext(this.mStream, this.buffer);
+		this.buffer = processNext(this.buffer);
 		if (this.buffer == null) {
 			throw new IllegalArgumentException("The returned buffer is null!");
 		} else if (this.buffer.getChannelCount() != Minim.STEREO) {

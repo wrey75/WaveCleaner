@@ -72,7 +72,7 @@ public class Explorer extends AbstractExplorerFrame {
 				if( o != null ){
 					setStatusMessage(o.getDirectory().getAbsolutePath());
 					File[] files = o.getFiles();
-					DefaultListModel model = new DefaultListModel();
+					DefaultListModel<String> model = new DefaultListModel<String>();
 					for( File f : files ){
 						if( f.isFile() ){
 							model.addElement(f.getName());

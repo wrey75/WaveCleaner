@@ -3,7 +3,6 @@ package com.oxande.wavecleaner.ui;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-import javax.sound.sampled.AudioFormat;
 import javax.swing.JComponent;
 
 import com.oxande.wavecleaner.audio.AudioDocument;
@@ -13,6 +12,7 @@ import com.oxande.wavecleaner.audio.AudioDocument;
  * @author wrey
  *
  */
+@SuppressWarnings("serial")
 public class AudioInfoComponent extends JComponent {
 	
 	private AudioDocument audio;
@@ -34,8 +34,8 @@ public class AudioInfoComponent extends JComponent {
 	}
 	
 	@Override
-	public void paintComponent(Graphics g){
-		Graphics2D g2 = (Graphics2D)g;
+	public void paintComponent(Graphics g0){
+		Graphics2D g = (Graphics2D)g0;
 		if( this.audio != null ){
 			this.line = 0;
 			println(g, "Sample rate", "" + audio.getSampleRate());

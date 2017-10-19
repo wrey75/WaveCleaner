@@ -1,14 +1,9 @@
 package com.oxande.wavecleaner.filters;
 
-import java.util.Arrays;
-
 import ddf.minim.AudioMetaData;
-import ddf.minim.AudioOutput;
-import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.UGen;
 import ddf.minim.spi.AudioRecordingStream;
-import ddf.minim.ugens.FilePlayer;
 
 /**
  * The monaural filter will take the STEREO SOUND
@@ -22,7 +17,7 @@ import ddf.minim.ugens.FilePlayer;
 public class TestFilter extends UGen {
 
 	private AudioRecordingStream mFileStream;
-	private boolean 			 isPaused;
+//	private boolean 			 isPaused;
 	// buffer we use to read from the stream
 	private MultiChannelBuffer   buffer;
 	// where in the buffer we should read the next sample from

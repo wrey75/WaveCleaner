@@ -3,7 +3,6 @@ package com.oxande.wavecleaner.audio;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.FloatBuffer;
 import java.nio.MappedByteBuffer;
@@ -17,7 +16,7 @@ import ddf.minim.Minim;
 
 
 /**
- * The audio cache is a very simple clas sto store the audio sample in
+ * The audio cache is a very simple class to store the audio sample in
  * an uncompressed form on disk. The main advantage of this class is
  * to use the "memory-mapping". We use a file but the kernel is in
  * charge to map the data from the file to
@@ -27,17 +26,17 @@ public class AudioCache implements AutoCloseable {
 	private static Logger LOG = LogFactory.getLog(AudioCache.class);
     private int lastSample = 0;
     private int bufferSize = 1024;
-    private int blockSize;
+//     private int blockSize;
     private MappedByteBuffer buffer;
     private FileChannel fileChannel;
     private RandomAccessFile randomAccessFile;
     private File file;
-    private BigInteger loaded = BigInteger.ZERO;
+//     private BigInteger loaded = BigInteger.ZERO;
 
     public AudioCache( int sampleSize, int numberOfChunks ) throws IOException {
         this.bufferSize = sampleSize;
         this.lastSample = (numberOfChunks+1) * sampleSize;
-        this.blockSize = this.bufferSize * Float.BYTES * 2;
+//         this.blockSize = this.bufferSize * Float.BYTES * 2;
 
         // Create file object
         file = File.createTempFile("wave", ".dat");
@@ -46,7 +45,7 @@ public class AudioCache implements AutoCloseable {
         //Delete the file; we will create a new file
         file.deleteOnExit();
 
-        // Get file channel in readonly mode
+        // Get file channel in read-only mode
         randomAccessFile = new RandomAccessFile(file, "rw");
         fileChannel = randomAccessFile.getChannel();
 

@@ -19,8 +19,6 @@
 
 package com.oxande.wavecleaner.filters;
 
-import ddf.minim.MultiChannelBuffer;
-import ddf.minim.spi.AudioStream;
 
 /**
  * The Declicker class.
@@ -33,8 +31,8 @@ import ddf.minim.spi.AudioStream;
 public class DeclickerFilter extends AudioFilter {
 
 
-	public DeclickerFilter( AudioStream stream ){
-		super( stream );
+	public DeclickerFilter(  ){
+		super();
 	}
 
 

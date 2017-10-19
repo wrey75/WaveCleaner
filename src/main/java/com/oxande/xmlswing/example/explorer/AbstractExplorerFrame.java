@@ -48,7 +48,7 @@ public class AbstractExplorerFrame extends JFrame {
    protected JToolBar toolbar = new JToolBar();
    private JSplitPane jsplitpane1 = new JSplitPane();
    protected JTree pathTree = new JTree();
-   protected JList fileList = new JList();
+   protected JList<String> fileList = new JList<>();
 private class SetStatusMessageClass implements Runnable {
       private String input;
 
