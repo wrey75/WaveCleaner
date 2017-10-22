@@ -71,6 +71,23 @@ public class AudioFilter extends UGen {
 		LOG.info("Filter {} {}", this.getClass().getSimpleName(), (b ? "enabled" : "disabled"));
 	}
 	
+	/**
+	 * Resize an array of floats
+	 * 
+	 * @param array the original array or null
+	 * @param newSize the new size
+	 * @return an array having the new size and the values from
+	 * the original array copied.
+	 */
+	public static float[] newFloatArray(float[] array, int newSize ){
+		float[] newArray = new float[newSize];
+		if(array != null){
+			int len = Math.min(newSize, array.length);
+			System.arraycopy(array, 0, newArray, 0, len);
+		}
+		return newArray;
+	}
+	
 	public boolean isEnabled(){
 		return enabled.getLastValue() > 0;
 	}

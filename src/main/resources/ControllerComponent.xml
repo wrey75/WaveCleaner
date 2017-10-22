@@ -7,6 +7,15 @@
 			<td>
 				<JCheckBox id="crackle"  text="Decrackling" action="onToggleCraclking">Decrackle</JCheckBox>
 			</td>
+			<td>
+				<JSlider id="crackle_factor" minimum="1" maximum="100" orientation="horizontal" value="2">Factor</JSlider>
+			</td>
+			<td>
+				<JSlider id="crackle_average" minimum="0" maximum="100" orientation="horizontal" value="3">Average</JSlider>
+			</td>
+			<td>
+				<JSlider id="crackle_window"  minimum="1" maximum="20000" orientation="horizontal" value="2000">Window</JSlider>
+			</td>
 		</tr>
 	</table>
 </JPanel>

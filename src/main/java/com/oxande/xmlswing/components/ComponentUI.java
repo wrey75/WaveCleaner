@@ -70,6 +70,11 @@ public class ComponentUI implements IComponent {
 		addMouseListener(jclass, initMethod, root, varName);
 	}
 	
+	/**
+	 * Parse a component
+	 * 
+	 * @throws UnexpectedTag if an non identified tag has been spotted.
+	 */
 	public static String parseComponent( JavaClass jclass, JavaMethod initMethod, Element root ) throws UnexpectedTag {
 		String tagName = root.getTagName();
 		String ret = null;
@@ -79,6 +84,9 @@ public class ComponentUI implements IComponent {
 		}
 		else if( tagName.equals("component") ){
 			component = new JComponentUI();
+		}
+		else if( tagName.equals("JSlider") ){
+			component = new JSliderUI();
 		}
 		else if( tagName.equals("tree") ){
 			component = new JTreeUI();

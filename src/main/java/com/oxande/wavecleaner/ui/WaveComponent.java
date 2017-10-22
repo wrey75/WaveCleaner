@@ -108,6 +108,9 @@ public class WaveComponent extends JComponent {
 	 * @param last last sample
 	 */
 	public void setVisibleWindow(int first, int last){
+		if( first < 0 ){
+			throw new IllegalArgumentException("'first' must be positive.");
+		}
 		this.firstVisibleSample = first;
 		this.lastVisibleSample = last;
 	}

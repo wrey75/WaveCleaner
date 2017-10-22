@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
+import javax.swing.JSlider;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
@@ -374,6 +375,21 @@ public class AttributeDefinition {
 			}
 			break;
 			
+		case VERTICAL_OR_HORIZONTAL :
+			orientation = Parser.getAttribute(e, attrName);
+			if( orientation != null ){
+				if( orientation.equalsIgnoreCase("horizontal") ){
+					params = new String[] { "JSlider.HORIZONTAL" };
+				}
+				else if( orientation.equalsIgnoreCase("vertical") ){
+					params = new String[] { "JSlider.VERTICAL" };
+				}
+				else {
+					throw new IllegalArgumentException("horizontal or vertical expected for this tag ('" + orientation + "') provided." );
+				}
+			}
+			break;
+
 		default :
 			if( Parser.getAttribute(e, attrName) != null ){
 				throw new IllegalArgumentException("Type " + type + " not yet supported." );

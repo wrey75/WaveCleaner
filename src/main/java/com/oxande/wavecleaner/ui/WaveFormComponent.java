@@ -251,7 +251,7 @@ public class WaveFormComponent extends JPanel
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		int diff = e.getValue() - firstVisibleSample;
 		lastVisibleSample += diff;
-		firstVisibleSample += diff;
+		firstVisibleSample += Math.max(0, firstVisibleSample + diff);
 		scrollTo(-1,-1);
 	}
 
