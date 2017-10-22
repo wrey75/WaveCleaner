@@ -10,9 +10,11 @@ import java.util.Date;
 import java.util.List;
 
 import javax.swing.Box;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.plaf.PanelUI;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,6 +28,7 @@ import com.oxande.xmlswing.components.FlowLayoutUI;
 import com.oxande.xmlswing.components.JButtonUI;
 import com.oxande.xmlswing.components.JDialogUI;
 import com.oxande.xmlswing.components.JFrameUI;
+import com.oxande.xmlswing.components.JPanelUI;
 import com.oxande.xmlswing.components.WindowUI;
 import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaCode;
@@ -257,7 +260,62 @@ public class UIParser {
 		jclass.addMethod( main );
 		return jclass;
 	}
-	
+
+
+	/**
+	 * Parse a JPanel. This is basically a basic {@link JComponent} but
+	 * with a layout. This is useful to create such components.
+	 * 
+	 * @param root the root element (the document root).
+	 * @return the JAVA class.
+	 * @throws UnexpectedTag if there an issue in the XML tags.
+	 */
+	public JavaClass parsePanel( Element root )  throws UnexpectedTag {
+		JavaMethod initMethod = new JavaMethod( "initComponents" );
+		
+		// "name" attribute
+		String className = Parser.getAttribute(root,"name",true);
+		jclass = new JavaClass( className );
+		jclass.setComments( getClassComments() );
+		addBaseClass( jclass, root, JPanel.class );
+		
+		// The content Pane is a border layout.
+		jclass.addImport(JPanel.class);
+		jclass.addImport( BorderLayout.class );
+		initMethod.addCall("this.setLayout", "new BorderLayout()" );
+		
+		List<Element> children = Parser.getChildElements(root);
+		switch( children.size() ){
+		case 0 :
+			// Nothing defined as content pane -> Add an empty (and anonymous) label.
+			jclass.addImport(Box.class);
+			initMethod.addCall( "this.add", "Box.createGlue()", "BorderLayout.CENTER");
+			break;
+
+		case 1 :
+			// Set the element as the CENTER of the JFrame. 
+			String name = ComponentUI.parseComponent(jclass, initMethod, children.get(0));
+			initMethod.addCall( "this.add", name, "BorderLayout.CENTER");
+			break;
+
+		default :
+			String layoutName = FlowLayoutUI.parseFlow(jclass, initMethod, root);
+			initMethod.addCall("this.add", layoutName, "BorderLayout.CENTER" );
+			break;
+		
+		}
+		// initMethod.addCall("this.setContentPane", contentPaneName );
+
+		JPanelUI.CONTROLLER.addToMethod(initMethod, root, "this");
+
+		setDefaulButtonIfNeeded(jclass, initMethod);
+		// packIfNeeded( root, initMethod, "this" );
+
+		jclass.addMethod( initMethod );
+
+		return jclass;
+	}
+
 	protected void clean(){
 		Parser.clearIds();
 	}
@@ -273,6 +331,9 @@ public class UIParser {
 		}
 		else if( rootTag.equals("JDialog") ){
 			clazz = parseDialog(rootElement);
+		}
+		else if( rootTag.equals("JPanel") ){
+			clazz = parsePanel(rootElement);
 		}
 		else {
 			throw new UnexpectedTag("No <" + rootTag + "> expected as root tag.");

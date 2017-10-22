@@ -140,6 +140,9 @@ public class ComponentUI implements IComponent {
 				component = new JButtonUI();
 			}
 		}
+		else if( tagName.equals("JCheckBox") ){
+			component = new JCheckBoxUI();
+		}
 		else if( tagName.equals("input")){
 			//
 			// For HTML compatibility
@@ -155,6 +158,9 @@ public class ComponentUI implements IComponent {
 				component = new JPasswordFieldUI();
 			}
 			else if( type.equals("checkbox") ){
+//				if( type.equals("checkbox") ){
+//					System.err.println("<checkbox> is deprecated in favor of <JCheckBox>");
+//				}
 				component = new JCheckBoxUI();
 			}
 			else {
@@ -248,6 +254,14 @@ public class ComponentUI implements IComponent {
 		}
 	}
 	
+	/**
+	 * Get the text attribute stored in "text". The text will
+	 * be displayed and mnemonics can be included (they will be
+	 * decoded further in the process)
+	 * 
+	 * @param root
+	 * @return
+	 */
 	public static String getTextAttribute( Element root ){
 		String text = Parser.getAttribute(root, TEXT_ATTRIBUTE );
 		if( text == null ) {

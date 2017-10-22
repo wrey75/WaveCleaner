@@ -53,8 +53,22 @@ public class AudioFilter extends UGen {
 	
 	private UGenInput enabled = new UGenInput(InputType.CONTROL, 1);
 
-	public void setEnable(boolean e){
-		this.enabled.setLastValue(e ? 0 : 1);
+	/**
+	 * Enables or disables the filter. When disabled, the filter is bypassed
+	 * but these parameters are kept. The already calculated audio is played
+	 * first and when all the buffer is consumed, we just swap to the original
+	 * input. 
+	 * 
+	 * <p>
+	 * Due to the expected "fast" switch, we do not generate events to
+	 * inform the use the filter is now bypassed.
+	 * </p> 
+	 * 
+	 * @param b true to enable the filter (or false to bypass it).
+	 */
+	public void setEnable(boolean b){
+		this.enabled.setLastValue(b ? 1 : 0);
+		LOG.info("Filter {} {}", this.getClass().getSimpleName(), (e ? "enabled" : "disabled"));
 	}
 	
 	public boolean isEnabled(){
@@ -86,6 +100,23 @@ public class AudioFilter extends UGen {
 			audio = null;
 			this.queue = null;
 		}
+	}
+	
+	/**
+	 * Check if we are bypassing the filter. This method returns the
+	 * opposite value compared to isEnabled() except in a small range
+	 * of time. You should refer the usage of {@link AudioFilter#isEnabled()}
+	 * except if you need a real time (less than 20 milliseconds) information.
+	 * Note also if this is the first filter of a pipeleine, the sound currently
+	 * played can be still filtered even you are already bypassing the filters.
+	 * 
+	 * @return true is the filter is bypassed.
+	 */
+	boolean isBypassing(){
+		if( sampleIndex > samples[0].length) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override

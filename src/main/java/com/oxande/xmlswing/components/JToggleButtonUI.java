@@ -15,8 +15,7 @@ import com.oxande.xmlswing.jcode.JavaMethod;
 /**
  * 
  * 
- * @author wrey
- * @version $Rev: 28 $
+ * @author wrey75
  *
  */
 public class JToggleButtonUI extends AbstractButtonUI {

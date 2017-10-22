@@ -300,6 +300,11 @@ public final class Parser {
 	 * @return the text stored in the tag.
 	 */
 	public static String getTextContents( Element e){
+		if(e.hasAttribute("_text")){
+			return e.getAttribute("_text");
+		}
+
+		// Look in children
 		StringBuilder buf = new StringBuilder();
 		NodeList list = e.getChildNodes();
 		for( int i = 0; i < list.getLength(); i++ ){

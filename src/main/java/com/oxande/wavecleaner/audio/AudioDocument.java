@@ -55,7 +55,7 @@ public class AudioDocument implements AudioListener {
 	int rightChannel = 1;
 	int nbChannels = 2;
 	private int totalSamples = 0;
-	DecrackleFilter decrackFilter = new DecrackleFilter();
+	public DecrackleFilter decrackFilter = new DecrackleFilter();
 	
 	/**
 	 * The listeners

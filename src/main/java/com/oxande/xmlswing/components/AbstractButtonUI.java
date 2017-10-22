@@ -96,8 +96,7 @@ public abstract class AbstractButtonUI extends JComponentUI {
 				performMethod.addCode( Parser.getTextContents(e) );
 			}
 			else {
-				// performMethod.addCode( "throw new " + UnsupportedOperationException.class.getSimpleName() + "(\"Not implemented\");" );
-				if( withMessage ){
+ 				if( withMessage ){
 					jclass.addImport(JOptionPane.class);
 					performMethod.addCode( "JOptionPane.showMessageDialog(" + varName + ", \"Not implemented.\","
 							+ varName + ".getText(), JOptionPane.INFORMATION_MESSAGE);" );
