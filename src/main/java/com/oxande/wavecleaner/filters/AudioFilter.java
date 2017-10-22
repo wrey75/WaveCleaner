@@ -68,7 +68,7 @@ public class AudioFilter extends UGen {
 	 */
 	public void setEnable(boolean b){
 		this.enabled.setLastValue(b ? 1 : 0);
-		LOG.info("Filter {} {}", this.getClass().getSimpleName(), (e ? "enabled" : "disabled"));
+		LOG.info("Filter {} {}", this.getClass().getSimpleName(), (b ? "enabled" : "disabled"));
 	}
 	
 	public boolean isEnabled(){
@@ -107,7 +107,7 @@ public class AudioFilter extends UGen {
 	 * opposite value compared to isEnabled() except in a small range
 	 * of time. You should refer the usage of {@link AudioFilter#isEnabled()}
 	 * except if you need a real time (less than 20 milliseconds) information.
-	 * Note also if this is the first filter of a pipeleine, the sound currently
+	 * Note also if this is the first filter of a pipeline, the sound currently
 	 * played can be still filtered even you are already bypassing the filters.
 	 * 
 	 * @return true is the filter is bypassed.
