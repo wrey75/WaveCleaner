@@ -62,8 +62,8 @@ public class WaveComponent extends JComponent {
 	public WaveComponent(){
 		this.audio = null;
 		this.setBackground( backgroundColor );
-		this.setMinimumSize(new Dimension(50, 50));
-		this.setPreferredSize(new Dimension(100, 100));
+		this.setMinimumSize(new Dimension(50, 100));
+		this.setPreferredSize(new Dimension(100, 200));
 	}
 	
 	/**

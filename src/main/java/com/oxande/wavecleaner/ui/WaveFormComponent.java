@@ -145,17 +145,31 @@ public class WaveFormComponent extends JPanel
 		updateAudio();
 	}
 	
-	protected void scrollTo(int first, int last) {
-		if (first != this.firstVisibleSample || last != this.lastVisibleSample) {
-			if (first != -1) this.firstVisibleSample = Math.max(0, first);
-			if (last != -1)	this.lastVisibleSample = last;
+	private void scrollTo(/* int first, int last */) {
+//		if (first != this.firstVisibleSample || last != this.lastVisibleSample) {
+//			if (first != -1){
+//				this.firstVisibleSample = Math.max(0, first);
+//			}
+//			if (last != -1){
+//				this.lastVisibleSample = last;
+//			}
+		if( this.firstVisibleSample < 0 ){
+			this.firstVisibleSample = 0;
+			LOG.error("firstVisibleSample = {}", this.firstVisibleSample );
+			return;
+		}
+		if( this.lastVisibleSample > this.numberOfSamples ){
+			this.lastVisibleSample = this.numberOfSamples;
+			LOG.error("lastVisibleSample = {} (first = {})", this.lastVisibleSample, this.firstVisibleSample );
+			return;
+		}
 			SwingUtilities.invokeLater(() -> {
 				this.scroll.setValues(this.firstVisibleSample, this.lastVisibleSample - this.firstVisibleSample, 0,
 						this.numberOfSamples);
 				this.wave.setVisibleWindow(this.firstVisibleSample, this.lastVisibleSample);
 				repaint();
 			});
-		}
+//		}
 	}
 
 	/**
@@ -171,7 +185,7 @@ public class WaveFormComponent extends JPanel
 			int unit = this.numberOfSamples / audio.getChunkSize();
 			this.scroll.setUnitIncrement(unit); // 1 buffer size (about 20 ms)
 			this.scroll.setBlockIncrement(unit * 10); // 10 buffers (about 200 ms)
-			scrollTo(-1, -1);
+			scrollTo(/* -1, -1 */);
 		}
 		repaint();
 	}
@@ -201,7 +215,7 @@ public class WaveFormComponent extends JPanel
 			this.lastVisibleSample += diff;
 			this.firstVisibleSample -= diff;
 		}
-		this.scrollTo(-1, -1);
+		this.scrollTo(/*-1, -1*/ );
 		this.repaint();
 	}
 
@@ -255,8 +269,8 @@ public class WaveFormComponent extends JPanel
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		int diff = e.getValue() - firstVisibleSample;
 		lastVisibleSample += diff;
-		firstVisibleSample += Math.max(0, firstVisibleSample + diff);
-		scrollTo(-1,-1);
+		firstVisibleSample = Math.max(0, firstVisibleSample + diff);
+		scrollTo(/* -1,-1 */);
 	}
 
 	@Override
