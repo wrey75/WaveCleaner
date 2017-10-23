@@ -1,5 +1,10 @@
 package com.oxande.wavecleaner.filters;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.util.StereoSampleQueue;
@@ -40,9 +45,13 @@ import ddf.minim.spi.AudioStream;
  */
 public class AudioFilter extends UGen {
 	private static Logger LOG = LogFactory.getLog(AudioFilter.class);
+	
+	public static final int INT_PARAM = 1;
+	public static final int FLOAT_PARAM = 2;
+			
 	private StereoSampleQueue queue;
 	private UGen audio;
-	// private UGenInput input; // The main input
+	protected Map<String,Parameter> parameters = new HashMap<>();
 	
 	/** buffer we use to read from the stream */
 	private MultiChannelBuffer buffer;
@@ -53,6 +62,65 @@ public class AudioFilter extends UGen {
 	
 	private UGenInput enabled = new UGenInput(InputType.CONTROL, 1);
 
+	/**
+	 * Return the parameters in a list.
+	 * 
+	 * @return the control parameters for the filter.
+	 */
+	public List<Parameter> getParameters(){
+		return new ArrayList<Parameter>( parameters.values() );
+	}
+	
+	protected synchronized Parameter addParameter(String name, int type, float min, float max, float defaultValue ){
+		Parameter p = new Parameter(name, type, min, max, defaultValue);
+		this.parameters.put(name.toUpperCase(), p);
+		return p;
+	}
+
+	/**
+	 * Set the parameter with the specified name.
+	 * 
+	 * @param name name of the parameter (case insensitive).
+	 * @param value the value.
+	 * @return the effective value set. 
+	 */
+	public float setControl(String name, float value ){
+		Parameter p = getParameter(name);
+		if( p == null ){
+			LOG.error("Parameter '{}' unknown.", name);
+			return 0.0f;
+		}
+		LOG.error("Parameter '{}' set to {}.", name, value);
+		p.setValue(value);
+		return p.getValue();
+	}
+	
+	/**
+	 * Get the parameter with the specified name.
+	 * 
+	 * @param name name of the parameter (case insensitive)
+	 * @return the value.
+	 */
+	public float getControl(String name){
+		Parameter p = getParameter(name);
+		if( p == null ){
+			LOG.error("Parameter '{}' unknown.", name);
+			return 0.0f;
+		}
+		return p.getValue();
+	}
+	
+	public int getIntControl(String name){
+		float v = this.getControl(name);
+		return (int)v;
+	}
+	
+	public Parameter getParameter(String name){
+		String key = name.toUpperCase().trim();
+		Parameter p = this.parameters.get(key);
+		return p;
+	}
+	
 	/**
 	 * Enables or disables the filter. When disabled, the filter is bypassed
 	 * but these parameters are kept. The already calculated audio is played
@@ -89,7 +157,7 @@ public class AudioFilter extends UGen {
 	}
 	
 	public boolean isEnabled(){
-		return enabled.getLastValue() > 0;
+		return enabled.getLastValue() > 0.5f;
 	}
 	
 	protected float[][] loadSamples(int len) {
@@ -100,6 +168,65 @@ public class AudioFilter extends UGen {
 		return queue.getSamples(len, extra);
 	}
 
+	public class Parameter {
+		private String name;
+		private int type;
+		private float min;
+		private float max;
+		private UGenInput input;
+		private float factor;
+		
+		Parameter(String name, int type, float min, float max, float defaultValue ){
+			this.name = name;
+			this.type = type;
+			this.min = min;
+			this.max = max;
+			this.input = new UGenInput(InputType.CONTROL);
+			this.setValue(defaultValue);
+			this.factor = 1.0f;
+		}
+		
+		void setValue( float v ){
+			if( v < min ){
+				LOG.warn("Parameter '{}' set to minimum {} instead of {}", name, min, v);
+				v = min;
+			}
+			if( v > max ){
+				LOG.warn("Parameter '{}' set to maximum {} instead of {}", name, max, v);
+				v = max;
+			}
+			this.input.setLastValue(v);
+		}
+		
+		public float getValue(){
+			return this.input.getLastValue();
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public int getType() {
+			return type;
+		}
+
+		public float getMinimum() {
+			return min;
+		}
+
+		public float getMaximum() {
+			return max;
+		}
+
+		public float getFactor() {
+			return this.factor;
+		}
+
+		Parameter setFactor( float f ){
+			this.factor = f;
+			return this;
+		}
+	}
 	
 	@Override
 	protected void addInput(UGen input) {

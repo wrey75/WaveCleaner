@@ -6,14 +6,16 @@ import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
 import javax.swing.JOptionPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.w3c.dom.Element;
 
 import com.oxande.xmlswing.AttributeDefinition;
+import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.Parser;
 import com.oxande.xmlswing.UnexpectedTag;
-import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaMethod;
 import com.oxande.xmlswing.jcode.JavaParam;
@@ -91,13 +93,13 @@ public class ComponentUI implements IComponent {
 		else if( tagName.equals("tree") ){
 			component = new JTreeUI();
 		}
-		else if( tagName.equals(JLabelUI.TAGNAME)){
+		else if( tagName.equals("label") || tagName.equals("JLabel")){
 			component = new JLabelUI();
 		}
-		else if( tagName.equals("panel")){
+		else if( tagName.equals("panel") || tagName.equals("JPanel")){
 			component = new JPanelUI();
 		}
-		else if( tagName.equals("tabs")){
+		else if( tagName.equals("tabs") || tagName.equals("JTabbedPanel")){
 			component = new JTabbedPaneUI();
 		}
 		else if( tagName.equals("textfield")){
@@ -261,6 +263,19 @@ public class ComponentUI implements IComponent {
 			initMethod.addCall(varName + ".addMouseListener", "new " + listenerClass.getClassName() + "()" );
 		}
 	}
+	
+	public static void addChangeListener(JavaClass jclass, JavaMethod initMethod, Element root, String varName){
+		JavaClass listenerClass = addListener(jclass, root, 
+				new String[] {"onChange:stateChanged"}, 
+				ChangeListener.class, ChangeEvent.class);
+		
+		if( listenerClass != null ){
+			// Add the inner class and related stuff..
+			jclass.addInnerClass(listenerClass);
+			initMethod.addCall(varName + ".addChangeListener", "new " + listenerClass.getClassName() + "()" );
+		}
+	}
+	
 	
 	/**
 	 * Get the text attribute stored in "text". The text will

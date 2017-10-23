@@ -2,13 +2,12 @@ package com.oxande.xmlswing.components;
 
 import javax.swing.JSlider;
 
-
 import org.w3c.dom.Element;
 
 import com.oxande.xmlswing.AttributeDefinition;
+import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.Parser;
-import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.UnexpectedTag;
 import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaMethod;
@@ -45,6 +44,11 @@ public class JSliderUI extends JComponentUI {
 		CONTROLLER.addToMethod(initMethod, e, varName);
 		addSpecifics(jclass, initMethod, e);
 		return varName;
+	}
+	
+	public void addSpecifics(JavaClass jclass, JavaMethod initMethod, Element root )  throws UnexpectedTag  {
+		super.addSpecifics(jclass, initMethod, root);
+		addChangeListener(jclass, initMethod, root, varName);
 	}
 
 }

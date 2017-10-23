@@ -327,7 +327,17 @@ public class JavaClass extends JavaCode {
 			javaType.setClassName("class");
 			w.write( javaType + " " + getClassName() );
 			if( extClassName != null ) {
-				w.write( " extends " + extClassName );
+				String extend = "extends";
+				try {
+					Class<?> clazz = Class.forName(extClassName);
+					if( clazz.isInterface() ){
+						extend = "implements";
+					}
+				}
+				catch(ClassNotFoundException ex){
+					// Simply ignore in case we not found the class
+				}
+				w.write( " " + extend + " " + extClassName );
 			}
 
 			if( this.implementInterfaces.size() > 0 ){

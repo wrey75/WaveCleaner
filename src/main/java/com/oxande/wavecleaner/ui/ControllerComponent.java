@@ -1,8 +1,5 @@
 package com.oxande.wavecleaner.ui;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
@@ -10,17 +7,13 @@ import java.io.IOException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
-import javax.swing.ButtonModel;
-import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.apache.logging.log4j.Logger;
 
-import com.oxande.wavecleaner.audio.AudioDocument;
+import com.oxande.wavecleaner.filters.AudioFilter;
+import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
-import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 @SuppressWarnings("serial")
@@ -28,6 +21,10 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
 	BufferedImage background;
 	DecrackleFilter decrackleFilter;
+	
+	public long samplesToMilliseconds(int nbSamples ){
+		return (long)(nbSamples * 1000 / 48000.0);
+	}
 
 	public ControllerComponent() {
 		super();
@@ -36,26 +33,50 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		// The following code should be taken into account by
 		// XML4SWING...!
 		this.crackle.addItemListener(this);
-		this.crackle_average.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent evt) {
-				Assert.equals(crackle_average, evt.getSource());
-				decrackleFilter.average.setLastValue(crackle_average.getValue());
-			}
-		});
-		this.crackle_window.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent evt) {
-				Assert.equals(crackle_window, evt.getSource());
-				decrackleFilter.window.setLastValue(crackle_window.getValue());
-			}
-		});
-		this.crackle_factor.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent evt) {
-				Assert.equals(crackle_factor, evt.getSource());
-				decrackleFilter.window.setLastValue(crackle_factor.getValue());
-			}
-		});
+//		this.crackle_average.addChangeListener(new ChangeListener() {
+//			public void stateChanged(ChangeEvent evt) {
+//				Assert.equals(crackle_average, evt.getSource());
+//				decrackleFilter.average.setLastValue(crackle_average.getValue());
+//			}
+//		});
+//		this.crackle_window.addChangeListener(new ChangeListener() {
+//			public void stateChanged(ChangeEvent evt) {
+//				Assert.equals(crackle_window, evt.getSource());
+//				decrackleFilter.window.setLastValue(crackle_window.getValue());
+//			}
+//		});
+//		this.crackle_factor.addChangeListener(new ChangeListener() {
+//			public void stateChanged(ChangeEvent evt) {
+//				Assert.equals(crackle_factor, evt.getSource());
+//				decrackleFilter.window.setLastValue(crackle_factor.getValue());
+//			}
+//		});
+	}
+	
+	protected final void refreshValues(){
+		setCrackleFactorLabel("Factor: " + decrackleFilter.getControl(DecrackleFilter.FACTOR));
+		setCrackleWindowLabel("Window: " + samplesToMilliseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + "ms.");
+		setCrackleAverageLabel("Average: " + decrackleFilter.getIntControl(DecrackleFilter.AVERAGE));
+	}
+	
+	@Override
+	protected void crackleFactorChanged(){
+		decrackleFilter.setControl(DecrackleFilter.FACTOR, crackle_factor.getValue() / 10.0f);
+		refreshValues();
 	}
 
+	@Override
+	protected void crackleWindowChanged(){
+		decrackleFilter.setControl(DecrackleFilter.WINDOW, crackle_window.getValue());
+		refreshValues();
+	}
+	
+	@Override
+	protected void crackleAverageChanged(){
+		decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
+		refreshValues();
+	}
+	
 	public void initComponents() {
 		super.initComponents();
 		URL url = getClass().getClassLoader().getResource("images/sono.png");
@@ -76,11 +97,27 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	public void setFilters(DecrackleFilter filter1) {
 		this.decrackleFilter = filter1;
 		this.crackle.setSelected(this.decrackleFilter.isEnabled());
-		this.crackle_factor.setValue((int) (this.decrackleFilter.factor.getLastValue() * 10));
-		this.crackle_window.setValue((int) (this.decrackleFilter.window.getLastValue()));
-		this.crackle_average.setValue((int) (this.decrackleFilter.average.getLastValue()));
+		this.initValue(crackle_factor, this.decrackleFilter, DecrackleFilter.FACTOR);
+		this.initValue(crackle_window, this.decrackleFilter, DecrackleFilter.WINDOW);
+		this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
+		refreshValues();
 	}
 
+	
+	/**
+	 * Init a {@link JSlider} based on the parameter of the filter.
+	 * 
+	 * @param slider the slider
+	 * @param filter the filter concerned
+	 * @param control the name of the controller.
+	 */
+	protected void initValue(JSlider slider, AudioFilter filter, String control ){
+		Parameter p = filter.getParameter(control);
+		slider.setMinimum( (int)(p.getMinimum() * p.getFactor()));
+		slider.setMaximum( (int)(p.getMaximum() * p.getFactor()));
+		slider.setValue((int)(p.getValue() * p.getFactor()));
+	}
+	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		if (this.crackle == e.getSource()) {

@@ -9,6 +9,7 @@ import java.awt.event.MouseWheelListener;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputListener;
 
 import org.apache.logging.log4j.Logger;
@@ -144,13 +145,16 @@ public class WaveFormComponent extends JPanel
 		updateAudio();
 	}
 	
-	protected void scrollTo(int first, int last){
-		if( first != this.firstVisibleSample || last != this.lastVisibleSample ){
-			if( first != -1 ) this.firstVisibleSample = first;
-			if( last != -1 ) this.lastVisibleSample = last;
-			this.scroll.setValues(this.firstVisibleSample, this.lastVisibleSample - this.firstVisibleSample, 0, this.numberOfSamples);
-			this.wave.setVisibleWindow(this.firstVisibleSample, this.lastVisibleSample);
-			repaint();
+	protected void scrollTo(int first, int last) {
+		if (first != this.firstVisibleSample || last != this.lastVisibleSample) {
+			if (first != -1) this.firstVisibleSample = Math.max(0, first);
+			if (last != -1)	this.lastVisibleSample = last;
+			SwingUtilities.invokeLater(() -> {
+				this.scroll.setValues(this.firstVisibleSample, this.lastVisibleSample - this.firstVisibleSample, 0,
+						this.numberOfSamples);
+				this.wave.setVisibleWindow(this.firstVisibleSample, this.lastVisibleSample);
+				repaint();
+			});
 		}
 	}
 

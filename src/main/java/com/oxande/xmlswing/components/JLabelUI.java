@@ -4,9 +4,9 @@ package com.oxande.xmlswing.components;
 import org.w3c.dom.Element;
 
 import com.oxande.xmlswing.AttributeDefinition;
+import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.Parser;
-import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.UnexpectedTag;
 import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaMethod;
@@ -14,8 +14,6 @@ import com.oxande.xmlswing.jcode.JavaMethod;
 
 
 public class JLabelUI extends JComponentUI {
-
-	public static final String TAGNAME = "label";
 	
 	public static final AttributeDefinition[] PROPERTIES = {
 		new AttributeDefinition( "autoscrolls", "setAutoscrolls", ClassType.BOOLEAN ),

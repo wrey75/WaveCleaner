@@ -45,6 +45,10 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 public class DecrackleFilter extends AudioFilter {
 	private static Logger LOG = LogFactory.getLog(DeclickerFilter.class);
 
+	public static final String WINDOW = "window";
+	public static final String AVERAGE = "average";
+	public static final String FACTOR = "factor";
+	
 	/**
 	 * Create the decrackler.
 	 * 
@@ -53,12 +57,10 @@ public class DecrackleFilter extends AudioFilter {
 	 */
 	public DecrackleFilter() {
 		super();
+		this.addParameter(WINDOW, INT_PARAM, 3, 10000, 2000);
+		this.addParameter(FACTOR, FLOAT_PARAM, 0.01f, 1.0f, 0.2f).setFactor(10.0f);
+		this.addParameter(AVERAGE, INT_PARAM, 1, 10, 3);
 	}
-
-
-	public UGenInput window = new UGenInput(InputType.CONTROL, 2000.0f); // decrackle_window;
-	public UGenInput average = new UGenInput(InputType.CONTROL, 3.0f); // decrackle_average;
-	public UGenInput factor = new UGenInput(InputType.CONTROL, 0.2f); // decrackle_level
 
 
 	private float[][] y = new float[2][];
@@ -72,8 +74,8 @@ public class DecrackleFilter extends AudioFilter {
 	 */
 	public float[][] nextSamples() {
 		// Load control values
-		int width = Math.max(1, (int)this.average.getLastValue());
-		int nmax = Math.max(3, (int)this.window.getLastValue());
+		int width = Math.max(1, (int)this.getControl(AVERAGE));
+		int nmax = Math.max(3, (int)this.getControl(WINDOW));
 		
 		int asize = nmax + old_width + width;
 		if( y_hat_tmp == null || y_hat_tmp.length < asize ){
@@ -101,7 +103,7 @@ public class DecrackleFilter extends AudioFilter {
 				absum += Math.abs(y[ch][i] - y[ch][i-1]);
 				scount++;
 			}
-			double scaled_factor = this.factor.getLastValue() * absum / scount;
+			double scaled_factor = this.getControl(FACTOR) * absum / scount;
 
 			for (int i = 0; i < n + width; i++) {
 				double dy0 = 0;
@@ -120,9 +122,11 @@ public class DecrackleFilter extends AudioFilter {
 					if (dy2dx > scaled_factor) {
 						// We found one!
 						cflag[i-1] = 1;
+						fixed++;
 					} else if (dy2dx < -scaled_factor) {
 						// We found one!
 						cflag[i-1] = 1;
+						fixed++;
 					} else {
 						cflag[i-1] = 0;
 					}
@@ -132,17 +136,16 @@ public class DecrackleFilter extends AudioFilter {
 
 			for (int i = old_width; i < n; i++) {
 				int first, last;
-				int w = width;
 				int flag = 0;
 				double sum = 0.0;
 				double sumwgt = 0.0;
 
-				first = i - w;
+				first = i - old_width;
 				if (first < 0) {
 					first = 0;
 					LOG.warn("first < 0");
 				}
-				last = i + w;
+				last = i + width;
 				if (last > asize - 1) {
 					last = asize - 1;
 					LOG.warn("last > asize");
@@ -187,7 +190,8 @@ public class DecrackleFilter extends AudioFilter {
 				y[ch][i] = y[ch][i + n - width];
 			}
 		}
-			
+		
+		LOG.debug("Changes applied: {}", fixed);
 		old_width = width; // Now transfer the new value.
 		return ret;
 	}
