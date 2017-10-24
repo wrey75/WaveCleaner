@@ -27,8 +27,10 @@ public class JToggleButtonUI extends AbstractButtonUI {
 	public String parse(JavaClass jclass, JavaMethod initMethod, Element root ) throws UnexpectedTag{
 		varName = Parser.addDeclaration( jclass, root, JToggleButton.class );
 		CONTROLLER.addToMethod(initMethod, root, varName);
+		addGroup( varName, jclass, initMethod, root );
 		addTextAndMnemonic(root, initMethod, varName);
 		addGetterSetter(jclass, root, varName, "selected", JComponentUI.BOOLEAN_TYPE );
+		addSpecifics(jclass, initMethod, root);
 		return varName;
 	}
 	

@@ -17,8 +17,7 @@ import com.oxande.xmlswing.jcode.JavaMethod;
  * component but it is managed as a JPanel component.
  * Can be managed transparently.
  * 
- * @author William R
- * @version $Rev$
+ * @author wrey75
  *
  */
 public class FlowLayoutUI extends JPanelUI {
@@ -27,7 +26,23 @@ public class FlowLayoutUI extends JPanelUI {
 		jclass.addImport( FlowLayout.class );
 		jclass.addImport( JPanel.class );
 		varName = Parser.addDeclaration( jclass, root, JPanel.class );
-		initMethod.addCall(varName + ".setLayout", "new " + FlowLayout.class.getSimpleName() + "()");
+		
+		// Create the layout...
+		String layoutName = Parser.addDeclaration( jclass, root, FlowLayout.class);
+		
+		if( root.hasAttribute("hgap") ){
+			initMethod.addCall(layoutName + ".setHgap", root.getAttribute("hgap"));
+		}
+		if( root.hasAttribute("vgap") ){
+			initMethod.addCall(layoutName + ".setVgap", root.getAttribute("vgap"));
+		}
+		if( root.hasAttribute("alignment") ){
+			String alignment = root.getAttribute("alignement").toUpperCase();
+			initMethod.addCall(layoutName + ".setAlignment", "FlowLayout." + alignment);
+		}
+		
+		initMethod.addCall(varName + ".setLayout", layoutName);
+		
 		List<Element> elements = Parser.getChildElements(root );
 		for( Element e : elements ){
 			String name = ComponentUI.parseComponent( jclass, initMethod, e );

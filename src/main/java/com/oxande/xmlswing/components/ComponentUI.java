@@ -143,6 +143,8 @@ public class ComponentUI implements IComponent {
 			component = new JCheckBoxUI(); 
 		}
 		else if( tagName.equals(JButtonUI.TAGNAME)){
+			// A button you can create toggle or normal!
+			// This is the original code
 			if( Parser.getBooleanAttribute(root, "toggle", false) ){
 				// Only if "toggle" attribute set to "true".
 				component = new JToggleButtonUI();
@@ -150,6 +152,12 @@ public class ComponentUI implements IComponent {
 			else {
 				component = new JButtonUI();
 			}
+		}
+		else if( tagName.equals("JToggleButton")){
+			component = new JToggleButtonUI();
+		}
+		else if( tagName.equals("JButton")){
+			component = new JButtonUI();
 		}
 		else if( tagName.equals("JCheckBox") ){
 			component = new JCheckBoxUI();

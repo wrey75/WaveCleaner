@@ -1,6 +1,7 @@
 package com.oxande.xmlswing.components;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -8,15 +9,14 @@ import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.oxande.xmlswing.AttributeDefinition;
+import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.Parser;
 import com.oxande.xmlswing.UnexpectedTag;
-import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaCode;
 import com.oxande.xmlswing.jcode.JavaComments;
@@ -29,7 +29,6 @@ import com.oxande.xmlswing.jcode.JavaType;
 public abstract class AbstractButtonUI extends JComponentUI {
 	
 	public static final String GROUP_ATTRIBUTE = "group";
-
 	
 	protected String actionVarName;
 
@@ -57,6 +56,13 @@ public abstract class AbstractButtonUI extends JComponentUI {
 		return varName;
 	}
 	
+	public void addSpecifics(JavaClass jclass, JavaMethod initMethod, Element root) throws UnexpectedTag {
+		jclass.addImport(ActionListener.class);
+		jclass.addImport(ActionEvent.class);
+		JavaClass actionClass = new JavaClass(ActionListener.class.getName());
+		addActionListener(jclass, actionClass, root, true, varName);
+		initMethod.addCall(varName + ".addActionListener", actionClass.toParam());
+	}
 	
 	private void addInit( JavaClass jclazz, String methodName, String ... params ){
 		jclazz.addStatic( JavaMethod.getCallSyntax(methodName, params));
