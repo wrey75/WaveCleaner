@@ -13,7 +13,6 @@ import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.Parser;
 import com.oxande.xmlswing.UnexpectedTag;
 import com.oxande.xmlswing.components.text.MaskFormatterUI;
-import com.oxande.xmlswing.jcode.JavaBlock;
 import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaMethod;
 

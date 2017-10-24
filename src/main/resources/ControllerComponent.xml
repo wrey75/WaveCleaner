@@ -5,7 +5,7 @@
 	<table>
 		<tr>
 			<td rowspan="2">
-				<JCheckBox id="crackle" text="Decrackling" action="onToggleCraclking">Decrackle
+				<JCheckBox id="crackle" text="Decrackling" action="onToggleCraclking" focusable="false">Decrackle
 				</JCheckBox>
 			</td>
 			<td fill="horizontal">
@@ -33,6 +33,14 @@
 			</td>
 			<td>
 				<JLabel property="crackleWindowLabel" align="center"></JLabel>
+			</td>
+		</tr>
+		<tr>
+		   <td>Volume</td>
+		   <td colspan="3" fill="horizontal">
+				<JSlider minsize="100,50"  id="volume" onChange="volumeChanged"
+					minimum="-24" maximum="+24" orientation="horizontal" value="0">Window
+				</JSlider>
 			</td>
 		</tr>
 	</table>

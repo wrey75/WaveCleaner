@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.filters.AudioFilter;
 import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
+import com.oxande.wavecleaner.filters.ControllerFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -21,6 +22,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
 	BufferedImage background;
 	DecrackleFilter decrackleFilter;
+	ControllerFilter controlFilter;
 	
 	public long samplesToMilliseconds(int nbSamples ){
 		return (long)(nbSamples * 1000 / 48000.0);
@@ -33,24 +35,6 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		// The following code should be taken into account by
 		// XML4SWING...!
 		this.crackle.addItemListener(this);
-//		this.crackle_average.addChangeListener(new ChangeListener() {
-//			public void stateChanged(ChangeEvent evt) {
-//				Assert.equals(crackle_average, evt.getSource());
-//				decrackleFilter.average.setLastValue(crackle_average.getValue());
-//			}
-//		});
-//		this.crackle_window.addChangeListener(new ChangeListener() {
-//			public void stateChanged(ChangeEvent evt) {
-//				Assert.equals(crackle_window, evt.getSource());
-//				decrackleFilter.window.setLastValue(crackle_window.getValue());
-//			}
-//		});
-//		this.crackle_factor.addChangeListener(new ChangeListener() {
-//			public void stateChanged(ChangeEvent evt) {
-//				Assert.equals(crackle_factor, evt.getSource());
-//				decrackleFilter.window.setLastValue(crackle_factor.getValue());
-//			}
-//		});
 	}
 	
 	protected final void refreshValues(){
@@ -76,7 +60,12 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
 		refreshValues();
 	}
-	
+
+	@Override
+	protected void volumeChanged(){
+		controlFilter.setControl(ControllerFilter.GAIN, volume.getValue());
+		refreshValues();
+	}
 	public void initComponents() {
 		super.initComponents();
 		URL url = getClass().getClassLoader().getResource("images/sono.png");
@@ -94,12 +83,15 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	 * @param filter1
 	 *            the {@link DecrackleFilter} filter.
 	 */
-	public void setFilters(DecrackleFilter filter1) {
+	public void setFilters(DecrackleFilter filter1, ControllerFilter lastFilter) {
 		this.decrackleFilter = filter1;
 		this.crackle.setSelected(this.decrackleFilter.isEnabled());
 		this.initValue(crackle_factor, this.decrackleFilter, DecrackleFilter.FACTOR);
 		this.initValue(crackle_window, this.decrackleFilter, DecrackleFilter.WINDOW);
 		this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
+		
+		this.controlFilter = lastFilter;
+		this.controlFilter.setControl(ControllerFilter.GAIN, +6.0f);
 		refreshValues();
 	}
 

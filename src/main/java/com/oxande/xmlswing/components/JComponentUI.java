@@ -3,7 +3,6 @@ package com.oxande.xmlswing.components;
 import java.awt.Container;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
@@ -11,8 +10,8 @@ import javax.swing.border.TitledBorder;
 import org.w3c.dom.Element;
 
 import com.oxande.xmlswing.AttributeDefinition;
-import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.AttributeDefinition.ClassType;
+import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.Parser;
 import com.oxande.xmlswing.UnexpectedTag;
 import com.oxande.xmlswing.jcode.JavaClass;

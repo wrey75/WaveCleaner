@@ -42,6 +42,7 @@ public class ComponentUI implements IComponent {
 		new AttributeDefinition( "coolsize", "setPreferredSize", ClassType.DIMENSION ),
 		new AttributeDefinition( "size", "setSize", ClassType.DIMENSION ),
 		new AttributeDefinition( VISIBLE, "setVisible", ClassType.BOOLEAN ),
+		new AttributeDefinition( "focusable", "setFocusable", ClassType.BOOLEAN),
 		new AttributeDefinition( "cursor", "setCursor", ClassType.CURSOR ),
 		new AttributeDefinition( "name", "setName", ClassType.STRING ),
 	};

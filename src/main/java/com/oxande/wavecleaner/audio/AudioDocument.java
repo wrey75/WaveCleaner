@@ -10,6 +10,7 @@ import javax.sound.sampled.AudioFormat;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.filters.ControllerFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.ui.WaveFormComponent;
 import com.oxande.wavecleaner.util.logging.LogFactory;
@@ -56,6 +57,7 @@ public class AudioDocument implements AudioListener {
 	int nbChannels = 2;
 	private int totalSamples = 0;
 	public DecrackleFilter decrackFilter = new DecrackleFilter();
+	public ControllerFilter controlFilter = new ControllerFilter();
 	
 	/**
 	 * The listeners
@@ -282,7 +284,8 @@ public class AudioDocument implements AudioListener {
 		filePlayer.pause();
 		lineOut.removeListener(this);
 		filePlayer.unpatch(decrackFilter);
-		decrackFilter.unpatch(lineOut);
+		decrackFilter.unpatch(controlFilter);
+		controlFilter.unpatch(lineOut);
 		LOG.info("PAUSED");
 		for(AudioDocumentListener listener : listeners){
 			listener.audioPaused();
@@ -299,7 +302,7 @@ public class AudioDocument implements AudioListener {
 		}
 
 		this.lineOut.addListener(this);
-		player.patch(decrackFilter).patch(lineOut);
+		player.patch(decrackFilter).patch(controlFilter).patch(lineOut);
 		// REAL VERSION player.patch(lineOut);
 		player.rewind();
 		player.play();

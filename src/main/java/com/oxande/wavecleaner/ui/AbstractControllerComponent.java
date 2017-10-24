@@ -30,6 +30,8 @@ public class AbstractControllerComponent extends JPanel {
    private JLabel jlabel1 = new JLabel();
    private JLabel jlabel2 = new JLabel();
    private JLabel jlabel3 = new JLabel();
+   private JLabel jlabel4 = new JLabel();
+   protected JSlider volume = new JSlider();
 public class ChangeListener1 implements javax.swing.event.ChangeListener {
 
       public void stateChanged(ChangeEvent e)
@@ -96,6 +98,14 @@ private class SetCrackleAverageLabelClass implements Runnable {
       }
 }
 
+public class ChangeListener4 implements javax.swing.event.ChangeListener {
+
+      public void stateChanged(ChangeEvent e)
+      {
+         volumeChanged();
+      }
+}
+
 
    protected void crackleFactorChanged()
    {
@@ -140,6 +150,7 @@ private class SetCrackleAverageLabelClass implements Runnable {
       jpanel1.setLayout(layout1);
       
       crackle.setText("Decrackle");
+      crackle.setFocusable(false);
       c1.gridy = 0;
       c1.gridx = 0;
       c1.gridheight = 2;
@@ -230,6 +241,33 @@ private class SetCrackleAverageLabelClass implements Runnable {
       c1.weightx = 1;
       layout1.setConstraints(jlabel3, c1);
       jpanel1.add(jlabel3);
+      
+      jlabel4.setText("Volume");
+      c1.gridy = 2;
+      c1.gridx = 0;
+      c1.gridheight = 1;
+      c1.gridwidth = 1;
+      c1.anchor = GridBagConstraints.WEST;
+      c1.fill = GridBagConstraints.NONE;
+      c1.weightx = 1;
+      layout1.setConstraints(jlabel4, c1);
+      jpanel1.add(jlabel4);
+      
+      volume.setMinimumSize(new java.awt.Dimension(100,50));
+      volume.setMaximum(24);
+      volume.setMinimum(-24);
+      volume.setOrientation(JSlider.HORIZONTAL);
+      volume.setValue(0);
+      volume.addChangeListener(new ChangeListener4());
+      c1.gridy = 2;
+      c1.gridx = 1;
+      c1.gridheight = 1;
+      c1.gridwidth = 3;
+      c1.anchor = GridBagConstraints.WEST;
+      c1.fill = GridBagConstraints.NONE;
+      c1.weightx = 3;
+      layout1.setConstraints(volume, c1);
+      jpanel1.add(volume);
       this.add(jpanel1, BorderLayout.CENTER);
       this.setPreferredSize(new java.awt.Dimension(600,400));
       this.setName("com.oxande.wavecleaner.ui.AbstractControllerComponent");
@@ -243,6 +281,11 @@ private class SetCrackleAverageLabelClass implements Runnable {
    public void setCrackleWindowLabel(String in)
    {
       SwingUtilities.invokeLater(new SetCrackleWindowLabelClass(in));
+   }
+
+   protected void volumeChanged()
+   {
+      throw new UnsupportedOperationException("Not implemented");
    }
 }
 

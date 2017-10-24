@@ -52,7 +52,7 @@ public class MainScreen extends AbstractMainScreen implements AudioDocumentListe
 		this.infos.setAudioDocument(audio);
 		
 		// Initialize the controller component
-		this.controller.setFilters(audio.decrackFilter);
+		this.controller.setFilters(audio.decrackFilter, audio.controlFilter);
 	}
 	
 	protected void onRecordSound(){

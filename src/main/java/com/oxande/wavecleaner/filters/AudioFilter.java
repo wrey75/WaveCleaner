@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.wavecleaner.util.ConvertUtils;
 import com.oxande.wavecleaner.util.StereoSampleQueue;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -14,6 +15,7 @@ import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.UGen;
 import ddf.minim.spi.AudioStream;
+import ddf.minim.ugens.FilePlayer;
 
 /**
  * This is the base for audio filters. Note the audio filter is an high-end
@@ -48,10 +50,16 @@ public class AudioFilter extends UGen {
 	
 	public static final int INT_PARAM = 1;
 	public static final int FLOAT_PARAM = 2;
+	public static final int BOOLEAN_PARAM = 2;
 			
+	
+
 	private StereoSampleQueue queue;
 	private UGen audio;
 	protected Map<String,Parameter> parameters = new HashMap<>();
+	
+	/** The original stream (not filtered) */
+	private UGen originalStream;
 	
 	/** buffer we use to read from the stream */
 	private MultiChannelBuffer buffer;
@@ -70,11 +78,24 @@ public class AudioFilter extends UGen {
 	public List<Parameter> getParameters(){
 		return new ArrayList<Parameter>( parameters.values() );
 	}
-	
+
+	protected Parameter addBooleanParameter(String name, boolean defaultValue ){
+		return addParameter(name, BOOLEAN_PARAM, 0.0f, 1.0f, ConvertUtils.bool2flt(defaultValue));
+	}
+
 	protected synchronized Parameter addParameter(String name, int type, float min, float max, float defaultValue ){
 		Parameter p = new Parameter(name, type, min, max, defaultValue);
 		this.parameters.put(name.toUpperCase(), p);
 		return p;
+	}
+	
+	/**
+	 * Get the original stream
+	 * 
+	 * @return the original stream
+	 */
+	public UGen getOriginalStream(){
+		return this.originalStream;
 	}
 
 	/**
@@ -165,7 +186,8 @@ public class AudioFilter extends UGen {
 	}
 
 	protected float[][] loadSamples(int len, int extra) {
-		return queue.getSamples(len, extra);
+		float[][] loaded = queue.getSamples(len, extra);
+		return loaded;
 	}
 
 	public class Parameter {
@@ -232,6 +254,14 @@ public class AudioFilter extends UGen {
 	protected void addInput(UGen input) {
 		audio = input;
 		if( audio != null ){
+			if( input instanceof AudioFilter ){
+				LOG.info("Filter {} attached to {}", audio, this);
+				this.originalStream = ((AudioFilter)input).getOriginalStream();
+			}
+			else if( input instanceof FilePlayer){
+				LOG.info("FilePlayer {} attached to {}", audio, this);
+				this.originalStream = audio;
+			}
 			this.queue = new StereoSampleQueue(this.audio);
 		}
 	}
@@ -256,7 +286,7 @@ public class AudioFilter extends UGen {
 	 * 
 	 * @return true is the filter is bypassed.
 	 */
-	boolean isBypassing(){
+	public final boolean isBypassing(){
 		if( sampleIndex > samples[0].length) {
 			return true;
 		}
@@ -279,11 +309,12 @@ public class AudioFilter extends UGen {
 				}
 			}
 			else {
-				// Just copy from input!
+				// Just copy from input! Consuming is flat.
 				this.audio.tick(channels);
 				return;
 			}
 		}
+		
 		channels[0] = samples[0][sampleIndex];
 		channels[1] = samples[1][sampleIndex];
 	}
@@ -311,6 +342,7 @@ public class AudioFilter extends UGen {
 		this.samples[0] = new float[0];
 		this.samples[1] = new float[0];
 		this.sampleIndex = 0;
+		this.init(1024);
 	}
 	
 
@@ -379,12 +411,12 @@ public class AudioFilter extends UGen {
 	 *         read the next samples.
 	 * 
 	 */
-	protected MultiChannelBuffer processNext(MultiChannelBuffer buff) {
-		float[][] samples = loadSamples(this.buffer.getBufferSize());
-		this.buffer.setChannel(0, samples[0]);
-		this.buffer.setChannel(1, samples[1]);
-		process(buffer);
-		return buffer;
+	protected MultiChannelBuffer processNext(MultiChannelBuffer buf) {
+		float[][] samples = loadSamples(buf.getBufferSize());
+		buf.setChannel(0, samples[0]);
+		buf.setChannel(1, samples[1]);
+		process(buf);
+		return buf;
 	}
 
 	/**
