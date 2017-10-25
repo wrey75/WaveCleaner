@@ -3,6 +3,7 @@ package com.oxande.wavecleaner.ui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.Runnable;
@@ -76,6 +77,7 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>Help/About</i>.
+    * Called by the menu item <i>Help/About</i>.
     */
    protected void showAboutDlg()
    {
@@ -89,6 +91,7 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>Edit/Zoom In</i>.
+    * Called by the menu item <i>Edit/Zoom In</i>.
     */
    protected void onZoomIn()
    {
@@ -96,6 +99,7 @@ private class SetStatusMessageClass implements Runnable {
    }
 
    /**
+    * Called by the menu item <i>File/Exit</i>.
     * Called by the menu item <i>File/Exit</i>.
     */
    protected void onExit()
@@ -110,6 +114,7 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>File/Record</i>.
+    * Called by the menu item <i>File/Record</i>.
     */
    protected void onRecordSound()
    {
@@ -118,6 +123,7 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>File/Play/Pause</i>.
+    * Called by the menu item <i>File/Play/Pause</i>.
     */
    protected void onPlayPause()
    {
@@ -125,6 +131,7 @@ private class SetStatusMessageClass implements Runnable {
    }
 
    /**
+    * Called by the menu item <i>File/Load the music</i>.
     * Called by the menu item <i>File/Load the music</i>.
     */
    protected void onLoadSound()
@@ -142,6 +149,7 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>Edit/Zoom Out</i>.
+    * Called by the menu item <i>Edit/Zoom Out</i>.
     */
    protected void onZoomOut()
    {
@@ -155,6 +163,15 @@ private class SetStatusMessageClass implements Runnable {
       jmenu1.setMnemonic(java.awt.event.KeyEvent.VK_F);
       jmenu1.setDisplayedMnemonicIndex(0);
       jmenuitem1.setText("Load the music");
+      jmenuitem1.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onLoadSound();
+   }
+}
+
+);
       jmenuitem1.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Load the music");
@@ -169,6 +186,15 @@ private class SetStatusMessageClass implements Runnable {
 );
       jmenu1.add(jmenuitem1);
       jmenuitem2.setText("Record");
+      jmenuitem2.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onRecordSound();
+   }
+}
+
+);
       jmenuitem2.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Record");
@@ -184,6 +210,15 @@ private class SetStatusMessageClass implements Runnable {
       jmenu1.add(jmenuitem2);
       jmenuitem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke("SPACE"));
       jmenuitem3.setText("Play/Pause");
+      jmenuitem3.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onPlayPause();
+   }
+}
+
+);
       jmenuitem3.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Play/Pause");
@@ -201,6 +236,15 @@ private class SetStatusMessageClass implements Runnable {
       jmenuitem4.setText("Exit");
       jmenuitem4.setMnemonic(java.awt.event.KeyEvent.VK_X);
       jmenuitem4.setDisplayedMnemonicIndex(1);
+      jmenuitem4.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onExit();
+   }
+}
+
+);
       jmenuitem4.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Exit");
@@ -223,6 +267,15 @@ private class SetStatusMessageClass implements Runnable {
       jmenuitem5.setName("zoomIn");
       jmenuitem5.setAccelerator(javax.swing.KeyStroke.getKeyStroke("ctrl L"));
       jmenuitem5.setText("Zoom In");
+      jmenuitem5.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onZoomIn();
+   }
+}
+
+);
       jmenuitem5.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Zoom In");
@@ -240,6 +293,15 @@ private class SetStatusMessageClass implements Runnable {
       jmenuitem6.setName("zoomOut");
       jmenuitem6.setAccelerator(javax.swing.KeyStroke.getKeyStroke("ctrl K"));
       jmenuitem6.setText("Zoom Out");
+      jmenuitem6.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      onZoomOut();
+   }
+}
+
+);
       jmenuitem6.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Zoom Out");
@@ -261,6 +323,15 @@ private class SetStatusMessageClass implements Runnable {
       jmenuitem7.setText("About");
       jmenuitem7.setMnemonic(java.awt.event.KeyEvent.VK_A);
       jmenuitem7.setDisplayedMnemonicIndex(0);
+      jmenuitem7.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      showAboutDlg();
+   }
+}
+
+);
       jmenuitem7.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "About");

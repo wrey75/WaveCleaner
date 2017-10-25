@@ -191,7 +191,7 @@ public class DecrackleFilter extends AudioFilter {
 			}
 		}
 		
-		LOG.debug("Changes applied: {}", fixed);
+		// LOG.debug("Changes applied: {}", fixed);
 		old_width = width; // Now transfer the new value.
 		return ret;
 	}

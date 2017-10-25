@@ -26,7 +26,7 @@ import com.oxande.xmlswing.jcode.JavaType;
 
 
 
-public abstract class AbstractButtonUI extends JComponentUI {
+public class AbstractButtonUI extends JComponentUI {
 	
 	public static final String GROUP_ATTRIBUTE = "group";
 	

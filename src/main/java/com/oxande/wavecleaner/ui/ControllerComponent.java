@@ -1,28 +1,28 @@
 package com.oxande.wavecleaner.ui;
 
+import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
 
-import javax.imageio.ImageIO;
 import javax.swing.JSlider;
+import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.filters.AudioFilter;
 import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
-import com.oxande.wavecleaner.filters.ControllerFilter;
+import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
+import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 @SuppressWarnings("serial")
 public class ControllerComponent extends AbstractControllerComponent implements ItemListener {
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
-	BufferedImage background;
+//	BufferedImage background;
 	DecrackleFilter decrackleFilter;
-	ControllerFilter controlFilter;
+	PreamplifierFilter controlFilter;
 	
 	public long samplesToMilliseconds(int nbSamples ){
 		return (long)(nbSamples * 1000 / 48000.0);
@@ -63,17 +63,23 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 
 	@Override
 	protected void volumeChanged(){
-		controlFilter.setControl(ControllerFilter.GAIN, volume.getValue());
+		controlFilter.setControl(PreamplifierFilter.GAIN, volume.getValue());
 		refreshValues();
 	}
+	
 	public void initComponents() {
+//		URL url = getClass().getClassLoader().getResource("images/sono.png");
+//		try {
+//			background = ImageIO.read(url);
+//			Dimension size = new Dimension(background.getWidth(), background.getHeight());
+//			this.setPreferredSize(size);
+//			this.setMinimumSize(size);
+//			this.setMaximumSize(size);
+//			this.setOpaque(false);
+//		} catch (IOException ex) {
+//			LOG.error("Can not load image: {}", ex.getMessage());
+//		}
 		super.initComponents();
-		URL url = getClass().getClassLoader().getResource("images/sono.png");
-		try {
-			background = ImageIO.read(url);
-		} catch (IOException ex) {
-			LOG.error("Can not load image: {}", ex.getMessage());
-		}
 		this.setVisible(true);
 	}
 
@@ -83,7 +89,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	 * @param filter1
 	 *            the {@link DecrackleFilter} filter.
 	 */
-	public void setFilters(DecrackleFilter filter1, ControllerFilter lastFilter) {
+	public void setFilters(DecrackleFilter filter1, PreamplifierFilter lastFilter) {
 		this.decrackleFilter = filter1;
 		this.crackle.setSelected(this.decrackleFilter.isEnabled());
 		this.initValue(crackle_factor, this.decrackleFilter, DecrackleFilter.FACTOR);
@@ -91,7 +97,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
 		
 		this.controlFilter = lastFilter;
-		this.controlFilter.setControl(ControllerFilter.GAIN, +6.0f);
+		this.controlFilter.setControl(PreamplifierFilter.GAIN, +6.0f);
 		refreshValues();
 	}
 
@@ -119,15 +125,48 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 			LOG.warn("Source {} unknown.", e.getSource());
 		}
 	}
-
-	// protected void paintComponent(Graphics g0) {
-	// Graphics2D g = (Graphics2D) g0;
-	// if (background != null) {
-	// g.drawImage(background, 0, 0, getWidth(), getHeight(), 0, 0,
-	// background.getWidth(), background.getHeight(),
-	// null);
-	// }
-	//
-	// super.paintComponent(g);
-	// }
+	
+	@Override public Dimension getPreferredSize()
+	{
+	    return new Dimension(120, 120);
+	}
+	
+	// ------------------------------------------
+	
+	private void setSource( JToggleButton btn, int source ){
+		Assert.isTrue( SwingUtilities.isEventDispatchThread() );
+		if( btn.isSelected() ){
+			controlFilter.setControl(PreamplifierFilter.SOURCE, source);
+			if( source != 0 ) finalOutput.setSelected(false);
+			if( source != 1 ) originalOutput.setSelected(false);
+			if( source != 2 ) diffOutput.setSelected(false);
+			if( source != 3 ) leftRightOutput.setSelected(false);
+		}
+	}
+	
+	protected void onOriginalOutput(){
+		setSource(originalOutput, 1);
+	}
+	
+	protected void onFinalOutput() {
+		setSource(finalOutput, 0);
+	}
+	
+	protected void onDiffOutput(){
+		setSource(diffOutput, 2);
+	}
+	
+	protected void onLeftRightOutput(){
+		setSource(leftRightOutput, 3);
+	}
+	
+//	protected void paintComponent(Graphics g0) {
+//		Graphics2D g = (Graphics2D) g0;
+//		super.paintComponent(g);
+//		if (background != null) {
+//			g.drawImage(background, 0, 0, getWidth(), getHeight(), 0, 0, background.getWidth(), background.getHeight(),
+//					null);
+//		}
+//
+//	}
 }

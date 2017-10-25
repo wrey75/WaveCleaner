@@ -74,15 +74,26 @@ public class StereoSampleQueue {
      * 
      * @param buf the buffer to read (we read everything).
      */
+//    static long nb = 0;
+//    static long nb_left = 0;
+//    static long nb_right = 0;
     protected void readFromInput(MultiChannelBuffer buf){
     	int size = buf.getBufferSize();
     	int channelCount = buf.getChannelCount();
     	float[] channels = new float[channelCount];
     	for(int i = 0; i < size; i++ ){
     		ugen.tick(channels);
-    		for(int ch = 0; ch < channelCount; ch++ ){
-    			buf.setSample(ch, i, channels[ch]);
-    		}
+//    		nb += 2;
+//    		if( Math.abs(channels[0]) == 0.0f ){
+//    			nb_left++;
+//    			LOG.debug("CHANNEL LEFT NEAR zero {} with i = {}/{} ({}%)", channels, i, size, String.format("%1.5f", 100 * (double)nb_left / nb));
+//    		}
+//    		if( Math.abs(channels[1]) == 0.0f ){
+//    			nb_right++;
+//    			LOG.debug("CHANNEL RIGHT NEAR zero {} with i = {}/{} ({}%)", channels, i, size, String.format("%1.5f", 100 * (double)nb_right / nb));
+//    		}
+   			buf.setSample(0, i, channels[0]);
+   			buf.setSample(1, i, channels[1]);
     	}
     }
 

@@ -10,7 +10,8 @@ import javax.sound.sampled.AudioFormat;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
-import com.oxande.wavecleaner.filters.ControllerFilter;
+import com.oxande.wavecleaner.filters.AudioDocumentPlayer;
+import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.ui.WaveFormComponent;
 import com.oxande.wavecleaner.util.logging.LogFactory;
@@ -20,7 +21,6 @@ import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.spi.AudioRecordingStream;
-import ddf.minim.ugens.FilePlayer;
 
 /**
  * Management of an audio file. The audio document can be seen as
@@ -48,7 +48,7 @@ public class AudioDocument implements AudioListener {
 	String fileName;
 	AudioRecordingStream stream;
 	AudioCache cache;
-	FilePlayer filePlayer = null;
+	AudioDocumentPlayer documentPlayer = null;
 	AudioOutput lineOut = null;
 	int bufferSize;
 	int sampleRate;
@@ -57,7 +57,7 @@ public class AudioDocument implements AudioListener {
 	int nbChannels = 2;
 	private int totalSamples = 0;
 	public DecrackleFilter decrackFilter = new DecrackleFilter();
-	public ControllerFilter controlFilter = new ControllerFilter();
+	public PreamplifierFilter controlFilter = new PreamplifierFilter(null);
 	
 	/**
 	 * The listeners
@@ -94,11 +94,11 @@ public class AudioDocument implements AudioListener {
 	 * 
 	 * @return the file player.
 	 */
-	private FilePlayer getFilePlayer(){
-		if( this.filePlayer == null ){
-			this.filePlayer = new FilePlayer( stream );
+	private AudioDocumentPlayer getDocumentPlayer(){
+		if( this.documentPlayer == null ){
+			this.documentPlayer = new AudioDocumentPlayer( stream );
 		}
-		return this.filePlayer;
+		return this.documentPlayer;
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class AudioDocument implements AudioListener {
 	}
 	
 	public boolean isPlaying(){
-		return getFilePlayer().isPlaying();
+		return getDocumentPlayer().isPlaying();
 	}
 	
 	/**
@@ -137,7 +137,7 @@ public class AudioDocument implements AudioListener {
 		// with
 		// loading it, the function will return 0 as the sample rate.
 		this.stream = minim.loadFileStream(f.getAbsolutePath());
-		this.filePlayer = new FilePlayer( stream );
+		this.documentPlayer = new AudioDocumentPlayer( stream );
 		this.sampleRate = (int)this.stream.getFormat().getSampleRate();
 		switch( sampleRate ){
 		case 44100:
@@ -281,9 +281,9 @@ public class AudioDocument implements AudioListener {
 	 * 
 	 */
 	public synchronized void stop(){
-		filePlayer.pause();
+		this.documentPlayer.pause();
 		lineOut.removeListener(this);
-		filePlayer.unpatch(decrackFilter);
+		this.documentPlayer.unpatch(decrackFilter);
 		decrackFilter.unpatch(controlFilter);
 		controlFilter.unpatch(lineOut);
 		LOG.info("PAUSED");
@@ -294,7 +294,7 @@ public class AudioDocument implements AudioListener {
 	
 	public synchronized void play(int pos){
 		int ms = (int)(pos * 1000.0 / this.getFormat().getSampleRate());
-		FilePlayer player = getFilePlayer();
+		AudioDocumentPlayer player = getDocumentPlayer();
 		if(player.isPlaying()){
 			LOG.info("MOVED PLAY TO {}", pos );
 			player.cue(ms);
@@ -302,6 +302,7 @@ public class AudioDocument implements AudioListener {
 		}
 
 		this.lineOut.addListener(this);
+		controlFilter.setPlayer(player);
 		player.patch(decrackFilter).patch(controlFilter).patch(lineOut);
 		// REAL VERSION player.patch(lineOut);
 		player.rewind();
@@ -317,7 +318,7 @@ public class AudioDocument implements AudioListener {
 
 	@Override
 	public void samples(float[] sampL, float[] sampR) {
-		int sample = (int)(filePlayer.position() / 1_000.0 * this.getFormat().getSampleRate());
+		int sample = (int)(this.documentPlayer.position() / 1_000.0 * this.getFormat().getSampleRate());
 		if( sample > this.getNumberOfSamples() - 200 ){
 			/** Stop if we have heard all the file */
 			this.stop();

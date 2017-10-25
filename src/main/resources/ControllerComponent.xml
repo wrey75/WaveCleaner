@@ -43,5 +43,14 @@
 				</JSlider>
 			</td>
 		</tr>
+				<tr>
+		   <td>OUTPUT SELECTOR</td>
+		   <td colspan="3" fill="horizontal" hgap="0">
+				<JToggleButton id="finalOutput" action="onFinalOutput" group="audioOut">NORMAL</JToggleButton>
+				<JToggleButton id="originalOutput" action="onOriginalOutput" group="audioOut">ORIGIN</JToggleButton>
+				<JToggleButton id="diffOutput" action="onDiffOutput" group="audioOut">DIFF</JToggleButton>
+				<JToggleButton id="leftRightOutput" action="onLeftRightOutput" group="audioOut">L/R</JToggleButton>
+			</td>
+		</tr>
 	</table>
 </JPanel>

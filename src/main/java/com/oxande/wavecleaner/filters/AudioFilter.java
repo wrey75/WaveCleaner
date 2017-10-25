@@ -217,11 +217,14 @@ public class AudioFilter extends UGen {
 				LOG.warn("Parameter '{}' set to maximum {} instead of {}", name, max, v);
 				v = max;
 			}
+			LOG.debug("Parameter '{}' set to {}", name, v);
 			this.input.setLastValue(v);
 		}
 		
 		public float getValue(){
-			return this.input.getLastValue();
+			float v = this.input.getLastValue();
+			// LOG.warn("Parameter '{}' returns {}", name, v);
+			return v;
 		}
 
 		public String getName() {
@@ -298,20 +301,19 @@ public class AudioFilter extends UGen {
 		++sampleIndex;
 		if (sampleIndex >= samples[0].length) {
 			// We have to consume ALL the audio before switching off the filter.
-			if( isEnabled() ){
-				// We have to synchronize here because the
-				// synchronization is not inherited in JAVA
-				// (see
-				// https://stackoverflow.com/questions/15998335/is-synchronized-inherited-in-java)
-				synchronized (this) {
+			synchronized (this) {
+				if( isEnabled() ){
+					// We have to synchronize here because the
+					// synchronization is not inherited in JAVA
+					// (see
+					// https://stackoverflow.com/questions/15998335/is-synchronized-inherited-in-java)
 					samples = nextSamples();
-					sampleIndex = 0; // Reset.
 				}
-			}
-			else {
-				// Just copy from input! Consuming is flat.
-				this.audio.tick(channels);
-				return;
+				else {
+					// Just load some samples
+					samples = loadSamples( 500 );
+				}
+				sampleIndex = 0; // Reset.
 			}
 		}
 		
@@ -375,7 +377,9 @@ public class AudioFilter extends UGen {
 
 	/**
 	 * Overwrite this method if you want to work with the current buffer. This
-	 * is quite ideal for applying FFT and some other stuff
+	 * is quite ideal for applying FFT and some other stuff. Basically, you have
+	 * to rewrite the contents of the {@link MultiChannelBuffer} which contains
+	 * the samples.
 	 * 
 	 * <p>
 	 * Currently this method does nothing.
