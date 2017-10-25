@@ -1,5 +1,42 @@
 # WaveCleaner
-A project to clean the recorded sound of vinyl records.
+
+A project to clean the recorded sound of vinyl records. Started in October 2017 from scratch.
+
+## Why a new record cleaner?
+
+You can find several software to record and clean the sound of vinyl records:
+
+- [Audacity](http://www.audacityteam.org/home/): a very good (and well-known) software to read sound files,
+modify them and repair them. Including a decrackling, a declicking and a noise reduction.
+- [WaveRepair](http://www.delback.co.uk/wavrep/): I used it a long time ago and does
+very good job. Even on really bad records. The noise removal is exceptional but it's
+a Windows shareware. And it takes time to get the best values.
+- [ClickRepair](http://www.clickrepair.net/): another software to remove clicks and
+denoise your records but not tested. Works with Java then can be used on all platforms. Note
+there are two software.
+- [GoldWave](https://www.goldwave.com/goldwave.php): for Windows, a extreme editor I used
+a long time ago. Now includes filters for noise reduction on your records.
+- [GTK Wave Cleaner](http://gwc.sourceforge.net/): formely "Gnome Wave Cleaner", this is an open
+sourced software now maintained by Alister Hood (https://github.com/AlisterH/gwc).  
+
+All of them works great. But the main issue I got by using them is losing time to get the
+right values for each of my records. It takes take to have the correct parameters for each record.
+You have to test, listen and test again.
+
+This software is diffrent, because it works in "real-time".
+
+## The philosophy
+
+Rather than selecting a piece of sound and processing it, the software is processing in real-time.
+If you change a value in the filters, you will listen the change immediately. This is a different behavior
+compared to non-linear software above.
+
+The software plays the original file and push the sound from a filter to another in a pipeline. The
+last stage is the "pre-amplifier". The Preamplifier has 2 functionalities: you can master the volume and
+the source. Then you can listen the original source untouched, the sound filtered or the difference
+between the original and filtered sound (to check you are not removing music but only clics and noise).
+
+# The technical background
 
 This project is based on the [Minim](http://code.compartmental.net/tools/minim/) library
 that provide very good stuff to manipulate the sound. I started to code with the excellent
@@ -12,67 +49,42 @@ and replaced by the JavaFX, I kept it because of the simplicity of programming a
 the user interface.
 
 This is the main reason the software is written in JAVA (the other response is: you can run
-it everywhere from Unix, MacOS and Windows).
-
-
-## Why another software?
-
-The question is correct: why not using the excellent [Audacity](http://www.audacityteam.org/)
-program? In fact, I use it and it is a really good software for audio edition. But, the fact is
-an editing program is not the perfect way to manage the complexity of removing the crackles and 
-other issues from vinyl records.
-
-I know there are some function in Audacity, especially for this type of work ("Suppression de
-clic" by CraigDeForest) and a noise reduction by Dominic Mazzoni. They are good piece of software 
-(and I will look into them because it is under GPL licence).
-
-There is a excellent software called [Wave Repair](http://www.delback.co.uk/wavrep/) but only
-working on Windows and it is a shareware. In addition it takes a long time to get excellent
-results (but you should buy it, it is really amazing).
-
-There is another one called [ClickRepair](http://www.clickrepair.net/), it works under
-JAVA and it is NOT open sourced. As a surprise, only Audacity and GNU Wave Cleaner seems
-to have open sourced the algorithms.
+it everywhere from Unix, MacOS and Windows). I have planned to create a native package for Windows
+and Mac but not force the first official release
 
 
 ## Why a GNU Licence?
 
-Well, I suppose i'm forced to use it mainly because I would like to take piece of code from
-Audacity. I am not sure I can with another licence. But it a very quick choice and can be changed
+Well, I suppose I'm forced to use it mainly because I would like to take piece of code from
+Audacity. I am not sure I can with another license. But it's a very quick choice and can be changed
 at any time.
 
-## What the program does
+## CAn I use it?
 
-Well, currently, nothing. Except loading a song in memory. When I say a song, it is a vinyl
-recorded audio file. But it is intended to modify and enhance the audio file you recoreded.
-Be patient.
+Well, currently, not really. But, for each new new feature, I do a preview release. Do not use for
+production: there is neither a save option neither a record button. But you can load your file and
+check how the software can evolve.
+ 
 
-## The software asks for big storage
+## Requirements
 
-Yes. Indeed. Mainly because the Minim library uses _float_ numbers to store the samples. Then one
-sample takes 32 bits, I mean 4 bytes. On a CD, the recording is saved on 16 bits only, then 2 bytes
-only. Then the record takes twice the size of a CD. That's mean about 1.2 GB for one hour of recording
-on 48kHz and 2.4 GB for 96kHz sampling (weel, 4.8GB for 192kHz).
+Basically, a dual CPU is needed but to live refresh of the graphical components and live filtering but
+a basic Windows PC or a Mac should be fine. I tried on both without any issue.
 
-This is a normal behaviour. You can also work with 24 bits samples if you want.
+Disk storage is required. We use about 700 MB for 30 minutes of playback. This is because we work internally
+on floating point numbers (with a precision of 24 bits). For 192kHz sampling, the size grows to 3 Gb for 30 minutes.
 
 ## Limitations
 
-There are 2 limitations in the coding I have made and nothing will change this:
- - A project (all the files used in a project) MUST have the same sampling rate.
- - The sampling rates are only 48kHz, 96kHz and 192kHz. Nothing else (don't expect 44.1kHz!).
- - We are working on mono and stereo files only (no 5:1 files and other stuff).
+There are 2 limitations in the coding I have made and nothing will change this in the future:
+ - The sampling rates are only 48kHz, 96kHz and 192kHz. Nothing else (44.1kHz is possible but the results
+ are not expected to be as good as for other sampling rates).
+ - We are working on STEREO files only (no 5:1 files and other stuff). We don't expect to have a MONO
+ input but you will be able to have a enhanced MONO output. 
 
 The limitations come from the fact the software has been creating to restore files,
-not for editing or other stuff.
+not for editing or other stuff. The limitation about the sampling rate is due to mathematics. We use
+a FFT formulae on a multiple of 1024 samples (1024 for 48kHz, 2048 for 96kHz). Then the size of
+the samples will not match the same duration for 44.1kHz, meaning you could have some difference on
+the output.
 
-NOTE: if you have files recorded in 44.1kHz, use Audacity to change the sampling rate.
- 
-
-
-
- 
-
-
-
- 
