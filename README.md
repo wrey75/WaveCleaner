@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/wrey75/WaveCleaner.svg?branch=master)](https://travis-ci.org/wrey75/WaveCleaner)
+
 # WaveCleaner
 A project to clean the recorded sound of vinyl records.
 
