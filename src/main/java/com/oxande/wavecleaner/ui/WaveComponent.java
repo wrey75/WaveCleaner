@@ -259,7 +259,7 @@ public class WaveComponent extends JComponent {
 	}
 	
 	/**
-	 * Draw the levels for the sond.
+	 * Draw the levels for the sound.
 	 * 
 	 * @param g
 	 *            the graphics where to render the wave

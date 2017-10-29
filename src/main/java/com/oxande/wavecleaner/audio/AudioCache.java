@@ -26,20 +26,17 @@ public class AudioCache implements AutoCloseable {
 	private static Logger LOG = LogFactory.getLog(AudioCache.class);
     private int lastSample = 0;
     private int bufferSize = 1024;
-//     private int blockSize;
     private MappedByteBuffer buffer;
     private FileChannel fileChannel;
     private RandomAccessFile randomAccessFile;
     private File file;
-//     private BigInteger loaded = BigInteger.ZERO;
 
     public AudioCache( int sampleSize, int numberOfChunks ) throws IOException {
         this.bufferSize = sampleSize;
         this.lastSample = (numberOfChunks+1) * sampleSize;
-//         this.blockSize = this.bufferSize * Float.BYTES * 2;
 
         // Create file object
-        file = File.createTempFile("wave", ".dat");
+        file = File.createTempFile("wave", ".dat", null);
         LOG.info("Temporary file '{}' created.", file.getAbsoluteFile());
 
         //Delete the file; we will create a new file
@@ -76,6 +73,7 @@ public class AudioCache implements AutoCloseable {
         catch( BufferUnderflowException ex){
         	LOG.error("Buffer Underflow: block {} not available, requested up to position {} but the capacity is {}.",
         			block,  (block+1) * 2 * bufferSize * Float.BYTES, buffer.capacity() );
+        	
         }
 
         return array;

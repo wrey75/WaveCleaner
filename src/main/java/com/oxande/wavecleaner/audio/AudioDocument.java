@@ -260,10 +260,7 @@ public class AudioDocument /*implements AudioListener*/ {
 			} catch (IOException e) {
 				LOG.error("Can not save into the cache.");
 			}
-			if (i % 100 == 0) {
-				// The modulo will limit 
-				listenerManager.publishOnce( l -> l.audioChanged() );
-			}
+			listenerManager.publishOnce( l -> l.audioChanged() );
 		}
 		stream.pause();
 		listenerManager.publish(l -> l.audioChanged() );

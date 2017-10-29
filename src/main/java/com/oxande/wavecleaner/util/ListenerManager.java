@@ -8,12 +8,15 @@ import java.util.function.Function;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.logging.log4j.Logger;
+
 import com.oxande.wavecleaner.audio.AudioChangedListener;
+import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicInteger;
 
 public class ListenerManager<T extends EventListener> {
-
+	private static Logger LOG = LogFactory.getLog(ListenerManager.class);
 	private List<ListenerInfo<T>> listenerInfos = new ArrayList<>();
 	
 	/**
@@ -44,6 +47,7 @@ public class ListenerManager<T extends EventListener> {
 				// we boost once  
 				calls.incrementAndGet();
 				SwingUtilities.invokeLater( () -> {
+					// LOG.debug("invoked.");
 					fnct.accept(this.listener);
 					calls.decrementAndGet();
 				});
