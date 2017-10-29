@@ -185,6 +185,7 @@ private class SetStatusMessageClass implements Runnable {
 
 );
       jmenu1.add(jmenuitem1);
+      jmenuitem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke("ctrl R"));
       jmenuitem2.setText("Record");
       jmenuitem2.addActionListener(new ActionListener()  {
 
@@ -198,6 +199,7 @@ private class SetStatusMessageClass implements Runnable {
       jmenuitem2.setAction(new AbstractAction()  {
    {
       putValue(Action.NAME, "Record");
+      putValue(Action.ACCELERATOR_KEY, jmenuitem2.getAccelerator());
    }
 
    public void actionPerformed(ActionEvent e)

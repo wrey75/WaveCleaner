@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JDialog rootClass="MainFrame"
+	name="com.oxande.wavecleaner.ui.AbstractRecordScreen" coolsize="400,200"
+	title="Recording">
+
+	<table>
+		<tr>
+			<td><label>You must have the turnable running (the disc turns) and 
+			the stylus just above the disc. Then you can start recording. </label></td>
+		</tr>
+		<tr>
+		  <td><JButton action="startRecord">START RECORDING</JButton></td>
+		</tr>
+	</table>
+</JDialog>

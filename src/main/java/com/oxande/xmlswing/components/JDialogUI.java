@@ -14,10 +14,7 @@ import com.oxande.xmlswing.jcode.JavaMethod;
 /**
  * The implementation of a dialog box.
  * 
- * TODO: writing the code.
- * 
  * @author wrey75
- * @version $Rev: 74 $
  *
  */
 public class JDialogUI extends DialogUI {

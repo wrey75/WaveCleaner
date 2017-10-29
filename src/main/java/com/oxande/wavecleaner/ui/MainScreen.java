@@ -67,7 +67,8 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 	}
 	
 	protected void onRecordSound(){
-		app.startRecord();
+		RecordScreen dialog = new RecordScreen();
+		dialog.initComponents();
 	}
 	
 	/**

@@ -126,7 +126,6 @@ public class UIParser {
 		jclass.setComments( getClassComments() );
 		addBaseClass(jclass, root, JDialog.class);
 		
-
 		// The content Pane is a border layout.
 		jclass.addImport(JPanel.class);
 		jclass.addImport( BorderLayout.class );
@@ -139,7 +138,14 @@ public class UIParser {
 		JFrameUI.addJMenuBar(jclass, initMethod, root, "this");
 		JFrameUI.addWindowListener(jclass, initMethod, root, "this");
 
-		List<Element> children = Parser.getChildElements(root);
+		// The buttons to add
+//		List<Element> buttons = Parser.getChildElements(root, "button");
+//		for(Element button : buttons){
+//			JButtonUI.§
+//		}e
+		
+		// Now the main screen
+		List<Element> children = Parser.getChildElementsExcept(root, "buttons");
 		switch( children.size() ){
 		case 0 :
 			// Nothing defined as content pane -> Add an empty (and anonymous) label.
@@ -177,6 +183,8 @@ public class UIParser {
 		main.addCall( "appl.setDefaultCloseOperation", JFrame.class.getName() + ".EXIT_ON_CLOSE" );
 		main.addCall( "appl.setVisible", JavaCode.toParam(true) );
 		jclass.addMethod( main );
+		
+		
 		return jclass;
 	}
 

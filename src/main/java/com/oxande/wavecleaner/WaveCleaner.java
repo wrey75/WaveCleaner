@@ -143,14 +143,7 @@ public class WaveCleaner {
 		mainFrame.init(this);
 	}
 
-	public void startRecord(){
-		AudioInput in = minim.getLineIn(Minim.STEREO, 2048, 48000f, 16);
-		AudioRecorder recorder = minim.createRecorder(in, "~/myrecording.wav");
-		recorder.beginRecord();
-	}
-
-
-	
+		
 	public AudioOutput getLineOut(){
 		return this.minim.getLineOut(Minim.STEREO);
 	}
