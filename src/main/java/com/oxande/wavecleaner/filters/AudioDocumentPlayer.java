@@ -1,7 +1,12 @@
 package com.oxande.wavecleaner.filters;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.wavecleaner.ui.WaveFormComponent;
+import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.spi.AudioRecordingStream;
@@ -91,25 +96,31 @@ public class AudioDocumentPlayer extends FilePlayer {
 		this.queue = new float[100];
 	}
 	
+	public int playHead(){
+		// TODO: Why no sample rate?
+		float sampleRate = 48000 /*sampleRate() */;
+		double pos = this.position() / 1000.0;
+		int sample = (int)(pos * sampleRate) + last - first;
+		return sample;
+	}
 
 	public void cue(int millis){
 		// We should know this... Because we are not at the same point anymore
 		super.cue(millis);
+		listenerManager.publish( l -> l.audioPlayed(this.playHead()) );
 	}
 	
 	private int buffsize(){
 		return this.queue.length / NB_CHANNELS;
 	}
 	
-	public float[] newQueue(float[] src, int inc ){
-		int newSize = (this.buffsize() + inc) * NB_CHANNELS;
-		float[] newQueue = new float[newSize];
-		System.arraycopy(src, 0, newQueue, 0, src.length);
-		return newQueue;
-	}
 
-	static long count = 0; // for debug
-	
+	/**
+	 * Pop one (and only one) sample per channel. Use to get the original
+	 * signal for the original file.
+	 * 
+	 * @param channels the STEREO channel.
+	 */
 	public synchronized void pop(float[] channels) {
 		if (first < 0 || last < first) {
 			throw new IllegalAccessError("The queue is empty!");
@@ -125,12 +136,10 @@ public class AudioDocumentPlayer extends FilePlayer {
 		first++; // We are ahead
 		if (first == buffsize()) {
 			// Not fully necessary because we do a modulo when pushing
+			// but helps in calling the refresh
 			first -= buffsize();
 			last -= buffsize();
-		}		
-		
-		if( count++ % 20000 == 0 ){
-			LOG.debug("pop() -- channels = {}, first = {}, last = {}, queue = {}", channels, first, last, queue.length);
+			listenerManager.publishOnce( l -> l.audioPlayed(this.playHead()));
 		}
 	}
 
@@ -144,13 +153,24 @@ public class AudioDocumentPlayer extends FilePlayer {
 	 * @param right the right sample.
 	 */
 	synchronized void push(float left, float right) {
-//		if( Math.abs(left) < 1e-14 ){
-//			LOG.warn("LEFT IS NEAR ZERO: {} - {}", left, right);
-//		}
 		if ( (last - first) + 1 > buffsize()) {
 			// Add 100 more samples
-			queue = newQueue(queue, 100);
-			LOG.info("Increased buffer to {} samples", buffsize());
+			int newSize = (this.buffsize() + 100) * NB_CHANNELS;
+			float[] newQueue = new float[newSize];
+			// The copy below is not performant.
+			for(int i = first; i < last; i++ ){
+				int oldPos = (i % buffsize()) * NB_CHANNELS;
+				int newPos = ((i - first) % buffsize()) * NB_CHANNELS;
+				for(int ch = 0; ch < NB_CHANNELS; ch ++ ){
+					newQueue[ newPos++ ] = newQueue[ oldPos++ ]; 
+				}
+			}
+			
+			// The queue is now from 0.
+			last -= first;
+			first = 0;
+			queue = newQueue;
+			LOG.info("Increased buffer to {} samples.", buffsize());
 		}
 
 		int pos = (last % buffsize()) * NB_CHANNELS;
@@ -159,9 +179,29 @@ public class AudioDocumentPlayer extends FilePlayer {
 		last++;
 	}
 
+	
 	protected void uGenerate(float[] channels) 
 	{
 		super.uGenerate(channels);
-		push(channels[0], channels[1]); // Store in the original buffer 
+		push(channels[0], channels[1]); // Store in the original buffer
+	}
+	
+
+	private ListenerManager<AudioPlayerListener> listenerManager = new ListenerManager<AudioPlayerListener>();
+	
+	
+	/**
+	 * Register a new listener. Used at the beginning for the
+	 * {@link WaveFormComponent} but any object can listen.
+	 * 
+	 * @param listener
+	 *            an audio listener.
+	 */
+	public void addPlayerListener(AudioPlayerListener listener) {
+		this.listenerManager.add(listener);
+	}
+
+	public void removePlayerListener(AudioPlayerListener listener) {
+		this.listenerManager.remove(listener);
 	}
 }

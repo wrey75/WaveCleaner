@@ -1,20 +1,15 @@
-package com.oxande.wavecleaner.audio;
+package com.oxande.wavecleaner.filters;
+
+import java.util.EventListener;
 
 /**
- * A listener interface to implement.
+ * A listener interface to implement for listening an audio player
+ * (only the AudioDocumentPlayer supports it).
  * 
  * @author wrey75
  *
  */
-public interface AudioDocumentListener {
-	
-	/**
-	 * Called when the audio has changed. The audio
-	 * changed when at least one sample of the record
-	 * changed.
-	 * 
-	 */
-	void audioChanged( );
+public interface AudioPlayerListener extends EventListener {
 	
 	/**
 	 * A sample is played (then audio is playing). The last

@@ -1,18 +1,21 @@
 package com.oxande.wavecleaner.ui;
 
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.oxande.wavecleaner.WaveCleaner;
+import com.oxande.wavecleaner.audio.AudioChangedListener;
 import com.oxande.wavecleaner.audio.AudioDocument;
-import com.oxande.wavecleaner.audio.AudioDocumentListener;
+import com.oxande.wavecleaner.filters.AudioPlayerListener;
+import com.oxande.wavecleaner.util.Assert;
 
 import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
 
 
 @SuppressWarnings("serial")
-public class MainScreen extends AbstractMainScreen implements AudioDocumentListener {
+public class MainScreen extends AbstractMainScreen implements AudioPlayerListener, AudioChangedListener {
 
 	private WaveCleaner app;
 	private AudioDocument audio;
@@ -48,7 +51,8 @@ public class MainScreen extends AbstractMainScreen implements AudioDocumentListe
     	this.audio = audio;
 		this.song.setAudioDocument(audio);
 		this.instant.setAudioDocument(audio);
-		this.audio.register(this);
+		this.audio.addChangedAudioListener(this);
+		this.audio.addAudioPlayerListener(this);
 		this.infos.setAudioDocument(audio);
 		
 		// Initialize the controller component
@@ -111,6 +115,7 @@ public class MainScreen extends AbstractMainScreen implements AudioDocumentListe
 	
 	@Override
 	public void audioPlayed(int sample) {
+		Assert.isTrue( SwingUtilities.isEventDispatchThread() );
 		this.song.setPlayHead(sample, true);
 		this.instant.mode = WaveComponent.WAVE_MODE;
 		this.instant.setVisibleWindow(sample, sample + audio.getChunkSize());

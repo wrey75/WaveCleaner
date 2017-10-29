@@ -111,7 +111,7 @@ public class AudioFilter extends UGen {
 			LOG.error("Parameter '{}' unknown.", name);
 			return 0.0f;
 		}
-		LOG.error("Parameter '{}' set to {}.", name, value);
+		LOG.debug("Parameter '{}' set to {}.", name, value);
 		p.setValue(value);
 		return p.getValue();
 	}

@@ -219,7 +219,7 @@ public class WaveComponent extends JComponent {
 			int y_middle = (int)(rect.height / 2 + (rect.height * 0.15) * (j == 0 ? -1.0 : +1.0));
 			g.setColor(j == 0 ? leftColor : rightColor);
 			if( factor < 0.02 ){
-				LOG.debug("FACTOR = {}", factor);
+				// LOG.debug("FACTOR = {}", factor);
 				int x_prev = -100;
 				int y = 0;
 				for(int i = firstChunk; i < lastChunk; i++){

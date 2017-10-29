@@ -2,8 +2,6 @@ package com.oxande.wavecleaner.audio;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 
@@ -11,40 +9,38 @@ import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
 import com.oxande.wavecleaner.filters.AudioDocumentPlayer;
+import com.oxande.wavecleaner.filters.AudioPlayerListener;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
-import com.oxande.wavecleaner.ui.WaveFormComponent;
+import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
-import ddf.minim.AudioListener;
 import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.spi.AudioRecordingStream;
 
 /**
- * Management of an audio file. The audio document can be seen as
- * the "driver" for its display. I created a listener for the document
- * as it is the case for mouse events and so on. It is based on
- * Microsoft MFC management with a <code>CDocument</code> and a
- * <code>CView</code>. 
+ * Management of an audio file. The audio document can be seen as the "driver"
+ * for its display. I created a listener for the document as it is the case for
+ * mouse events and so on. It is based on Microsoft MFC management with a
+ * <code>CDocument</code> and a <code>CView</code>.
  * 
- *   <p>
- *   When the file is linked to this audio document class, the
- *   levels are read from the disk at full speed (works also on
- *   MP3!) and visually updated in the display. We use a thread
- *   to read the file then the update can be done behind the
- *   scenes.
- *   </p>
- *   
- *   
+ * <p>
+ * When the file is linked to this audio document class, the levels are read
+ * from the disk at full speed (works also on MP3!) and visually updated in the
+ * display. We use a thread to read the file then the update can be done behind
+ * the scenes.
+ * </p>
+ * 
+ * 
  * 
  * @author wrey75
  *
  */
-public class AudioDocument implements AudioListener {
+public class AudioDocument /*implements AudioListener*/ {
 	private Logger LOG = LogFactory.getLog(AudioDocument.class);
-	
+
 	String fileName;
 	AudioRecordingStream stream;
 	AudioCache cache;
@@ -58,45 +54,39 @@ public class AudioDocument implements AudioListener {
 	private int totalSamples = 0;
 	public DecrackleFilter decrackFilter = new DecrackleFilter();
 	public PreamplifierFilter controlFilter = new PreamplifierFilter(null);
-	
-	/**
-	 * The listeners
-	 */
-	private List<AudioDocumentListener> listeners = new ArrayList<>();
-	
+
+
 	private RMSSample[] samples = null;
-	
-	
+
 	/**
 	 * Returns the level samples.
 	 * 
 	 * @return the array of samples
 	 */
-	public RMSSample[] getLevels(){
+	public RMSSample[] getLevels() {
 		return this.samples;
 	}
-	
-	public float getSampleRate(){
+
+	public float getSampleRate() {
 		return this.stream.getFormat().getSampleRate();
 	}
-	
+
 	/**
 	 * Return the size of the buffer.
 	 * 
 	 */
-	public int getChunkSize(){
+	public int getChunkSize() {
 		return this.bufferSize;
 	}
-	
+
 	/**
-	 * Get the file player. If there was no file player,
-	 * a new one is created.
+	 * Get the file player. If there was no file player, a new one is created.
 	 * 
 	 * @return the file player.
 	 */
-	private AudioDocumentPlayer getDocumentPlayer(){
-		if( this.documentPlayer == null ){
-			this.documentPlayer = new AudioDocumentPlayer( stream );
+	private AudioDocumentPlayer getDocumentPlayer() {
+		if (this.documentPlayer == null) {
+			this.documentPlayer = new AudioDocumentPlayer(stream);
 		}
 		return this.documentPlayer;
 	}
@@ -104,22 +94,25 @@ public class AudioDocument implements AudioListener {
 	/**
 	 * Attach a line out for playing directly.
 	 * 
-	 * @param out the line out (usually speakers)
+	 * @param out
+	 *            the line out (usually speakers)
 	 */
-	public void attachLineOut(AudioOutput out){
+	public void attachLineOut(AudioOutput out) {
 		this.lineOut = out;
 	}
-	
-	public boolean isPlaying(){
+
+	public boolean isPlaying() {
 		return getDocumentPlayer().isPlaying();
 	}
-	
+
 	/**
 	 * Create an audio document.
 	 * 
-	 * @param minim the minim object.
-	 * @param f the file
-	 * @throws IOException 
+	 * @param minim
+	 *            the minim object.
+	 * @param f
+	 *            the file
+	 * @throws IOException
 	 */
 	public AudioDocument(Minim minim, File f) throws IOException {
 		this.fileName = f.getAbsolutePath();
@@ -137,9 +130,9 @@ public class AudioDocument implements AudioListener {
 		// with
 		// loading it, the function will return 0 as the sample rate.
 		this.stream = minim.loadFileStream(f.getAbsolutePath());
-		this.documentPlayer = new AudioDocumentPlayer( stream );
-		this.sampleRate = (int)this.stream.getFormat().getSampleRate();
-		switch( sampleRate ){
+		this.documentPlayer = new AudioDocumentPlayer(stream);
+		this.sampleRate = (int) this.stream.getFormat().getSampleRate();
+		switch (sampleRate) {
 		case 44100:
 		case 48000:
 			bufferSize = 1024;
@@ -153,104 +146,103 @@ public class AudioDocument implements AudioListener {
 		default:
 			bufferSize = 512;
 		}
-		// buffer = new MultiChannelBuffer(bufferSize, stream.getFormat().getChannels());
+		// buffer = new MultiChannelBuffer(bufferSize,
+		// stream.getFormat().getChannels());
 		nbChannels = stream.getFormat().getChannels();
-		if( nbChannels < 2 ){
+		if (nbChannels < 2) {
 			rightChannel = leftChannel = 0;
 		}
-		
+
 		int streamDuration = stream.getMillisecondLength();
-		totalSamples = (int)( ( streamDuration * 0.001 * sampleRate )  ) + 1;
-		int nbChunks = (int)(totalSamples / bufferSize) + 1;
+		totalSamples = (int) ((streamDuration * 0.001 * sampleRate)) + 1;
+		int nbChunks = (int) (totalSamples / bufferSize) + 1;
 		this.cache = new AudioCache(bufferSize, nbChunks);
 		new Thread(() -> loadWaveSamples()).start();
 	}
-	
+
 	/**
 	 * Returns the audio file (a reference to the).
 	 * 
 	 * @return the file
 	 */
-	public File getFile(){
+	public File getFile() {
 		File f = new File(this.fileName);
 		return f;
 	}
-	/**
-	 * Register a new listener. Used at the beginning for the {@link WaveFormComponent}
-	 * but any object can listen.
-	 * 
-	 * @param listener an audio listener.
-	 */
-	public void register( AudioDocumentListener listener ){
-		this.listeners.add(listener);
-	}
-	
-	public static long lastPublish = 0;
-	
-	private void publish(long debounce){
-		if( debounce == 0 || (lastPublish + debounce < System.currentTimeMillis()) ){
-			for(AudioDocumentListener listener : listeners){
-				listener.audioChanged();
-			}
-			lastPublish = System.currentTimeMillis();
-		}
-	}
-	
-	public AudioFormat getFormat(){
+
+
+	public AudioFormat getFormat() {
 		return stream.getFormat();
 	}
-	
+
 	/**
-	 * Returns the number of chunks. A chunk contains the audio levels for
-	 * about 0.2 seconds of music.
-	 *  
+	 * Returns the number of chunks. A chunk contains the audio levels for about
+	 * 0.2 seconds of music.
+	 * 
 	 * @return the number of chunks.
 	 */
-	protected int getNumberOfChunks(){
+	protected int getNumberOfChunks() {
 		int totalChunks = (totalSamples / bufferSize) + 1;
 		return totalChunks;
 	}
-	
+
 	public int getNumberOfSamples() {
 		return totalSamples;
 	}
-	
-//	/**
-//	 * Start to listen.
-//	 * 
-//	 * @return the buffer where data will be stored.
-//	 */
-//	protected MultiChannelBuffer start(){
-//		stream.play();
-//		MultiChannelBuffer buf = new MultiChannelBuffer(bufferSize, stream.getFormat().getChannels());
-//		return buf;
-//	}
-//	
-//	protected WaveSample nextSample(MultiChannelBuffer buf){
-//		stream.read(buf);
-//		float left[] = buf.getChannel(leftChannel);
-//		float right[] = buf.getChannel(rightChannel);
-//		return WaveSample.create(left, right);
-//	}
-	
+
+	// /**
+	// * Start to listen.
+	// *
+	// * @return the buffer where data will be stored.
+	// */
+	// protected MultiChannelBuffer start(){
+	// stream.play();
+	// MultiChannelBuffer buf = new MultiChannelBuffer(bufferSize,
+	// stream.getFormat().getChannels());
+	// return buf;
+	// }
+	//
+	// protected WaveSample nextSample(MultiChannelBuffer buf){
+	// stream.read(buf);
+	// float left[] = buf.getChannel(leftChannel);
+	// float right[] = buf.getChannel(rightChannel);
+	// return WaveSample.create(left, right);
+	// }
+
 	/**
-	 * Get the audio samples in a chunk. Use a mapped
-	 * memory to load the samples inside the chunk. 
+	 * Get the audio samples in a chunk. Use a mapped memory to load the samples
+	 * inside the chunk.
 	 * 
-	 * @param chunk the chunk. The size of a chunk is depending of
-	 * the window size (basically a chunk is about 20 milliseconds).
+	 * @param chunk
+	 *            the chunk. The size of a chunk is depending of the window size
+	 *            (basically a chunk is about 20 milliseconds).
 	 * @return the array of samples (always stereo expected).
 	 */
-	public float[][] getAudioSamples( int chunk ){
+	public float[][] getAudioSamples(int chunk) {
 		float[][] samples = null;
 		samples = this.cache.getSamples(chunk);
 		return samples;
 	}
+	
+	ListenerManager<AudioChangedListener> listenerManager = new ListenerManager<AudioChangedListener>();
+	
+	public void addChangedAudioListener(AudioChangedListener listener){
+		listenerManager.add(listener);
+	}
+	
+	public void removeChangedAudioListener(AudioChangedListener listener){
+		listenerManager.remove(listener);
+	}
+	
+	void addAudioChangedListener( AudioChangedListener listener ){
+		
+	}
 
 	/**
-	 * Load the samples of the audio file. This method should be
-	 * called in a different thread.
-	 * @throws IOException 
+	 * Load the samples of the audio file. This method should be called in a
+	 * different thread.
+	 * 
+	 * @throws IOException
 	 * 
 	 */
 	public synchronized void loadWaveSamples() {
@@ -268,64 +260,75 @@ public class AudioDocument implements AudioListener {
 			} catch (IOException e) {
 				LOG.error("Can not save into the cache.");
 			}
-			if (i % 100 == 0){
-				publish(100);
+			if (i % 100 == 0) {
+				// The modulo will limit 
+				listenerManager.publishOnce( l -> l.audioChanged() );
 			}
 		}
 		stream.pause();
-		publish(0);
+		listenerManager.publish(l -> l.audioChanged() );
 	}
 
 	/**
 	 * Stop to play. Basically a mute but we unpatch the line out!
 	 * 
 	 */
-	public synchronized void stop(){
+	public synchronized void stop() {
 		this.documentPlayer.pause();
-		lineOut.removeListener(this);
+		// lineOut.removeListener(this);
 		this.documentPlayer.unpatch(decrackFilter);
 		decrackFilter.unpatch(controlFilter);
 		controlFilter.unpatch(lineOut);
 		LOG.info("PAUSED");
-		for(AudioDocumentListener listener : listeners){
-			listener.audioPaused();
-		}
+//		for (AudioDocumentListener listener : listeners) {
+//			listener.audioPaused();
+//		}
+	}
+
+	// The 2 following methods are for compatibility because
+	// the audio player can not be accessed directly.
+	public void addAudioPlayerListener(AudioPlayerListener listener){
+		getDocumentPlayer().addPlayerListener(listener);
+	}
+
+	public void removeAudioPlayerListener(AudioPlayerListener listener){
+		getDocumentPlayer().removePlayerListener(listener);
 	}
 	
-	public synchronized void play(int pos){
-		int ms = (int)(pos * 1000.0 / this.getFormat().getSampleRate());
+	public synchronized void play(int pos) {
+		int ms = (int) (pos * 1000.0 / this.getFormat().getSampleRate());
 		AudioDocumentPlayer player = getDocumentPlayer();
-		if(player.isPlaying()){
-			LOG.info("MOVED PLAY TO {}", pos );
+		if (player.isPlaying()) {
+			LOG.info("MOVED PLAY TO {}", pos);
 			player.cue(ms);
 			return;
 		}
 
-		this.lineOut.addListener(this);
+		// this.lineOut.addListener(this);
 		controlFilter.setPlayer(player);
 		player.patch(decrackFilter).patch(controlFilter).patch(lineOut);
 		// REAL VERSION player.patch(lineOut);
 		player.rewind();
 		player.play();
 		player.cue(ms);
-		LOG.info("START PLAY (from sample {})", pos );
+		LOG.info("START PLAY (from sample {})", pos);
 	}
 
-	@Override
-	public void samples(float[] samp) {
-		samples(samp, samp);
-	}
+//	@Override
+//	public void samples(float[] samp) {
+//		samples(samp, samp);
+//	}
+//
+//	@Override
+//	public void samples(float[] sampL, float[] sampR) {
+//		int sample = (int) (this.documentPlayer.position() / 1_000.0 * this.getFormat().getSampleRate());
+//		if (sample > this.getNumberOfSamples() - 200) {
+//			/** Stop if we have heard all the file */
+//			this.stop();
+//		}
+//		for (AudioDocumentListener listener : listeners) {
+//			listener.audioPlayed(sample);
+//		}
+//	}
 
-	@Override
-	public void samples(float[] sampL, float[] sampR) {
-		int sample = (int)(this.documentPlayer.position() / 1_000.0 * this.getFormat().getSampleRate());
-		if( sample > this.getNumberOfSamples() - 200 ){
-			/** Stop if we have heard all the file */
-			this.stop();
-		}
-		for(AudioDocumentListener listener : listeners){
-			listener.audioPlayed(sample);
-		}
-	}
-	
 }

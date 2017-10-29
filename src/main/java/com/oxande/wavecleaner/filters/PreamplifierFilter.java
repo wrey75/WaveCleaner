@@ -91,9 +91,9 @@ public class PreamplifierFilter extends AudioFilter {
 			source[1] = buff.getSample(1, i);
 			player.pop(original);
 			
-			if( Math.abs(source[0] - original[0]) > 0.1 || Math.abs(source[1] - original[1]) > 0.1) {
-				LOG.debug("SIGNAL at {} HAS CHANGED A LOT: {} => {} (delay = {})", i, original, source, player.getDelay() );
-			}
+//			if( Math.abs(source[0] - original[0]) > 0.1 || Math.abs(source[1] - original[1]) > 0.1) {
+//				LOG.debug("SIGNAL at {} HAS CHANGED A LOT: {} => {} (delay = {})", i, original, source, player.getDelay() );
+//			}
 
 			switch( mode ){
 			case NORMAL:
