@@ -24,6 +24,10 @@ import ddf.minim.Minim;
  */
 public class AudioCache implements AutoCloseable {
 	private static Logger LOG = LogFactory.getLog(AudioCache.class);
+	
+	public static final String PREFIX = "wcleaner-";
+	public static final String SUFFIX = ".dat";
+	
     private int lastSample = 0;
     private int bufferSize = 1024;
     private MappedByteBuffer buffer;
@@ -36,7 +40,7 @@ public class AudioCache implements AutoCloseable {
         this.lastSample = (numberOfChunks+1) * sampleSize;
 
         // Create file object
-        file = File.createTempFile("wave", ".dat", null);
+        file = File.createTempFile(PREFIX, SUFFIX);
         LOG.info("Temporary file '{}' created.", file.getAbsoluteFile());
 
         //Delete the file; we will create a new file

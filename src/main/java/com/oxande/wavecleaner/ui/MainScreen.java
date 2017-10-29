@@ -1,6 +1,10 @@
 package com.oxande.wavecleaner.ui;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -77,9 +81,33 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 	    int returnVal = chooser.showOpenDialog(this);
 	    if(returnVal == JFileChooser.APPROVE_OPTION) {
 	    	String name = chooser.getSelectedFile().getAbsolutePath();
-	    	this.app.loadSoundFile(name);
+	    	this.loadSoundFile(name);
 	    }
 	}
+	
+
+	/**
+	 * Load the file sound specified.
+	 * 
+	 * @param name the file to load
+	 */
+	public void loadSoundFile( String name ){
+		File f = new File(name);
+		if(f.exists()){
+			try {
+				AudioDocument audio = new AudioDocument(this.app, f);
+				this.setWaveForm(audio);
+				this.setTitle(f.getName() + " | " + WaveCleaner.TITLE );
+			}
+			catch(IOException ex){
+				JOptionPane.showMessageDialog(this, "Can not load the file " + name, ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		else {
+			JOptionPane.showMessageDialog(this, "File " + name, "File does not exists", JOptionPane.WARNING_MESSAGE);
+		}
+	}
+
 	
 	@Override
 	public void onPlayPause(){

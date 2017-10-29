@@ -9,6 +9,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.wavecleaner.audio.AudioCache;
 import com.oxande.wavecleaner.audio.AudioDocument;
 import com.oxande.wavecleaner.ui.MainScreen;
 import com.oxande.wavecleaner.util.ProcessingLegacy;
@@ -19,127 +20,49 @@ import ddf.minim.AudioOutput;
 import ddf.minim.AudioRecorder;
 import ddf.minim.AudioSample;
 import ddf.minim.Minim;
+import ddf.minim.spi.AudioRecordingStream;
 
 public class WaveCleaner {
-	public static final String SOFTWARE_ID = "waveclean"; 
+	public static final String TITLE = "Wavecleaner"; 
 	public static String workingDir = ".";
 	
 	private static Logger LOG = LogFactory.getLog(WaveCleaner.class);
 	private MainScreen mainFrame;
 	public Minim minim;
+	protected File userDir = null;
+	protected File tempDir = null;
+	
 	
 	/**
-	 * Looking for a working directory
+	 * Looking for the user directory.
 	 * 
 	 * @return the working directory
 	 */
-	protected File lookingForWorkingDirectory(){
-		File workingDir = new File(".");
-		String value = System.getenv( (SOFTWARE_ID + "_data").toUpperCase() );
-		if(value == null){
-			String homeDir = System.getProperty("home.dir");
-			File f = new File(homeDir);
-			if( !f.exists() ){
-				JOptionPane.showMessageDialog(null, "No user directory specified!");
-				f = new File(".");
-			}
-			String workingDirName = f.getAbsolutePath() + File.pathSeparator + SOFTWARE_ID.toLowerCase();
-			workingDir = new File(workingDirName);
-			if(!workingDir.exists()){
-				workingDir.mkdirs();
-			}
+	protected String lookingForUserDirectory(){
+		String userHome = System.getProperty("user.home");
+		if( userHome != null ){
+			LOG.info("User directory set from 'user.home'" );
+			return userHome;
 		}
-		return workingDir;
+		
+		String homePath = System.getenv("HOMEPATH");
+		if( homePath != null ){
+			LOG.info("User directory set from HOMEDRIVE/PATH." );
+			String homeDrive = System.getenv("HOMEDRIVE");
+			String homeShare = System.getenv("HOMESHARE");
+			return (homeDrive == null ? homeShare : homeDrive) + homePath;
+		}
+		
+		String home = System.getenv("HOME");
+		if( home != null ){
+			return home;
+		}
+		
+		return ".";
 	}
 
 	public static void main(String[] args) {
 		LOG.debug("Program started.");
-		
-		
-		/*
-		//AudioFormat(float sampleRate, int sampleSizeInBits,
-		// int channels, boolean signed, boolean bigEndian)
-
-		AudioFormat audioFormat = new AudioFormat(48000,16,2,true,true);
-
-		DataLine.Info info = new DataLine.Info(TargetDataLine.class, audioFormat);
-		if (!AudioSystem.isLineSupported(info)) {
-		  System.err.println("Audio Format specified is not supported");
-		  return;
-		}
-
-		// On récupère le DataLine adéquat
-		TargetDataLine line;
-		try {
-			Line.Info[] infos = AudioSystem.getTargetLineInfo(info);
-			for(int j = 0; j < infos.length; j++ ){
-				System.out.println(infos[j].getLineClass());
-			}
-			
-			line = (TargetDataLine) AudioSystem.  getLine(info);
-			System.out.println("LINE = " + line);
-		} catch (LineUnavailableException e) { 
-		  e.printStackTrace();
-		  return;
-		}
-
-
-		try {
-			line.open();
-		} catch (LineUnavailableException e1) {
-		e1.printStackTrace();
-		return;
-		}
-
-
-			line.start();
-
-		 AudioFileFormat.Type targetType = AudioFileFormat.Type.WAVE;
-		 AudioInputStream audioInputStream = new AudioInputStream(line);
-		 try {
-		   OutputStream file = new FileOutputStream("/Users/wrey/sound.wav");
-		AudioSystem.write(audioInputStream,targetType, file );
-		 } catch (IOException e1) {
-		    e1.printStackTrace();
-		 } finally {
-		    line.close();
-		    try {
-		       audioInputStream.close();
-		    } catch (IOException e) {
-		       e.printStackTrace();
-		    }
-		 }
-		/*
-		Mixer.Info[] mixers = AudioSystem.getMixerInfo();
-		List<Line.Info> availableLines = new ArrayList<>();
-		for (Mixer.Info mixerInfo : mixers){
-		    System.out.println("\nFound Mixer: " + mixerInfo );
-
-		    Mixer m = AudioSystem.getMixer(mixerInfo);
-
-		    Line.Info[] lines = m.getTargetLineInfo();
-
-		    for (Line.Info li : lines){
-		    	if( li.matches(Port.Info.LINE_IN)){
-		    		System.out.println(">> SUPPORT LINE-IN");
-		    	}
-		    	if( li.matches(Port.Info.MICROPHONE)){
-		    		System.out.println(">> SUPPORT MICROPHONE");
-		    	}
-		        System.out.println("Found target line: " + li);
-		        try {
-		            m.open();
-		            availableLines.add(li);                  
-		        } catch (LineUnavailableException e){
-		            System.out.println("Line unavailable.");
-		        }
-		    }  
-		}
-
-		System.out.println("Available lines: " + availableLines);
-
-		System.exit(0);
-				*/
 		
 		// For Mac users!
         System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -152,19 +75,47 @@ public class WaveCleaner {
         
 		WaveCleaner app = new WaveCleaner();
 		app.start();
+		app.cleanUp();
 		for( int i = 0; i < args.length; i++ ){
 			if(args[i].charAt(0) == '-'){
 				switch( args[i].charAt(1) ){
 				case 's' :
 					// Load the sound file
-					app.loadSoundFile( args[++i]);
+					app.mainFrame.loadSoundFile(args[++i]);
 					break;
-					
 				}
 			}
 		}
-
-
+	}
+	
+	
+	/**
+	 * load the file stream.
+	 * 
+	 * @param f the file to load
+	 * @return the stream loaded.
+	 */
+	public AudioRecordingStream loadFileStream(File f){
+		String filename = f.getAbsolutePath();
+		AudioRecordingStream stream = this.minim.loadFileStream(filename);
+		return stream;
+	}
+	
+	/**
+	 * Check for old temporary files created by other instances. If found, they are deleted.
+	 * Note the deletion works only if the file is not locked (then 2 instances can run 
+	 * simultaneously)
+	 *  
+	 */
+	protected void cleanUp(){
+		File files[] = tempDir.listFiles();
+		for(File f : files){
+			String name = f.getName();
+			if( name.startsWith(AudioCache.PREFIX) && name.endsWith(AudioCache.SUFFIX)){
+				boolean success = f.delete();
+				LOG.info("Deletion of {} has {}.", f, (success ? "SUCCEED" : "FAILED"));
+			}
+		}
 	}
 	
 	public AudioSample getAudioSample( File f ){
@@ -172,22 +123,6 @@ public class WaveCleaner {
 		return minim.loadSample(name);
 	}
 	
-	public void loadSoundFile( String name ){
-		File f = new File(name);
-		if(f.exists()){
-			try {
-				AudioDocument audio = new AudioDocument(minim, f);
-				mainFrame.setWaveForm(audio);
-			}
-			catch(IOException ex){
-				JOptionPane.showMessageDialog(this.mainFrame, "Can not load the file " + name, ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
-			}
-		}
-		else {
-			JOptionPane.showMessageDialog(this.mainFrame, "File " + name, "File does not exists", JOptionPane.WARNING_MESSAGE);
-		}
-	}
-
 	/**
 	 * Terminates the application
 	 */
@@ -195,7 +130,13 @@ public class WaveCleaner {
 		minim.dispose();
 	}
 	
+	/**
+	 * Starts the program
+	 */
 	public void start(){
+		this.userDir = new File( lookingForUserDirectory() );
+		this.tempDir = new File( System.getProperty("java.io.tmpdir") );
+		
 		// Initialize the main screen
 		mainFrame = new MainScreen();
 		minim = new Minim(new ProcessingLegacy());

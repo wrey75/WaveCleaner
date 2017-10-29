@@ -8,6 +8,7 @@ import javax.sound.sampled.AudioFormat;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.WaveCleaner;
 import com.oxande.wavecleaner.filters.AudioDocumentPlayer;
 import com.oxande.wavecleaner.filters.AudioPlayerListener;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
@@ -114,7 +115,7 @@ public class AudioDocument /*implements AudioListener*/ {
 	 *            the file
 	 * @throws IOException
 	 */
-	public AudioDocument(Minim minim, File f) throws IOException {
+	public AudioDocument(WaveCleaner app, File f) throws IOException {
 		this.fileName = f.getAbsolutePath();
 		// construct a new MultiChannelBuffer with 2 channels and 1024 sample
 		// frames.
@@ -129,7 +130,7 @@ public class AudioDocument /*implements AudioListener*/ {
 		// the file. if the file doesn't exist, or there is some other problen
 		// with
 		// loading it, the function will return 0 as the sample rate.
-		this.stream = minim.loadFileStream(f.getAbsolutePath());
+		this.stream = app.loadFileStream(f);
 		this.documentPlayer = new AudioDocumentPlayer(stream);
 		this.sampleRate = (int) this.stream.getFormat().getSampleRate();
 		switch (sampleRate) {
