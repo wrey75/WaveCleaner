@@ -1,7 +1,6 @@
 package com.oxande.xmlswing;
 
 import java.awt.BorderLayout;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,7 +13,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.plaf.PanelUI;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -180,7 +178,7 @@ public class UIParser {
 		main.setParams( new JavaParam( "args", "String", 1) );
 		main.addCode( jclass.getClassName() + " appl = new " + jclass.getClassName() + "();" );
 		main.addCall( "appl." + initMethod.getName() );
-		main.addCall( "appl.setDefaultCloseOperation", JFrame.class.getName() + ".EXIT_ON_CLOSE" );
+		main.addCall( "appl.setDefaultCloseOperation", "DISPOSE_ON_CLOSE" );
 		main.addCall( "appl.setVisible", JavaCode.toParam(true) );
 		jclass.addMethod( main );
 		

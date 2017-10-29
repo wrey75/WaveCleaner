@@ -2,14 +2,13 @@ package com.oxande.xmlswing.components;
 
 import javax.swing.JMenuItem;
 
-
 import org.w3c.dom.Element;
 
 import com.oxande.xmlswing.AttributeDefinition;
+import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.Parser;
 import com.oxande.xmlswing.UnexpectedTag;
-import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaMethod;
 
@@ -37,7 +36,7 @@ public class JMenuItemUI extends AbstractButtonUI {
 		CONTROLLER.addToMethod(initMethod, root, varName);
 		addTextAndMnemonic(root, initMethod, varName);
 		addSpecifics(jclass, initMethod, root);
-		addAction(jclass,initMethod,root, true);
+		// addAction(jclass,initMethod,root, true);
 		return varName;
 	}
 
