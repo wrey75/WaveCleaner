@@ -5,7 +5,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -130,13 +132,13 @@ public class ComponentUI implements IComponent {
 		else if( tagName.equals("iframe")){
 			component = new JInternalFrameUI(); 
 		}
-		else if( tagName.equals("select")){
+		else if( tagName.equals("select") || tagName.equals(JComboBox.class.getSimpleName())){
 			component = new JComboBoxUI(); 
 		}
 		else if( tagName.equalsIgnoreCase("JTable")){
 			component = new JTableUI(); 
 		}
-		else if( tagName.equals("radiobutton") || tagName.equals("radio")){
+		else if( tagName.equals("radiobutton") || tagName.equals("radio") || tagName.equals(JRadioButton.class.getSimpleName())){
 			component = new JRadioButtonUI(); 
 		}
 		else if( tagName.equals("checkbox")){

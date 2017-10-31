@@ -11,13 +11,12 @@ import com.oxande.wavecleaner.RMSSample;
 import com.oxande.wavecleaner.WaveCleaner;
 import com.oxande.wavecleaner.filters.AudioDocumentPlayer;
 import com.oxande.wavecleaner.filters.AudioPlayerListener;
-import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
+import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.AudioOutput;
-import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.spi.AudioRecordingStream;
 
@@ -54,7 +53,7 @@ public class AudioDocument /*implements AudioListener*/ {
 	int nbChannels = 2;
 	private int totalSamples = 0;
 	public DecrackleFilter decrackFilter = new DecrackleFilter();
-	public PreamplifierFilter controlFilter = new PreamplifierFilter(null);
+	public PreamplifierFilter preamplifer = new PreamplifierFilter(null);
 
 
 	private RMSSample[] samples = null;
@@ -275,8 +274,8 @@ public class AudioDocument /*implements AudioListener*/ {
 		this.documentPlayer.pause();
 		// lineOut.removeListener(this);
 		this.documentPlayer.unpatch(decrackFilter);
-		decrackFilter.unpatch(controlFilter);
-		controlFilter.unpatch(lineOut);
+		decrackFilter.unpatch(preamplifer);
+		preamplifer.unpatch(lineOut);
 		LOG.info("PAUSED");
 //		for (AudioDocumentListener listener : listeners) {
 //			listener.audioPaused();
@@ -303,8 +302,8 @@ public class AudioDocument /*implements AudioListener*/ {
 		}
 
 		// this.lineOut.addListener(this);
-		controlFilter.setPlayer(player);
-		player.patch(decrackFilter).patch(controlFilter).patch(lineOut);
+		preamplifer.setPlayer(player);
+		player.patch(decrackFilter).patch(preamplifer).patch(lineOut);
 		// REAL VERSION player.patch(lineOut);
 		player.rewind();
 		player.play();

@@ -5,11 +5,16 @@
 
 	<table>
 		<tr>
-			<td><label>You must have the turnable running (the disc turns) and 
-			the stylus just above the disc. Then you can start recording. </label></td>
+			<td><label><![CDATA[<html>You must have the turnable running (the disc turns) and 
+			the stylus just above the disc. Then you can start recording.</html>]]></label></td>
+		</tr>
+		<tr>
+		<td>Select your input:</td>
+		<td><JComboBox id="inputLine"></JComboBox></td>
 		</tr>
 		<tr>
 		  <td><JButton action="startRecord">START RECORDING</JButton></td>
+		  <td><JButton action="endRecord">END RECORDING</JButton></td>
 		</tr>
 	</table>
 </JDialog>

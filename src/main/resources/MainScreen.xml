@@ -30,7 +30,7 @@
 			<!-- 
 			<tree id="pathTree" vscroll="auto" hscroll="auto" />
 			 -->
-			 <component minsize="50,100" id="infos" class="AudioInfoComponent"></component>
+			 <component minsize="50,100" id="vuMeter" class="VUMeterComponent"></component>
 		</splitpane>
 
 		<splitpane  minsize="100,200" orientation="vertical" >

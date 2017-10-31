@@ -111,7 +111,6 @@ public class AudioFilter extends UGen {
 			LOG.error("Parameter '{}' unknown.", name);
 			return 0.0f;
 		}
-		LOG.debug("Parameter '{}' set to {}.", name, value);
 		p.setValue(value);
 		return p.getValue();
 	}
@@ -217,8 +216,10 @@ public class AudioFilter extends UGen {
 				LOG.warn("Parameter '{}' set to maximum {} instead of {}", name, max, v);
 				v = max;
 			}
-			LOG.debug("Parameter '{}' set to {}", name, v);
-			this.input.setLastValue(v);
+			if( v != this.input.getLastValue() ){
+				LOG.debug("Parameter '{}' set to {}", name, v);
+				this.input.setLastValue(v);
+			}
 		}
 		
 		public float getValue(){

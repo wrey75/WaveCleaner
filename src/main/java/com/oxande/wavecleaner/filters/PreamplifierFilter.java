@@ -2,6 +2,7 @@ package com.oxande.wavecleaner.filters;
 
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.wavecleaner.ui.VUMeterComponent;
 import com.oxande.wavecleaner.util.ConvertUtils;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -52,6 +53,7 @@ public class PreamplifierFilter extends AudioFilter {
 	public static final int LEFT_RIGHT = 3;
 	
 	private AudioDocumentPlayer player;
+	private VUMeterComponent vumeter = null;
 	
 	public PreamplifierFilter( AudioDocumentPlayer player){
 		super();
@@ -71,6 +73,18 @@ public class PreamplifierFilter extends AudioFilter {
 	public void setPlayer(AudioDocumentPlayer player){
 		LOG.debug("New player is now {}", player);
 		this.player = player;	
+	}
+
+	public void setVUMeter(VUMeterComponent vumeter){
+		this.vumeter = vumeter;
+		this.vumeter.setSampleRate(this.sampleRate());
+	}
+	
+	@Override
+	protected void sampleRateChanged(){
+		if( this.vumeter != null ){
+			this.vumeter.setSampleRate(this.sampleRate());
+		}
 	}
 	
 	protected void process(MultiChannelBuffer buff) {
@@ -116,6 +130,10 @@ public class PreamplifierFilter extends AudioFilter {
 			for( int ch = 0; ch < buff.getChannelCount(); ch++ ){
 				sample[ch] = sample[ch] * mValue;
 				buff.setSample(ch, i, sample[ch]);
+			}
+			
+			if( vumeter != null ){
+				vumeter.push(sample);
 			}
 		}
 	}

@@ -9,8 +9,6 @@ import java.awt.event.WindowEvent;
 import java.lang.Runnable;
 import java.lang.UnsupportedOperationException;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -48,7 +46,7 @@ public class AbstractMainScreen extends JFrame {
    private JSplitPane jsplitpane1 = new JSplitPane();
    private JSplitPane jsplitpane2 = new JSplitPane();
    protected WaveComponent instant = new WaveComponent();
-   protected AudioInfoComponent infos = new AudioInfoComponent();
+   protected VUMeterComponent vuMeter = new VUMeterComponent();
    private JSplitPane jsplitpane3 = new JSplitPane();
    protected com.oxande.wavecleaner.ui.WaveFormComponent song = new com.oxande.wavecleaner.ui.WaveFormComponent();
    protected com.oxande.wavecleaner.ui.ControllerComponent controller = new com.oxande.wavecleaner.ui.ControllerComponent();
@@ -77,7 +75,6 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>Help/About</i>.
-    * Called by the menu item <i>Help/About</i>.
     */
    protected void showAboutDlg()
    {
@@ -91,7 +88,6 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>Edit/Zoom In</i>.
-    * Called by the menu item <i>Edit/Zoom In</i>.
     */
    protected void onZoomIn()
    {
@@ -99,7 +95,6 @@ private class SetStatusMessageClass implements Runnable {
    }
 
    /**
-    * Called by the menu item <i>File/Exit</i>.
     * Called by the menu item <i>File/Exit</i>.
     */
    protected void onExit()
@@ -114,7 +109,6 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>File/Record</i>.
-    * Called by the menu item <i>File/Record</i>.
     */
    protected void onRecordSound()
    {
@@ -123,7 +117,6 @@ private class SetStatusMessageClass implements Runnable {
 
    /**
     * Called by the menu item <i>File/Play/Pause</i>.
-    * Called by the menu item <i>File/Play/Pause</i>.
     */
    protected void onPlayPause()
    {
@@ -131,7 +124,6 @@ private class SetStatusMessageClass implements Runnable {
    }
 
    /**
-    * Called by the menu item <i>File/Load the music</i>.
     * Called by the menu item <i>File/Load the music</i>.
     */
    protected void onLoadSound()
@@ -148,7 +140,6 @@ private class SetStatusMessageClass implements Runnable {
    }
 
    /**
-    * Called by the menu item <i>Edit/Zoom Out</i>.
     * Called by the menu item <i>Edit/Zoom Out</i>.
     */
    protected void onZoomOut()
@@ -172,35 +163,10 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenuitem1.setAction(new AbstractAction()  {
-   {
-      putValue(Action.NAME, "Load the music");
-   }
-
-   public void actionPerformed(ActionEvent e)
-   {
-      onLoadSound();
-   }
-}
-
-);
       jmenu1.add(jmenuitem1);
       jmenuitem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke("ctrl R"));
       jmenuitem2.setText("Record");
       jmenuitem2.addActionListener(new ActionListener()  {
-
-   public void actionPerformed(ActionEvent e)
-   {
-      onRecordSound();
-   }
-}
-
-);
-      jmenuitem2.setAction(new AbstractAction()  {
-   {
-      putValue(Action.NAME, "Record");
-      putValue(Action.ACCELERATOR_KEY, jmenuitem2.getAccelerator());
-   }
 
    public void actionPerformed(ActionEvent e)
    {
@@ -221,38 +187,11 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenuitem3.setAction(new AbstractAction()  {
-   {
-      putValue(Action.NAME, "Play/Pause");
-      putValue(Action.ACCELERATOR_KEY, jmenuitem3.getAccelerator());
-   }
-
-   public void actionPerformed(ActionEvent e)
-   {
-      onPlayPause();
-   }
-}
-
-);
       jmenu1.add(jmenuitem3);
       jmenuitem4.setText("Exit");
       jmenuitem4.setMnemonic(java.awt.event.KeyEvent.VK_X);
       jmenuitem4.setDisplayedMnemonicIndex(1);
       jmenuitem4.addActionListener(new ActionListener()  {
-
-   public void actionPerformed(ActionEvent e)
-   {
-      onExit();
-   }
-}
-
-);
-      jmenuitem4.setAction(new AbstractAction()  {
-   {
-      putValue(Action.NAME, "Exit");
-      putValue(Action.MNEMONIC_KEY, java.awt.event.KeyEvent.VK_X);
-      putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, new Integer(1));
-   }
 
    public void actionPerformed(ActionEvent e)
    {
@@ -278,37 +217,11 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenuitem5.setAction(new AbstractAction()  {
-   {
-      putValue(Action.NAME, "Zoom In");
-      putValue(Action.ACCELERATOR_KEY, jmenuitem5.getAccelerator());
-   }
-
-   public void actionPerformed(ActionEvent e)
-   {
-      onZoomIn();
-   }
-}
-
-);
       jmenu2.add(jmenuitem5);
       jmenuitem6.setName("zoomOut");
       jmenuitem6.setAccelerator(javax.swing.KeyStroke.getKeyStroke("ctrl K"));
       jmenuitem6.setText("Zoom Out");
       jmenuitem6.addActionListener(new ActionListener()  {
-
-   public void actionPerformed(ActionEvent e)
-   {
-      onZoomOut();
-   }
-}
-
-);
-      jmenuitem6.setAction(new AbstractAction()  {
-   {
-      putValue(Action.NAME, "Zoom Out");
-      putValue(Action.ACCELERATOR_KEY, jmenuitem6.getAccelerator());
-   }
 
    public void actionPerformed(ActionEvent e)
    {
@@ -334,20 +247,6 @@ private class SetStatusMessageClass implements Runnable {
 }
 
 );
-      jmenuitem7.setAction(new AbstractAction()  {
-   {
-      putValue(Action.NAME, "About");
-      putValue(Action.MNEMONIC_KEY, java.awt.event.KeyEvent.VK_A);
-      putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, new Integer(0));
-   }
-
-   public void actionPerformed(ActionEvent e)
-   {
-      showAboutDlg();
-   }
-}
-
-);
       jmenu3.add(jmenuitem7);
       jmenubar1.add(jmenu3);
       this.setJMenuBar(jmenubar1);
@@ -362,7 +261,7 @@ private class SetStatusMessageClass implements Runnable {
       jsplitpane2.setOrientation(JSplitPane.VERTICAL_SPLIT);
       jsplitpane2.setDividerLocation(0.5);
       jsplitpane2.setTopComponent(instant);
-      jsplitpane2.setBottomComponent(infos);
+      jsplitpane2.setBottomComponent(vuMeter);
       jsplitpane1.setTopComponent(jsplitpane2);
       jsplitpane3.setMinimumSize(new java.awt.Dimension(100,200));
       jsplitpane3.setOrientation(JSplitPane.VERTICAL_SPLIT);

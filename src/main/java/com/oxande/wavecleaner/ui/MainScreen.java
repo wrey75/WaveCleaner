@@ -60,14 +60,16 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 		this.instant.setAudioDocument(audio);
 		this.audio.addChangedAudioListener(this);
 		this.audio.addAudioPlayerListener(this);
-		this.infos.setAudioDocument(audio);
+		// this.infos.setAudioDocument(audio);
 		
 		// Initialize the controller component
-		this.controller.setFilters(audio.decrackFilter, audio.controlFilter);
+		this.audio.preamplifer.setVUMeter(this.vuMeter);
+		this.vuMeter.setVisible(true);
+		this.controller.setFilters(audio.decrackFilter, audio.preamplifer);
 	}
 	
 	protected void onRecordSound(){
-		RecordScreen dialog = new RecordScreen();
+		RecordScreen dialog = new RecordScreen(this.app);
 		dialog.initComponents();
 	}
 	
@@ -115,6 +117,7 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 		int pos = song.getPlayHead();
 		if(this.audio.isPlaying()){
 			this.audio.stop();
+			this.vuMeter.reset();
 		}
 		else {
 			this.audio.play(pos);

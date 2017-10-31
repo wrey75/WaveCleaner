@@ -1,16 +1,13 @@
 package com.oxande.wavecleaner;
 
 import java.io.File;
-import java.io.IOException;
 
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.audio.AudioCache;
-import com.oxande.wavecleaner.audio.AudioDocument;
 import com.oxande.wavecleaner.ui.MainScreen;
 import com.oxande.wavecleaner.util.ProcessingLegacy;
 import com.oxande.wavecleaner.util.logging.LogFactory;
@@ -98,6 +95,19 @@ public class WaveCleaner {
 	public AudioRecordingStream loadFileStream(File f){
 		String filename = f.getAbsolutePath();
 		AudioRecordingStream stream = this.minim.loadFileStream(filename);
+		return stream;
+	}
+	
+	/**
+	 * Retrieve an audio recorder.
+	 * 
+	 * @param f the file to save the sound.
+	 * @param sampleRate the sample rate
+	 * @return the {@link AudioRecorder}.
+	 */
+	public AudioRecorder getAudioRecorder(File f, float sampleRate){
+		AudioInput in = this.minim.getLineIn(Minim.STEREO, (int)(sampleRate / 20), sampleRate);
+		AudioRecorder stream = minim.createRecorder(in, f.getAbsolutePath());
 		return stream;
 	}
 	

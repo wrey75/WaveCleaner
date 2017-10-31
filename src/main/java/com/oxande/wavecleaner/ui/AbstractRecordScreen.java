@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -22,7 +23,43 @@ public class AbstractRecordScreen extends JDialog {
    private JPanel jpanel1 = new JPanel();
    private JPanel jpanel2 = new JPanel();
    private JLabel jlabel1 = new JLabel();
+   private JLabel jlabel2 = new JLabel();
+   protected JComboBox inputLine = new JComboBox();
    private JButton jbutton1 = new JButton();
+   private JButton jbutton2 = new JButton();
+public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
+      private String key;
+      private String value;
+
+      public  SimpleMapEntry(java.lang.String key, java.lang.String value)
+      {
+         this.key = key;
+         this.value = value;
+      }
+
+      public String getKey()
+      {
+         return key;
+      }
+
+      public String getValue()
+      {
+         return value;
+      }
+
+      public String setValue(String value)
+      {
+         String old = this.value;
+         this.value = value.toString();
+         return old;
+      }
+
+      public String toString()
+      {
+         return this.value;
+      }
+}
+
 
    /**
     * Called by the menu item <i>START RECORDING</i>.
@@ -32,11 +69,19 @@ public class AbstractRecordScreen extends JDialog {
       JOptionPane.showMessageDialog(jbutton1, "Not implemented.",jbutton1.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
+   /**
+    * Called by the menu item <i>END RECORDING</i>.
+    */
+   protected void endRecord()
+   {
+      JOptionPane.showMessageDialog(jbutton2, "Not implemented.",jbutton2.getText(), JOptionPane.INFORMATION_MESSAGE);
+   }
+
    public static void main(String[] args)
    {
       AbstractRecordScreen appl = new AbstractRecordScreen();
       appl.initComponents();
-      appl.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+      appl.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
       appl.setVisible(true);
    }
 
@@ -47,7 +92,8 @@ public class AbstractRecordScreen extends JDialog {
       GridBagConstraints c1 = new GridBagConstraints();
       jpanel2.setLayout(layout1);
       
-      jlabel1.setText("You must have the turnable running (the disc turns) and the stylus just above the disc. Then you can start recording.");
+      jlabel1.setText("<html>You must have the turnable running (the disc turns) and \n"
+ +    "\t\t\tthe stylus just above the disc. Then you can start recording.</html>");
       c1.gridy = 0;
       c1.gridx = 0;
       c1.gridheight = 1;
@@ -57,6 +103,27 @@ public class AbstractRecordScreen extends JDialog {
       c1.weightx = 1;
       layout1.setConstraints(jlabel1, c1);
       jpanel2.add(jlabel1);
+      
+      jlabel2.setText("Select your input:");
+      c1.gridy = 1;
+      c1.gridx = 0;
+      c1.gridheight = 1;
+      c1.gridwidth = 1;
+      c1.anchor = GridBagConstraints.WEST;
+      c1.fill = GridBagConstraints.NONE;
+      c1.weightx = 1;
+      layout1.setConstraints(jlabel2, c1);
+      jpanel2.add(jlabel2);
+      
+      c1.gridy = 1;
+      c1.gridx = 1;
+      c1.gridheight = 1;
+      c1.gridwidth = 1;
+      c1.anchor = GridBagConstraints.WEST;
+      c1.fill = GridBagConstraints.NONE;
+      c1.weightx = 1;
+      layout1.setConstraints(inputLine, c1);
+      jpanel2.add(inputLine);
       
       jbutton1.addActionListener(new ActionListener()  {
 
@@ -68,7 +135,7 @@ public class AbstractRecordScreen extends JDialog {
 
 );
       jbutton1.setText("START RECORDING");
-      c1.gridy = 1;
+      c1.gridy = 2;
       c1.gridx = 0;
       c1.gridheight = 1;
       c1.gridwidth = 1;
@@ -77,6 +144,26 @@ public class AbstractRecordScreen extends JDialog {
       c1.weightx = 1;
       layout1.setConstraints(jbutton1, c1);
       jpanel2.add(jbutton1);
+      
+      jbutton2.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      endRecord();
+   }
+}
+
+);
+      jbutton2.setText("END RECORDING");
+      c1.gridy = 2;
+      c1.gridx = 1;
+      c1.gridheight = 1;
+      c1.gridwidth = 1;
+      c1.anchor = GridBagConstraints.WEST;
+      c1.fill = GridBagConstraints.NONE;
+      c1.weightx = 1;
+      layout1.setConstraints(jbutton2, c1);
+      jpanel2.add(jbutton2);
       jpanel1.add(jpanel2, BorderLayout.CENTER);
       this.setContentPane(jpanel1);
       this.pack();
