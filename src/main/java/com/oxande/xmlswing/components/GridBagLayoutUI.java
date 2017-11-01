@@ -73,7 +73,7 @@ public class GridBagLayoutUI extends JPanelUI {
 				int colspan = Parser.getIntegerAttribute(e, COLSPAN_ATTRIBUTE, 1);
 				maxRows = Math.max(maxRows, nbRows + rowspan);
 				maxCols = Math.max(maxCols, nbCols + colspan);
-				nbCols++;
+				nbCols += colspan;
 			}
 			nbRows++;
 		}
@@ -138,7 +138,7 @@ public class GridBagLayoutUI extends JPanelUI {
 				while( grid[rowNum][colNum] != 0 ){
 					// If spanned, you must jump the used parts. This
 					// is a very annoying issue for the GridBagLayout but
-					// thanks to this class to solve evrything...
+					// thanks to this class to solve everything...
 					colNum++;
 					maxColumns++;
 				}
