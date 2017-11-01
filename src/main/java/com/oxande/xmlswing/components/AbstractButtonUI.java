@@ -68,6 +68,14 @@ public class AbstractButtonUI extends JComponentUI {
 		jclazz.addStatic( JavaMethod.getCallSyntax(methodName, params));
 	}
 
+	public static void addActionListener(JavaMethod initMethod, JavaClass jclass, Element root, String varName ){
+		jclass.addImport(ActionListener.class);
+		jclass.addImport(ActionEvent.class);
+		JavaClass actionClass = new JavaClass(ActionListener.class.getName());
+		addActionListener(jclass, actionClass, root, false, varName);
+		initMethod.addCall(varName + ".addActionListener", actionClass.toParam());
+	}
+	
 	/**
 	 * Add an action listener for this button. The implementation
 	 * relies on the <i>action</i> attribute of the <i>root</i>
@@ -121,8 +129,10 @@ public class AbstractButtonUI extends JComponentUI {
 				method = new JavaMethod( actionMethod );
 				method.setReturnType( new JavaType("void", JavaType.PROTECTED ));
 				jclass.addImport(JOptionPane.class);
-				method.addCode( "JOptionPane.showMessageDialog(" + varName + ", \"Not implemented.\","
-						+ varName + ".getText(), JOptionPane.INFORMATION_MESSAGE);" );
+				if( withMessage ){
+					method.addCode( "JOptionPane.showMessageDialog(" + varName + ", \"Not implemented.\","
+							+ varName + ".getText(), JOptionPane.INFORMATION_MESSAGE);" );
+				}
 				jclass.addMethod( method );
 			}
 			performMethod.addCall(actionMethod);

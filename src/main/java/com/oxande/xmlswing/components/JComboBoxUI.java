@@ -5,10 +5,10 @@ import javax.swing.JComboBox;
 import org.w3c.dom.Element;
 
 import com.oxande.xmlswing.AttributeDefinition;
+import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.AttributesController;
 import com.oxande.xmlswing.Parser;
 import com.oxande.xmlswing.UnexpectedTag;
-import com.oxande.xmlswing.AttributeDefinition.ClassType;
 import com.oxande.xmlswing.jcode.JavaClass;
 import com.oxande.xmlswing.jcode.JavaMethod;
 
@@ -31,4 +31,7 @@ public class JComboBoxUI extends JComponentUI {
 		return varName;
 	}
 
+	public void addSpecifics(JavaClass jclass, JavaMethod initMethod, Element root) throws UnexpectedTag {
+		AbstractButtonUI.addActionListener(initMethod, jclass, root, varName);
+	}
 }
