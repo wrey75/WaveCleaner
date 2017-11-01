@@ -6,9 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 /**
- * Used by Minim for challenging processing environnement (see progressing.org).
+ * Used by Minim for challenging processing environment (see progressing.org).
  * 
- * @author wrey
+ * @author wrey75
  *
  */
 public class ProcessingLegacy {

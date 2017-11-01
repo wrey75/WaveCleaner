@@ -1,30 +1,32 @@
 package com.oxande.wavecleaner.ui;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Mixer;
-import javax.sound.sampled.Port;
-import javax.sound.sampled.TargetDataLine;
+import javax.swing.JOptionPane;
 
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.WaveCleaner;
+import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
+import ddf.minim.AudioInput;
+import ddf.minim.AudioListener;
 import ddf.minim.AudioRecorder;
 import ddf.minim.Minim;
 
-public class RecordScreen extends AbstractRecordScreen {
+/**
+ * The class which implements the recording.
+ * 
+ * @author wrey75
+ *
+ */
+@SuppressWarnings("serial")
+public class RecordScreen extends AbstractRecordScreen implements AudioListener {
 	private static Logger LOG = LogFactory.getLog(RecordScreen.class);
 	protected AudioRecorder recorder;
+	protected AudioInput lineIn;
 	protected WaveCleaner app = null;
+
+//	List<Mixer> availableMixers = new ArrayList<>();
 	
 	RecordScreen( WaveCleaner application ){
 		this.app = application;
@@ -36,75 +38,76 @@ public class RecordScreen extends AbstractRecordScreen {
 	 * 
 	 */
 	public void initComponents(){
+		Assert.isEventDispatchThread();
 		super.initComponents();
-		setModal(true);
-		File f = new File("recording.wav");
-		recorder = this.app.getAudioRecorder(f, 48000);
+
 		
-		
+		/*
 		Mixer.Info[] mixers = AudioSystem.getMixerInfo();
-		List<Line.Info> availableLines = new ArrayList<>();
+		availableMixers.clear();
 		for (Mixer.Info mixerInfo : mixers){
 		    System.out.println(mixerInfo);
 		    Mixer m = AudioSystem.getMixer(mixerInfo);
 
 		    Line.Info[] lines = m.getSourceLineInfo();
 		    for (Line.Info li : lines){
-		        System.out.println("Found target line: " + li);
+		        LOG.debug("Found target line: " + li);
 		        try {
-		            m.open();
+		            //m.open();
+		            Line line = m.getLine(li);
 		            if( li instanceof Port.Info ){
 		            	Port.Info in = (Port.Info) li;
-		            	this.inputLine.addItem( new SimpleMapEntry("" + availableLines.size(), in.getName()));
-		            	availableLines.add(li);
+		            	this.inputLine.addItem( new SimpleMapEntry("" + availableMixers.size(), in.getName()));
+		            	availableMixers.add(m);
+		            	LOG.debug("** Added {} as {}", in.getName(), m);
 		            }
+		            //m.close();
 		        } catch (LineUnavailableException e){
-		            System.out.println("Line unavailable.");
+		        	LOG.error("Line unavailable.");
 		        }
 		    }  
 		}
 		
-		for(Line.Info infoLine : availableLines ){
-			LOG.info("Target line {}: {}", infoLine.getClass(), infoLine);
+		for(Mixer infoMix : availableMixers ){
+			LOG.info("Mixer {}: {}", infoMix, infoMix.getMixerInfo().getName());
 		}
+		*/
 		
-		
-		int sampleRate = 48000;
-		int bitDepth = 16;
-		int type = Minim.STEREO;
-		int bufferSize = 4096;
-		AudioFormat format = new AudioFormat(sampleRate, bitDepth, type, true, false);
-//		TargetDataLine line = getTargetDataLine(format, bufferSize * 4);
-//		if (line != null)
-//		{
-//			return new JSAudioInput(line, bufferSize);
-//		};
-//		TargetDataLine line;
-		DataLine.Info info = new DataLine.Info(TargetDataLine.class, format); // format is an AudioFormat object
-		if (!AudioSystem.isLineSupported(info)) {
-		    // Handle the error.
-		}
-		    // Obtain and open the line.
-		try {
-			Line.Info[] infoLines = AudioSystem.getSourceLineInfo(info);
-			for(Line.Info infoLine : infoLines ){
-				LOG.info("Source line: {}", infoLine);
-			}
-			infoLines = AudioSystem.getTargetLineInfo(info);
-			for(Line.Info infoLine : infoLines ){
-				LOG.info("Target line {}: {}", infoLine.getClass(), infoLine);
-			}
-			TargetDataLine line = (TargetDataLine) AudioSystem.getLine(info);
-		    line.open(format);
-		} catch (LineUnavailableException ex) {
-		        // Handle the error.
-		    //... 
-		}
-		
-
+		mixerSelected();
 		setVisible(true);
+		setModal(true);
 	}
 
+   protected void mixerSelected()
+   {
+//	   int index = inputLine.getSelectedIndex();
+//	   if(index < availableMixers.size()){
+//		   Mixer mixer = availableMixers.get(index);
+
+		   if(lineIn != null){
+			   lineIn.removeListener(this);
+			   lineIn.close();
+		   }
+		   
+		   // get a stereo line-in: sample buffer length of 2048
+		   // default sample rate is 44100, default bit depth is 16
+		   lineIn = app.minim.getLineIn(Minim.STEREO, 2048, 48000);
+		   if( lineIn == null ){
+			   JOptionPane.showMessageDialog(this, "Can not select the selected line", "Audio error", JOptionPane.ERROR_MESSAGE);
+			   return;
+		   }
+		   // this.app.minim.setInputMixer(mixer);
+		   
+		   // create an AudioRecorder that will record from in to the filename specified.
+		   // the file will be located in the sketch's main folder.
+		   recorder = this.app.minim.createRecorder(lineIn, "myrecording.wav");
+		   lineIn.addListener(this);
+		   lineIn.toString();
+		   lineIn.getFormat();
+		   // lineIn.enableMonitoring();
+//	   }
+   }
+   
 	protected void startRecord(){
 		recorder.beginRecord();
 	}
@@ -112,5 +115,17 @@ public class RecordScreen extends AbstractRecordScreen {
 	protected void endRecord(){
 		recorder.endRecord();
 		recorder.save();
+	}
+
+
+	@Override
+	public void samples(float[] samp) {
+		samples(samp, samp);
+	}
+
+
+	@Override
+	public void samples(float[] sampL, float[] sampR) {
+		fastWave.update(sampL, sampR);
 	}
 }

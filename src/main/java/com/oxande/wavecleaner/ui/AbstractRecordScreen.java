@@ -23,6 +23,7 @@ public class AbstractRecordScreen extends JDialog {
    private JPanel jpanel1 = new JPanel();
    private JPanel jpanel2 = new JPanel();
    private JLabel jlabel1 = new JLabel();
+   protected RealtimeWaveComponent fastWave = new RealtimeWaveComponent();
    private JLabel jlabel2 = new JLabel();
    protected JComboBox inputLine = new JComboBox();
    private JButton jbutton1 = new JButton();
@@ -77,6 +78,13 @@ public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
       JOptionPane.showMessageDialog(jbutton2, "Not implemented.",jbutton2.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
+   /**
+    * Called by the menu item <i></i>.
+    */
+   protected void mixerSelected()
+   {
+   }
+
    public static void main(String[] args)
    {
       AbstractRecordScreen appl = new AbstractRecordScreen();
@@ -92,17 +100,26 @@ public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
       GridBagConstraints c1 = new GridBagConstraints();
       jpanel2.setLayout(layout1);
       
-      jlabel1.setText("<html>You must have the turnable running (the disc turns) and \n"
- +    "\t\t\tthe stylus just above the disc. Then you can start recording.</html>");
+      jlabel1.setText("You must have the turnable running (the disc turns) and the stylus just above the disc. Then you can start recording.");
       c1.gridy = 0;
       c1.gridx = 0;
       c1.gridheight = 1;
+      c1.gridwidth = 2;
+      c1.anchor = GridBagConstraints.WEST;
+      c1.fill = GridBagConstraints.NONE;
+      c1.weightx = 2;
+      layout1.setConstraints(jlabel1, c1);
+      jpanel2.add(jlabel1);
+      
+      c1.gridy = 0;
+      c1.gridx = 2;
+      c1.gridheight = 3;
       c1.gridwidth = 1;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
       c1.weightx = 1;
-      layout1.setConstraints(jlabel1, c1);
-      jpanel2.add(jlabel1);
+      layout1.setConstraints(fastWave, c1);
+      jpanel2.add(fastWave);
       
       jlabel2.setText("Select your input:");
       c1.gridy = 1;
@@ -115,6 +132,15 @@ public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
       layout1.setConstraints(jlabel2, c1);
       jpanel2.add(jlabel2);
       
+      inputLine.addActionListener(new ActionListener()  {
+
+   public void actionPerformed(ActionEvent e)
+   {
+      mixerSelected();
+   }
+}
+
+);
       c1.gridy = 1;
       c1.gridx = 1;
       c1.gridheight = 1;

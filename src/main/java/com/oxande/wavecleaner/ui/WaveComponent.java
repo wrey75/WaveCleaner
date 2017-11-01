@@ -29,6 +29,9 @@ import ddf.minim.analysis.FFT;
  */
 @SuppressWarnings("serial")
 public class WaveComponent extends JComponent {
+	public static final Color LEFT_COLOR = new Color(46, 204, 113);
+	public static final Color RIGHT_COLOR = new Color(26, 188, 156);
+	
 	static public final int AUTO_MODE = 0;
 	static public final int WAVE_MODE = 1;
 	static public final int CHUNK_MODE = 2;
@@ -51,8 +54,8 @@ public class WaveComponent extends JComponent {
 	// Colors to be used. Note alpha must NOT be set
 	// for Windows (because the platform is too lengthly
 	// for repainting).
-	private Color rightColor = new Color(26, 188, 156);
-	private Color leftColor = new Color(46, 204, 113);
+	protected Color rightColor = RIGHT_COLOR;
+	protected Color leftColor = LEFT_COLOR;
 	private Color peakColor = new Color(52, 152, 219).brighter();
 	private Color rmsColor = new Color(41, 128, 185);
 	private Color backgroundColor = new Color(44, 62, 80).darker();
@@ -204,7 +207,7 @@ public class WaveComponent extends JComponent {
 		}
 	}
 
-	private void drawWave(Graphics g, int first, int last){
+	protected void drawWave(Graphics g, int first, int last){
 		int chunkSize = audio.getChunkSize();
 		Rectangle rect = g.getClipBounds();
 		double factor = rect.getWidth() / (last - first);

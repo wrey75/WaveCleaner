@@ -68,10 +68,14 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 		this.controller.setFilters(audio.decrackFilter, audio.preamplifer);
 	}
 	
-//	protected void onRecordSound(){
-//		RecordScreen dialog = new RecordScreen(this.app);
-//		dialog.initComponents();
-//	}
+	/**
+	 * A record has been requested.
+	 * 
+	 */
+	public void onRecordSound(){
+		RecordScreen dialog = new RecordScreen(this.app);
+		dialog.initComponents();
+	}
 	
 	/**
 	 * Load the sound file

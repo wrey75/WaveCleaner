@@ -2,6 +2,8 @@ package com.oxande.wavecleaner.util;
 
 import java.util.Objects;
 
+import javax.swing.SwingUtilities;
+
 /**
  * To do some checks.
  * 
@@ -12,6 +14,12 @@ final public class Assert {
 	public final static void isTrue( boolean value ){
 		if(!value){
 			throw new IllegalArgumentException("Expected value is false.");
+		}
+	}
+
+	public final static void isEventDispatchThread(){
+		if(!SwingUtilities.isEventDispatchThread()){
+			throw new IllegalStateException("You must run this in the AWT Thread.");
 		}
 	}
 	

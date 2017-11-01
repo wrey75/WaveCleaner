@@ -5,16 +5,25 @@
 
 	<table>
 		<tr>
-			<td><label><![CDATA[<html>You must have the turnable running (the disc turns) and 
-			the stylus just above the disc. Then you can start recording.</html>]]></label></td>
+			<td colspan="2">
+				<label>You must have the turnable running (the disc turns) and 
+			the stylus just above the disc. Then you can start recording.</label>
+			</td>
+			<td rowspan="3" fill="both"><component id="fastWave" class="RealtimeWaveComponent"></component></td>
 		</tr>
 		<tr>
-		<td>Select your input:</td>
-		<td><JComboBox id="inputLine"></JComboBox></td>
+			<td>Select your input:</td>
+			<td>
+				<JComboBox action="mixerSelected" id="inputLine"></JComboBox>
+			</td>
 		</tr>
 		<tr>
-		  <td><JButton action="startRecord">START RECORDING</JButton></td>
-		  <td><JButton action="endRecord">END RECORDING</JButton></td>
+			<td>
+				<JButton action="startRecord">START RECORDING</JButton>
+			</td>
+			<td>
+				<JButton action="endRecord">END RECORDING</JButton>
+			</td>
 		</tr>
 	</table>
 </JDialog>
