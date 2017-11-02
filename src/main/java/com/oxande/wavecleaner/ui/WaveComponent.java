@@ -69,6 +69,8 @@ public class WaveComponent extends JComponent {
 		this.setPreferredSize(new Dimension(100, 200));
 	}
 	
+	
+	
 	/**
 	 * Clear the current selection.
 	 * 

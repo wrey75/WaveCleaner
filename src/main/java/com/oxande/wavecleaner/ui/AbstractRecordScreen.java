@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,49 +24,17 @@ public class AbstractRecordScreen extends JDialog {
    private JLabel jlabel1 = new JLabel();
    protected RealtimeWaveComponent fastWave = new RealtimeWaveComponent();
    private JLabel jlabel2 = new JLabel();
-   protected JComboBox inputLine = new JComboBox();
-   private JButton jbutton1 = new JButton();
-   private JButton jbutton2 = new JButton();
-public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
-      private String key;
-      private String value;
-
-      public  SimpleMapEntry(java.lang.String key, java.lang.String value)
-      {
-         this.key = key;
-         this.value = value;
-      }
-
-      public String getKey()
-      {
-         return key;
-      }
-
-      public String getValue()
-      {
-         return value;
-      }
-
-      public String setValue(String value)
-      {
-         String old = this.value;
-         this.value = value.toString();
-         return old;
-      }
-
-      public String toString()
-      {
-         return this.value;
-      }
-}
-
+   private JLabel jlabel3 = new JLabel();
+   private JLabel jlabel4 = new JLabel();
+   protected JButton recStart = new JButton();
+   protected JButton recStop = new JButton();
 
    /**
     * Called by the menu item <i>START RECORDING</i>.
     */
    protected void startRecord()
    {
-      JOptionPane.showMessageDialog(jbutton1, "Not implemented.",jbutton1.getText(), JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(recStart, "Not implemented.",recStart.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    /**
@@ -75,14 +42,7 @@ public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
     */
    protected void endRecord()
    {
-      JOptionPane.showMessageDialog(jbutton2, "Not implemented.",jbutton2.getText(), JOptionPane.INFORMATION_MESSAGE);
-   }
-
-   /**
-    * Called by the menu item <i></i>.
-    */
-   protected void mixerSelected()
-   {
+      JOptionPane.showMessageDialog(recStop, "Not implemented.",recStop.getText(), JOptionPane.INFORMATION_MESSAGE);
    }
 
    public static void main(String[] args)
@@ -121,37 +81,41 @@ public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
       layout1.setConstraints(fastWave, c1);
       jpanel2.add(fastWave);
       
-      jlabel2.setText("Select your input:");
+      jlabel2.setText("Due to a technical limitation of your sound library, you must select your input directly through your operating system bef"
+ +    "ore starting the program. Please refer to the documentation of the project.");
       c1.gridy = 1;
+      c1.gridx = 0;
+      c1.gridheight = 1;
+      c1.gridwidth = 2;
+      c1.anchor = GridBagConstraints.WEST;
+      c1.fill = GridBagConstraints.NONE;
+      c1.weightx = 2;
+      layout1.setConstraints(jlabel2, c1);
+      jpanel2.add(jlabel2);
+      
+      jlabel3.setText("Follow your recording on the left.");
+      c1.gridy = 2;
       c1.gridx = 0;
       c1.gridheight = 1;
       c1.gridwidth = 1;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
       c1.weightx = 1;
-      layout1.setConstraints(jlabel2, c1);
-      jpanel2.add(jlabel2);
+      layout1.setConstraints(jlabel3, c1);
+      jpanel2.add(jlabel3);
       
-      inputLine.addActionListener(new ActionListener()  {
-
-   public void actionPerformed(ActionEvent e)
-   {
-      mixerSelected();
-   }
-}
-
-);
-      c1.gridy = 1;
+      jlabel4.setText("TODO: The record will be saved as \"noname.wav\" until you save the project.");
+      c1.gridy = 2;
       c1.gridx = 1;
       c1.gridheight = 1;
       c1.gridwidth = 1;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
       c1.weightx = 1;
-      layout1.setConstraints(inputLine, c1);
-      jpanel2.add(inputLine);
+      layout1.setConstraints(jlabel4, c1);
+      jpanel2.add(jlabel4);
       
-      jbutton1.addActionListener(new ActionListener()  {
+      recStart.addActionListener(new ActionListener()  {
 
    public void actionPerformed(ActionEvent e)
    {
@@ -160,18 +124,18 @@ public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
 }
 
 );
-      jbutton1.setText("START RECORDING");
-      c1.gridy = 2;
+      recStart.setText("START RECORDING");
+      c1.gridy = 3;
       c1.gridx = 0;
       c1.gridheight = 1;
       c1.gridwidth = 1;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
       c1.weightx = 1;
-      layout1.setConstraints(jbutton1, c1);
-      jpanel2.add(jbutton1);
+      layout1.setConstraints(recStart, c1);
+      jpanel2.add(recStart);
       
-      jbutton2.addActionListener(new ActionListener()  {
+      recStop.addActionListener(new ActionListener()  {
 
    public void actionPerformed(ActionEvent e)
    {
@@ -180,16 +144,16 @@ public class SimpleMapEntry implements java.util.Map.Entry<String,String> {
 }
 
 );
-      jbutton2.setText("END RECORDING");
-      c1.gridy = 2;
+      recStop.setText("END RECORDING");
+      c1.gridy = 3;
       c1.gridx = 1;
       c1.gridheight = 1;
       c1.gridwidth = 1;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
       c1.weightx = 1;
-      layout1.setConstraints(jbutton2, c1);
-      jpanel2.add(jbutton2);
+      layout1.setConstraints(recStop, c1);
+      jpanel2.add(recStop);
       jpanel1.add(jpanel2, BorderLayout.CENTER);
       this.setContentPane(jpanel1);
       this.pack();

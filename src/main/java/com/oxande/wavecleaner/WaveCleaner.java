@@ -1,6 +1,7 @@
 package com.oxande.wavecleaner;
 
 import java.io.File;
+import java.util.Arrays;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -18,6 +19,7 @@ import ddf.minim.AudioOutput;
 import ddf.minim.AudioRecorder;
 import ddf.minim.AudioSample;
 import ddf.minim.Minim;
+import ddf.minim.Recordable;
 import ddf.minim.spi.AudioRecordingStream;
 
 public class WaveCleaner {
@@ -25,11 +27,29 @@ public class WaveCleaner {
 	public static String workingDir = ".";
 	
 	private static Logger LOG = LogFactory.getLog(WaveCleaner.class);
+	private static WaveCleaner application;
 	private MainScreen mainFrame;
 	public Minim minim;
 	protected File userDir = null;
 	protected File tempDir = null;
 	
+	private WaveCleaner(){
+		if( WaveCleaner.application != null ){
+			throw new IllegalStateException("The application is ALREADY created!");
+		}
+	}
+	
+	/**
+	 * Get the application instance.
+	 * 
+	 * @return the application instance.
+	 */
+	public static final WaveCleaner getApplication(){
+		if( application == null ){
+			throw new IllegalStateException("The application MUST be created at this point.");
+		}
+		return application;
+	}
 	
 	/**
 	 * Looking for the user directory.
@@ -71,20 +91,20 @@ public class WaveCleaner {
 			System.err.println("Does not support the native look and feel");
 		}
         
-		WaveCleaner app = new WaveCleaner();
-		app.start();
-		app.cleanUp();
+        application = new WaveCleaner();
+        application.start();
+		application.cleanUp();
 		for( int i = 0; i < args.length; i++ ){
 			if(args[i].charAt(0) == '-'){
 				switch( args[i].charAt(1) ){
 				case 's' :
 					// Load the sound file
-					app.mainFrame.loadSoundFile(args[++i]);
+					application.mainFrame.loadSoundFile(args[++i]);
 					break;
 				
 				case 'r' :
 					SwingUtilities.invokeLater(() -> {
-						app.mainFrame.onRecordSound();					
+						application.mainFrame.onRecordSound();					
 					});
 					break;
 				}
@@ -160,9 +180,30 @@ public class WaveCleaner {
 		mainFrame.init(this);
 	}
 
-		
+	public AudioInput getLineIn(float sampleRate, int bufferSize){
+		AudioInput input = this.minim.getLineIn(Minim.STEREO, bufferSize, sampleRate);
+		return input;
+	}
+	
 	public AudioOutput getLineOut(){
 		return this.minim.getLineOut(Minim.STEREO);
+	}
+
+	public String fixAudioFilename(String filename ){
+		// Add an extension if necessary
+		String extension = "";
+		if( filename.indexOf(".") >= 0 ){
+			extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+		}
+		if( !Arrays.asList(".wav", ".aiff").contains(extension) ){
+			filename += ".wav"; 
+		}
+		
+		return filename;
+	}
+	
+	public AudioRecorder createRecorder(AudioInput source, String filename){
+		return this.minim.createRecorder(source, filename);
 	}
 
 }

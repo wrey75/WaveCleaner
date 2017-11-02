@@ -3,6 +3,7 @@ package com.oxande.wavecleaner.util;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -10,10 +11,8 @@ import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.Logger;
 
-import com.oxande.wavecleaner.audio.AudioChangedListener;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
-import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicInteger;
 
 public class ListenerManager<T extends EventListener> {
 	private static Logger LOG = LogFactory.getLog(ListenerManager.class);
@@ -26,9 +25,10 @@ public class ListenerManager<T extends EventListener> {
 	 */
 	private static class ListenerInfo<T extends EventListener>  {
 		
-		AtomicInteger calls = new AtomicInteger(0);
+		AtomicInteger mutex = new AtomicInteger(0);
 		T listener;
 		int skipped = 0;
+		int calls = 0;
 		
 		public ListenerInfo(T listener){
 			this.listener = listener;
@@ -36,27 +36,35 @@ public class ListenerManager<T extends EventListener> {
 		
 		
 		/**
-		 * We invoke the listener if possible.
+		 * We invoke the listener but only if a call is not already
+		 * in the queue. This avoid multiple calls. Note only the
+		 * first call is, in this case, used. The other calls are
+		 * dimissed.
 		 * 
 		 * @param val the value for invocation.
 		 */
 		public void invoke(Consumer<T> fnct){
-			if( calls.getAndIncrement() < 1 ){
+			calls++;
+			if( mutex.getAndIncrement() < 1 ){
 				// We can run the code in the SWING thread...
 				// the value is now "1" (means: waiting)
 				// we boost once  
-				calls.incrementAndGet();
+				mutex.incrementAndGet();
 				SwingUtilities.invokeLater( () -> {
 					// LOG.debug("invoked.");
 					fnct.accept(this.listener);
-					calls.decrementAndGet();
+					mutex.decrementAndGet();
 				});
 			}
 			else {
 				// for debugging purposes
 				skipped++;
+				if( skipped % 1000 == 0 ){
+					int ratio = (int)(100.0 * (calls - skipped) / calls);
+					LOG.debug("Listener {} called {} times ({}%).", this.listener.getClass().getSimpleName(), (calls - skipped), ratio);
+				}
 			}
-			calls.decrementAndGet();
+			mutex.decrementAndGet();
 		}
 		
 		T getListener(){

@@ -6,23 +6,32 @@
 	<table>
 		<tr>
 			<td colspan="2">
-				<label>You must have the turnable running (the disc turns) and 
-			the stylus just above the disc. Then you can start recording.</label>
+				<label>You must have the turnable running (the disc turns) and
+					the stylus just above the disc. Then you can start recording.
+				</label>
 			</td>
-			<td rowspan="3" fill="both"><component id="fastWave" class="RealtimeWaveComponent"></component></td>
-		</tr>
-		<tr>
-			<td>Select your input:</td>
-			<td>
-				<JComboBox action="mixerSelected" id="inputLine"></JComboBox>
+			<td rowspan="3" fill="both">
+				<component id="fastWave" class="RealtimeWaveComponent"></component>
 			</td>
 		</tr>
 		<tr>
+			<td colspan="2">
+				Due to a technical limitation of your sound library,
+				you must select your input directly through your operating system
+				before starting the program.
+				Please refer to the documentation of the project.
+			</td>
+		</tr>
+		<tr>
+			<td>Follow your recording on the left.</td>
+			<td>TODO: The record will be saved as "noname.wav" until you save the project.</td>
+		</tr>
+		<tr>
 			<td>
-				<JButton action="startRecord">START RECORDING</JButton>
+				<JButton id="recStart" action="startRecord">START RECORDING</JButton>
 			</td>
 			<td>
-				<JButton action="endRecord">END RECORDING</JButton>
+				<JButton id="recStop" action="endRecord">END RECORDING</JButton>
 			</td>
 		</tr>
 	</table>
