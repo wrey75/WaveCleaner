@@ -27,6 +27,7 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 	private WaveCleaner app;
 	private AudioDocument audio;
 	private AudioOutput lineOut;
+	private File projectFile;
 	
 	public void init(WaveCleaner app) {
 		this.app = app;
