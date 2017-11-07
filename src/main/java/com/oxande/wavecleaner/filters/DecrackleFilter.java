@@ -43,7 +43,7 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  *
  */
 public class DecrackleFilter extends AudioFilter {
-	private static Logger LOG = LogFactory.getLog(DeclickerFilter.class);
+	private static Logger LOG = LogFactory.getLog(DecrackleFilter.class);
 
 	public static final String WINDOW = "window";
 	public static final String AVERAGE = "average";

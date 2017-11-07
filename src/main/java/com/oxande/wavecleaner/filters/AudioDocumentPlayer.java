@@ -1,8 +1,5 @@
 package com.oxande.wavecleaner.filters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.ui.WaveFormComponent;
@@ -100,7 +97,7 @@ public class AudioDocumentPlayer extends FilePlayer {
 		// TODO: Why no sample rate?
 		float sampleRate = 48000 /*sampleRate() */;
 		double pos = this.position() / 1000.0;
-		int sample = (int)(pos * sampleRate) + last - first;
+		int sample = (int)(pos * sampleRate) /*+ last - first*/;
 		return sample;
 	}
 
@@ -139,7 +136,9 @@ public class AudioDocumentPlayer extends FilePlayer {
 			// but helps in calling the refresh
 			first -= buffsize();
 			last -= buffsize();
-			listenerManager.publishOnce( l -> l.audioPlayed(this.playHead()));
+		}
+		if( first % 100 == 0 ){
+			listenerManager.publishOnce( l -> l.audioPlayed(this.playHead() - last + first));
 		}
 	}
 

@@ -66,6 +66,11 @@ public class AudioCache implements AutoCloseable {
         float[][] array = new float[2][];
         array[0] = new float[bufferSize];
         array[1] = new float[bufferSize];
+        
+        if( block * bufferSize > lastSample ){
+        	LOG.warn("Trying to read block {} after the end of the record.", block );
+        	return array;
+        }
 
         try {
 	        FloatBuffer fBuf = buffer.asFloatBuffer();

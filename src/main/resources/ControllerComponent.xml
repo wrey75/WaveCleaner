@@ -5,7 +5,8 @@
 	<table>
 		<tr>
 			<td rowspan="2">
-				<JCheckBox id="crackle" text="Decrackling" action="onToggleCraclking" focusable="false">Decrackle
+				<JCheckBox id="crackle" text="Decrackling" action="onToggleCrackling"
+					focusable="false">Decrackle
 				</JCheckBox>
 			</td>
 			<td fill="horizontal">
@@ -14,12 +15,12 @@
 				</JSlider>
 			</td>
 			<td fill="horizontal">
-				<JSlider minsize="100,50"  id="crackle_average" onChange="crackleAverageChanged"
+				<JSlider minsize="100,50" id="crackle_average" onChange="crackleAverageChanged"
 					minimum="0" maximum="100" orientation="horizontal" value="3">Average
 				</JSlider>
 			</td>
 			<td fill="horizontal">
-				<JSlider minsize="100,50"  id="crackle_window" onChange="crackleWindowChanged"
+				<JSlider minsize="100,50" id="crackle_window" onChange="crackleWindowChanged"
 					minimum="1" maximum="20000" orientation="horizontal" value="2000">Window
 				</JSlider>
 			</td>
@@ -36,20 +37,44 @@
 			</td>
 		</tr>
 		<tr>
-		   <td>Volume</td>
-		   <td colspan="3" fill="horizontal">
-				<JSlider minsize="100,50"  id="volume" onChange="volumeChanged"
+			<td rowspan="1">
+				<JCheckBox id="click" text="Remove clicks" action="onToggleClicks"
+					focusable="false">Remove clicks
+				</JCheckBox>
+			</td>
+			<td fill="horizontal">
+				<JSlider minsize="100,50" id="thresold_factor" onChange="clickThresoldChanged"
+					minimum="0" maximum="900" orientation="horizontal" value="200">Factor
+				</JSlider>
+			</td>
+			<td fill="horizontal">
+				<JSlider minsize="100,50" id="declick_window" onChange="clickWindowChanged"
+					minimum="0" maximum="40" orientation="horizontal" value="20">Average
+				</JSlider>
+			</td>
+			<td fill="horizontal">
+			</td>
+		</tr>
+
+		<tr>
+			<td>Volume</td>
+			<td colspan="3" fill="horizontal">
+				<JSlider minsize="100,50" id="volume" onChange="volumeChanged"
 					minimum="-24" maximum="+24" orientation="horizontal" value="0">Window
 				</JSlider>
 			</td>
 		</tr>
-				<tr>
-		   <td>OUTPUT SELECTOR</td>
-		   <td colspan="3" fill="horizontal" hgap="0">
-				<JToggleButton id="finalOutput" action="onFinalOutput" group="audioOut">NORMAL</JToggleButton>
-				<JToggleButton id="originalOutput" action="onOriginalOutput" group="audioOut">ORIGIN</JToggleButton>
-				<JToggleButton id="diffOutput" action="onDiffOutput" group="audioOut">DIFF</JToggleButton>
-				<JToggleButton id="leftRightOutput" action="onLeftRightOutput" group="audioOut">L/R</JToggleButton>
+		<tr>
+			<td>OUTPUT SELECTOR</td>
+			<td colspan="3" fill="horizontal" hgap="0">
+				<JToggleButton id="finalOutput" action="onFinalOutput"
+					group="audioOut">NORMAL</JToggleButton>
+				<JToggleButton id="originalOutput" action="onOriginalOutput"
+					group="audioOut">ORIGIN</JToggleButton>
+				<JToggleButton id="diffOutput" action="onDiffOutput"
+					group="audioOut">DIFF</JToggleButton>
+				<JToggleButton id="leftRightOutput" action="onLeftRightOutput"
+					group="audioOut">L/R</JToggleButton>
 			</td>
 		</tr>
 	</table>

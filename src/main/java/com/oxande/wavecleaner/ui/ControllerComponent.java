@@ -12,8 +12,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.filters.AudioFilter;
 import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
-import com.oxande.wavecleaner.filters.PreamplifierFilter;
+import com.oxande.wavecleaner.filters.ClickRemovalFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
+import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -22,6 +23,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
 //	BufferedImage background;
 	DecrackleFilter decrackleFilter;
+	ClickRemovalFilter clickFilter;
 	PreamplifierFilter controlFilter;
 	
 	public long samplesToMilliseconds(int nbSamples ){
@@ -35,12 +37,14 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		// The following code should be taken into account by
 		// XML4SWING...!
 		this.crackle.addItemListener(this);
+		this.click.addItemListener(this);
 	}
 	
 	protected final void refreshValues(){
 		setCrackleFactorLabel("Factor: " + decrackleFilter.getControl(DecrackleFilter.FACTOR));
 		setCrackleWindowLabel("Window: " + samplesToMilliseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + "ms.");
 		setCrackleAverageLabel("Average: " + decrackleFilter.getIntControl(DecrackleFilter.AVERAGE));
+		
 	}
 	
 	@Override
@@ -58,6 +62,18 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	@Override
 	protected void crackleAverageChanged(){
 		decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
+		refreshValues();
+	}
+	
+	@Override
+	protected void clickThresoldChanged(){
+		clickFilter.setControl(ClickRemovalFilter.THRESHOLD, thresold_factor.getValue());
+		refreshValues();
+	}
+
+	@Override
+	protected void clickWindowChanged(){
+		clickFilter.setControl(ClickRemovalFilter.WIDTH, declick_window.getValue());
 		refreshValues();
 	}
 
@@ -89,9 +105,11 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	 * @param filter1
 	 *            the {@link DecrackleFilter} filter.
 	 */
-	public void setFilters(DecrackleFilter filter1, PreamplifierFilter lastFilter) {
+	public void setFilters(DecrackleFilter filter1, ClickRemovalFilter filter2, PreamplifierFilter lastFilter) {
 		this.decrackleFilter = filter1;
 		this.crackle.setSelected(this.decrackleFilter.isEnabled());
+		this.clickFilter = filter2;
+		this.click.setSelected(this.clickFilter.isEnabled());
 		this.initValue(crackle_factor, this.decrackleFilter, DecrackleFilter.FACTOR);
 		this.initValue(crackle_window, this.decrackleFilter, DecrackleFilter.WINDOW);
 		this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
@@ -121,6 +139,9 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		if (this.crackle == e.getSource()) {
 			boolean bSelected = this.crackle.isSelected();
 			this.decrackleFilter.setEnable(bSelected);
+		} else if (this.click == e.getSource()) {
+			boolean bSelected = this.click.isSelected();
+			this.clickFilter.setEnable(bSelected);
 		} else {
 			LOG.warn("Source {} unknown.", e.getSource());
 		}

@@ -27,11 +27,16 @@ public class RegionSelected {
 		this.begin = pos;
 		this.end = pos;
 	}
+	
 	public RegionSelected(String name){
 		this( name, -1);
 	}
 	
 	public boolean isActive(){
 		return active;
+	}
+	
+	public boolean isEmpty(){
+		return (this.end - this.begin == 0);
 	}
 }

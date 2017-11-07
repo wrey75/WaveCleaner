@@ -11,6 +11,7 @@ import com.oxande.wavecleaner.RMSSample;
 import com.oxande.wavecleaner.WaveCleaner;
 import com.oxande.wavecleaner.filters.AudioDocumentPlayer;
 import com.oxande.wavecleaner.filters.AudioPlayerListener;
+import com.oxande.wavecleaner.filters.ClickRemovalFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.util.ListenerManager;
@@ -53,6 +54,7 @@ public class AudioDocument /*implements AudioListener*/ {
 	int nbChannels = 2;
 	private int totalSamples = 0;
 	public DecrackleFilter decrackFilter = new DecrackleFilter();
+	public ClickRemovalFilter clickFilter = new ClickRemovalFilter();
 	public PreamplifierFilter preamplifer = new PreamplifierFilter(null);
 
 
@@ -274,7 +276,8 @@ public class AudioDocument /*implements AudioListener*/ {
 		this.documentPlayer.pause();
 		// lineOut.removeListener(this);
 		this.documentPlayer.unpatch(decrackFilter);
-		decrackFilter.unpatch(preamplifer);
+		decrackFilter.unpatch(clickFilter);
+		clickFilter.unpatch(preamplifer);
 		preamplifer.unpatch(lineOut);
 		LOG.info("PAUSED");
 //		for (AudioDocumentListener listener : listeners) {
@@ -303,12 +306,38 @@ public class AudioDocument /*implements AudioListener*/ {
 
 		// this.lineOut.addListener(this);
 		preamplifer.setPlayer(player);
-		player.patch(decrackFilter).patch(preamplifer).patch(lineOut);
+		player.patch(decrackFilter)
+			.patch(clickFilter)
+			.patch(preamplifer)
+			.patch(lineOut);
+		
 		// REAL VERSION player.patch(lineOut);
 		player.rewind();
 		player.play();
 		player.cue(ms);
 		LOG.info("START PLAY (from sample {})", pos);
+	}
+	
+	/**
+	 * Play in loop.
+	 * 
+	 * @param first
+	 * @param last
+	 */
+	public synchronized void startLoop(int first, int last) {
+		int begMs = (int) (first * 1000.0 / this.getFormat().getSampleRate());
+		int endMs = (int) (last * 1000.0 / this.getFormat().getSampleRate());
+		AudioDocumentPlayer player = getDocumentPlayer();
+		player.setLoopPoints(begMs, endMs);
+		player.loop();
+		// player.cue(begMs);
+	}
+	
+	public synchronized void endLoop() {
+		AudioDocumentPlayer player = getDocumentPlayer();
+		if( player.isLooping() ){
+			player.play();
+		}
 	}
 
 //	@Override

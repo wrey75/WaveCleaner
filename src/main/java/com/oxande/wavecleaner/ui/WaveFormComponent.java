@@ -234,10 +234,11 @@ public class WaveFormComponent extends JPanel
 	@Override
 	public void mousePressed(MouseEvent e) {
 		this.selection = new RegionSelected("loop", sampleFrom(e.getX()));
+		this.audio.endLoop();
 		this.wave.addSelection(this.selection);
 		LOG.debug("Pressed at: {}", this.selection.begin );
 	}
-	
+
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if( this.selection == null ){
@@ -247,6 +248,13 @@ public class WaveFormComponent extends JPanel
 		LOG.debug("Dragging..");
 		this.selection.end = sampleFrom(e.getX());
 		this.repaint();
+	}
+	
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		if( !this.selection.isEmpty() ){
+			this.audio.startLoop(this.selection.begin, this.selection.end);
+		}
 	}
 
 	@Override
@@ -264,7 +272,6 @@ public class WaveFormComponent extends JPanel
 	}
 
 
-
 	@Override
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		int diff = e.getValue() - firstVisibleSample;
@@ -272,6 +279,7 @@ public class WaveFormComponent extends JPanel
 		firstVisibleSample = Math.max(0, firstVisibleSample + diff);
 		scrollTo(/* -1,-1 */);
 	}
+
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -290,6 +298,7 @@ public class WaveFormComponent extends JPanel
 		repaint();
 	}
 
+	
 	/**
 	 * Get the sample position from the x position from the visible window.
 	 * 
@@ -307,10 +316,7 @@ public class WaveFormComponent extends JPanel
 
 
 
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-	}
+
 
 	@Override
 	public void mouseEntered(MouseEvent e) {

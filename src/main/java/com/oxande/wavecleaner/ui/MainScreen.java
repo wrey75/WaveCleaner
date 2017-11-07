@@ -65,7 +65,7 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 		// Initialize the controller component
 		this.audio.preamplifer.setVUMeter(this.vuMeter);
 		this.vuMeter.setVisible(true);
-		this.controller.setFilters(audio.decrackFilter, audio.preamplifer);
+		this.controller.setFilters(audio.decrackFilter, audio.clickFilter, audio.preamplifer);
 	}
 	
 	/**
@@ -154,15 +154,23 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 	
 	@Override
 	public void audioPlayed(int sample) {
+		// LOG.info("Audio played.");
 		Assert.isTrue( SwingUtilities.isEventDispatchThread() );
 		this.song.setPlayHead(sample, true);
 		this.instant.mode = WaveComponent.WAVE_MODE;
 		this.instant.setVisibleWindow(sample, sample + audio.getChunkSize());
 		repaint();
+		if( this.audio.getNumberOfSamples() < sample ){
+			LOG.info("END OF SONG: STOP THE PLAYER");
+			this.audio.stop();
+			this.vuMeter.reset();
+		}
 	}
 
+	
 	@Override
 	public void audioPaused() {
 		// TODO - Update the "PLAY/RECORD BUTTONS"
 	}
+	
 }
