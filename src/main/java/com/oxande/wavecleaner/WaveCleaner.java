@@ -37,6 +37,8 @@ public class WaveCleaner {
 		if( WaveCleaner.application != null ){
 			throw new IllegalStateException("The application is ALREADY created!");
 		}
+
+		this.userDir = new File( lookingForUserDirectory() );
 	}
 	
 	/**
@@ -56,7 +58,7 @@ public class WaveCleaner {
 	 * 
 	 * @return the working directory
 	 */
-	protected String lookingForUserDirectory(){
+	protected static String lookingForUserDirectory(){
 		String userHome = System.getProperty("user.home");
 		if( userHome != null ){
 			LOG.info("User directory set from 'user.home'" );
@@ -94,12 +96,17 @@ public class WaveCleaner {
         application = new WaveCleaner();
         application.start();
 		application.cleanUp();
+		String userDir = lookingForUserDirectory();
 		for( int i = 0; i < args.length; i++ ){
 			if(args[i].charAt(0) == '-'){
 				switch( args[i].charAt(1) ){
 				case 's' :
 					// Load the sound file
 					application.mainFrame.loadSoundFile(args[++i]);
+					break;
+					
+				case 'u' :
+					application.userDir = new File(args[++i]);
 					break;
 				
 				case 'r' :
@@ -171,7 +178,6 @@ public class WaveCleaner {
 	 * Starts the program
 	 */
 	public void start(){
-		this.userDir = new File( lookingForUserDirectory() );
 		this.tempDir = new File( System.getProperty("java.io.tmpdir") );
 		
 		// Initialize the main screen

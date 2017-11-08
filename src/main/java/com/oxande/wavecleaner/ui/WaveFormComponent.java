@@ -108,7 +108,7 @@ public class WaveFormComponent extends JPanel
 	private int numberOfSamples = 0;
 
 	/**
-	 * Get the scroll position
+	 * Get the scroll position.
 	 * 
 	 * @return
 	 */
