@@ -159,32 +159,18 @@ public class WaveComponent extends JComponent {
 		setStroke(g, 1.0);
 		for( int j = 0; j < 2; j++){
 			float h = (float) ((rect.height * 0.01) * (j == 0 ? -1 : +1));
-//			int x_old = -100;
-//			int y_old = y_middle;
-			// g.setColor(j == 0 ? leftColor : rightColor);
-			
-			// g.setFillColor(j == 0 ? leftColor : rightColor);
 			g.setColor( colors[ 5 ]);
 			g.setColor(new Color(187, 143, 206));
 			for(int i = firstChunk; i < firstChunk + 1; i++){
 				float[][] samples = audio.getAudioSamples(i);
  				fft.forward(samples[j]);
 				for(int k = 0; k < fftSize; k++){
-					// float freq = fft.indexToFreq(k);
-//					double logFreq = Math.log(k+1);
-//					int x = (int)((logFreq - 1.0) / 5.0 * rect.getWidth());
 					int x = calculateX(k, rect.getWidth());
 					int y = (int)(fft.getBand(k) * h ) + y_middle;
 					
-					// double lineWidth = Math.max((x - x_old) / 1, 1);
-					// g.drawLine(x_old, y_old, x, y);
-					// g.setColor( colors[ Math.min(colors.length - 1, (int)(fft.getBand(k) / 5.0) )]);
 					for(int w = 0 ; w <= (k > 8 ? 1 : (10 - k)); w++){
 						g.drawLine(x + w, y_middle, x + w, y);
 					}
-					// g.drawRect(x_old, (j == 0 ? y_middle : y_middle - (int)(fft.getBand(k) * h )), x - x_old - 2, (j == 0 ? (int)(fft.getBand(k) * h ) : y_middle) );
-//					x_old = x;
-//					y_old = y;
 				}
 			}
 		}

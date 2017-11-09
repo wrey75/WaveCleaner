@@ -37,6 +37,6 @@ public class RegionSelected {
 	}
 	
 	public boolean isEmpty(){
-		return (this.end - this.begin == 0);
+		return (this.end <= this.begin);
 	}
 }
