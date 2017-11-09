@@ -140,6 +140,10 @@ public class WaveFormComponent extends JPanel
 	 *            the audio document.
 	 */
 	public void setAudioDocument(AudioDocument doc) {
+		if( this.audio != null ){
+			this.audio.stop();
+			this.audio.dispose();
+		}
 		this.audio = doc;
 		this.wave.setAudioDocument(doc);
 		updateAudio();
@@ -252,6 +256,7 @@ public class WaveFormComponent extends JPanel
 	
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		this.selection.validate();
 		if( !this.selection.isEmpty() ){
 			this.audio.startLoop(this.selection.begin, this.selection.end);
 		}

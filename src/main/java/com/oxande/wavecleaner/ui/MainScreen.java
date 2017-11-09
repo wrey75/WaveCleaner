@@ -10,6 +10,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.wavecleaner.AudioProject;
+import com.oxande.wavecleaner.ProjectListener;
 import com.oxande.wavecleaner.WaveCleaner;
 import com.oxande.wavecleaner.audio.AudioChangedListener;
 import com.oxande.wavecleaner.audio.AudioDocument;
@@ -22,16 +24,18 @@ import ddf.minim.Minim;
 
 
 @SuppressWarnings("serial")
-public class MainScreen extends AbstractMainScreen implements AudioPlayerListener, AudioChangedListener {
+public class MainScreen extends AbstractMainScreen implements AudioPlayerListener, AudioChangedListener, ProjectListener {
 	private static Logger LOG = LogFactory.getLog(MainScreen.class);
 	private WaveCleaner app;
 	private AudioDocument audio;
 	private AudioOutput lineOut;
-	private File projectFile;
+	private AudioProject project;
 	
 	public void init(WaveCleaner app) {
 		this.app = app;
 		this.lineOut = this.app.getLineOut();
+		this.project = new AudioProject();
+		this.project.addListener(this);
 		
 		// Init the components
 		initComponents();
@@ -54,6 +58,7 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 	 * @param audio
 	 */
 	public void setWaveForm( AudioDocument audio ){
+		
     	this.lineOut = this.app.minim.getLineOut(Minim.STEREO, 512, 48000f, 16);
 		audio.attachLineOut(lineOut);
     	this.audio = audio;
@@ -105,6 +110,7 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 			try {
 				AudioDocument audio = new AudioDocument(this.app, f);
 				this.setWaveForm(audio);
+				this.project.addSource(f);
 				this.setTitle(f.getName() + " | " + WaveCleaner.TITLE );
 			}
 			catch(IOException ex){

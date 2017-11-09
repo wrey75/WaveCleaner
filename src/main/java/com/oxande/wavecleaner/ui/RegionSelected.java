@@ -36,6 +36,19 @@ public class RegionSelected {
 		return active;
 	}
 	
+	/**
+	 * Validate the region by forcing the end
+	 * to be _after_ the beginning. This is very usual as the user 
+	 * will select from right to left.
+	 * 
+	 */
+	public void validate(){
+		if (this.end < this.begin){
+			int swap = this.end;
+			this.end = this.begin;
+			this.begin = swap;
+		}
+	}
 	public boolean isEmpty(){
 		return (this.end <= this.begin);
 	}

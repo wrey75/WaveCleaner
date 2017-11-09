@@ -357,4 +357,7 @@ public class AudioDocument /*implements AudioListener*/ {
 //		}
 //	}
 
+	public void dispose(){
+		// When we detach the audio
+	}
 }
