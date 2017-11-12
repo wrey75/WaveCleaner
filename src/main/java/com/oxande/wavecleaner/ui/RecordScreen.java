@@ -13,7 +13,6 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 import ddf.minim.AudioInput;
 import ddf.minim.AudioListener;
 import ddf.minim.AudioRecorder;
-import ddf.minim.Minim;
 
 /**
  * The class which implements the recording.
@@ -23,6 +22,7 @@ import ddf.minim.Minim;
  */
 @SuppressWarnings("serial")
 public class RecordScreen extends AbstractRecordScreen implements AudioListener {
+	@SuppressWarnings("unused")
 	private static Logger LOG = LogFactory.getLog(RecordScreen.class);
 	protected AudioRecorder recorder;
 	protected AudioInput lineIn;

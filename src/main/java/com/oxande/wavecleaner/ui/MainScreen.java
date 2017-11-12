@@ -22,21 +22,21 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
 
-
 @SuppressWarnings("serial")
-public class MainScreen extends AbstractMainScreen implements AudioPlayerListener, AudioChangedListener, ProjectListener {
+public class MainScreen extends AbstractMainScreen
+		implements AudioPlayerListener, AudioChangedListener, ProjectListener {
 	private static Logger LOG = LogFactory.getLog(MainScreen.class);
 	private WaveCleaner app;
 	private AudioDocument audio;
 	private AudioOutput lineOut;
 	private AudioProject project;
-	
+
 	public void init(WaveCleaner app) {
 		this.app = app;
 		this.lineOut = this.app.getLineOut();
 		this.project = new AudioProject();
 		this.project.addListener(this);
-		
+
 		// Init the components
 		initComponents();
 		this.pack();
@@ -51,105 +51,112 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 		this.dispose();
 		System.exit(0);
 	}
-	
+
 	/**
 	 * Set the wave form based on the audio document.
 	 * 
 	 * @param audio
 	 */
-	public void setWaveForm( AudioDocument audio ){
-		
-    	this.lineOut = this.app.minim.getLineOut(Minim.STEREO, 512, 48000f, 16);
+	public void setWaveForm(AudioDocument audio) {
+
+		this.lineOut = this.app.minim.getLineOut(Minim.STEREO, 512, 48000f, 16);
 		audio.attachLineOut(lineOut);
-    	this.audio = audio;
+		this.audio = audio;
 		this.song.setAudioDocument(audio);
 		this.instant.setAudioDocument(audio);
 		this.audio.addChangedAudioListener(this);
 		this.audio.addAudioPlayerListener(this);
 		// this.infos.setAudioDocument(audio);
-		
+
 		// Initialize the controller component
 		this.audio.preamplifer.setVUMeter(this.vuMeter);
 		this.vuMeter.setVisible(true);
 		this.controller.setFilters(audio.decrackFilter, audio.clickFilter, audio.preamplifer);
 	}
-	
+
 	/**
 	 * A record has been requested.
 	 * 
 	 */
-	public void onRecordSound(){
+	public void onRecordSound() {
 		RecordScreen dialog = new RecordScreen(this);
 		dialog.initComponents();
 	}
-	
+
 	/**
 	 * Load the sound file
 	 * 
 	 */
-	protected synchronized void onLoadSound(){
+	protected synchronized void onLoadSound() {
 		JFileChooser chooser = new JFileChooser();
-	    FileNameExtensionFilter filter = new FileNameExtensionFilter("Sound files", "aiff", "wav", "mp3" );
-	    chooser.setFileFilter(filter);
-	    int returnVal = chooser.showOpenDialog(this);
-	    if(returnVal == JFileChooser.APPROVE_OPTION) {
-	    	String name = chooser.getSelectedFile().getAbsolutePath();
-	    	this.loadSoundFile(name);
-	    }
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("Sound files", "aiff", "wav", "mp3");
+		chooser.setFileFilter(filter);
+		int returnVal = chooser.showOpenDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			String name = chooser.getSelectedFile().getAbsolutePath();
+			this.loadSoundFile(name);
+		}
 	}
-	
+
+//	protected void saveMixed() {
+//		JFileChooser chooser = new JFileChooser();
+//		FileNameExtensionFilter filter = new FileNameExtensionFilter("Sound files", "aiff", "wav", "mp3");
+//		chooser.setFileFilter(filter);
+//		int returnVal = chooser.showOpenDialog(this);
+//		if (returnVal == JFileChooser.APPROVE_OPTION) {
+//			String name = chooser.getSelectedFile().getAbsolutePath();
+//			this.audio.saveTo(name);
+//		}
+//	}
 
 	/**
 	 * Load the file sound specified.
 	 * 
-	 * @param name the file to load
+	 * @param name
+	 *            the file to load
 	 */
-	public void loadSoundFile( String name ){
+	public void loadSoundFile(String name) {
 		File f = new File(name);
-		if(f.exists()){
+		if (f.exists()) {
 			try {
 				AudioDocument audio = new AudioDocument(this.app, f);
 				this.setWaveForm(audio);
 				this.project.addSource(f);
-				this.setTitle(f.getName() + " | " + WaveCleaner.TITLE );
+				this.setTitle(f.getName() + " | " + WaveCleaner.TITLE);
+			} catch (IOException ex) {
+				JOptionPane.showMessageDialog(this, "Can not load the file " + name, ex.getLocalizedMessage(),
+						JOptionPane.ERROR_MESSAGE);
 			}
-			catch(IOException ex){
-				JOptionPane.showMessageDialog(this, "Can not load the file " + name, ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
-			}
-		}
-		else {
+		} else {
 			JOptionPane.showMessageDialog(this, "File " + name, "File does not exists", JOptionPane.WARNING_MESSAGE);
 		}
 	}
 
-	
 	@Override
-	public void onPlayPause(){
+	public void onPlayPause() {
 		int pos = song.getPlayHead();
-		if(this.audio.isPlaying()){
+		if (this.audio.isPlaying()) {
 			this.audio.stop();
 			this.vuMeter.reset();
-		}
-		else {
+		} else {
 			this.audio.play(pos);
 		}
 	}
-	
-	
-	protected void onZoomIn(){
-		// int nb = this.song.getExtent() - this.audio.getNumberOfSamples() / 20;
-		int nb = (int)(this.song.getExtent() * 1.10);
+
+	protected void onZoomIn() {
+		// int nb = this.song.getExtent() - this.audio.getNumberOfSamples() /
+		// 20;
+		int nb = (int) (this.song.getExtent() * 1.10);
 		this.song.setExtent(nb);
 	}
-	
-	
-	protected void onZoomOut(){
-		// int nb = this.song.getExtent() + this.audio.getNumberOfSamples() / 20;
-		int nb = (int)(this.song.getExtent() * 0.90);
+
+	protected void onZoomOut() {
+		// int nb = this.song.getExtent() + this.audio.getNumberOfSamples() /
+		// 20;
+		int nb = (int) (this.song.getExtent() * 0.90);
 		this.song.setExtent(nb);
 	}
-	
-	
+
 	@Override
 	public void audioChanged() {
 		// int max = audio.getNumberOfSamples();
@@ -158,26 +165,25 @@ public class MainScreen extends AbstractMainScreen implements AudioPlayerListene
 		// }
 		// repaint();
 	}
-	
+
 	@Override
 	public void audioPlayed(int sample) {
 		// LOG.info("Audio played.");
-		Assert.isTrue( SwingUtilities.isEventDispatchThread() );
+		Assert.isTrue(SwingUtilities.isEventDispatchThread());
 		this.song.setPlayHead(sample, true);
 		this.instant.mode = WaveComponent.WAVE_MODE;
 		this.instant.setVisibleWindow(sample, sample + audio.getChunkSize());
 		repaint();
-		if( this.audio.getNumberOfSamples() < sample ){
+		if (this.audio.getNumberOfSamples() < sample) {
 			LOG.info("END OF SONG: STOP THE PLAYER");
 			this.audio.stop();
 			this.vuMeter.reset();
 		}
 	}
 
-	
 	@Override
 	public void audioPaused() {
 		// TODO - Update the "PLAY/RECORD BUTTONS"
 	}
-	
+
 }

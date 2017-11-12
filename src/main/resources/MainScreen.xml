@@ -6,6 +6,7 @@
 			<menuitem action="onLoadSound">Load the music</menuitem>
 			<menuitem shortcut="ctrl R" action="onRecordSound">Record</menuitem>
 			<menuitem shortcut="SPACE" action="onPlayPause">Play/Pause</menuitem>
+			<menuitem shortcut="ctrl M" action="saveMixed">Save the mixed results</menuitem>
 			<!-- <menu text="_Look &amp; Feel"> <lookandfeel /> </menu> -->
 			<menuitem action="onExit">E_xit</menuitem>
 		</menu>

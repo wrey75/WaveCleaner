@@ -14,11 +14,14 @@ import com.oxande.wavecleaner.filters.AudioPlayerListener;
 import com.oxande.wavecleaner.filters.ClickRemovalFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
+import com.oxande.wavecleaner.filters.RecorderOutput;
 import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.AudioOutput;
+import ddf.minim.AudioRecorder;
 import ddf.minim.MultiChannelBuffer;
+import ddf.minim.UGen;
 import ddf.minim.spi.AudioRecordingStream;
 
 /**
@@ -295,6 +298,25 @@ public class AudioDocument /*implements AudioListener*/ {
 		getDocumentPlayer().removePlayerListener(listener);
 	}
 	
+	public synchronized void saveTo(String fileName){
+		AudioDocumentPlayer player = getDocumentPlayer();
+		if (player.isPlaying()) {
+			stop();
+		}
+		AudioFormat format = player.getStream().getFormat();
+		RecorderOutput out = new RecorderOutput(format);
+		if(!fileName.endsWith(".mp3") && !fileName.endsWith(".wav") && !fileName.endsWith(".aiff")){
+			fileName += ".wav";
+		}
+		player.patch(decrackFilter)
+			.patch(clickFilter)
+			//.patch(preamplifer)
+			.patch(out);
+		AudioRecorder rec = WaveCleaner.getApplication().createRecorder(out, fileName);
+		rec.beginRecord();
+		player.play(0);
+	}
+	
 	public synchronized void play(int pos) {
 		int ms = (int) (pos * 1000.0 / this.getFormat().getSampleRate());
 		AudioDocumentPlayer player = getDocumentPlayer();
@@ -311,7 +333,6 @@ public class AudioDocument /*implements AudioListener*/ {
 			.patch(preamplifer)
 			.patch(lineOut);
 		
-		// REAL VERSION player.patch(lineOut);
 		player.rewind();
 		player.play();
 		player.cue(ms);
