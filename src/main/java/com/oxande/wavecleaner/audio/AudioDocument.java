@@ -14,13 +14,15 @@ import com.oxande.wavecleaner.filters.AudioPlayerListener;
 import com.oxande.wavecleaner.filters.ClickRemovalFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
-import com.oxande.wavecleaner.filters.UGenRecorder;
 import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.AudioOutput;
+import ddf.minim.AudioRecorder;
 import ddf.minim.MultiChannelBuffer;
+import ddf.minim.SignalSplitter;
 import ddf.minim.spi.AudioRecordingStream;
+import ddf.minim.ugens.Summer;
 
 /**
  * Management of an audio file. The audio document can be seen as the "driver"
@@ -40,7 +42,7 @@ import ddf.minim.spi.AudioRecordingStream;
  * @author wrey75
  *
  */
-public class AudioDocument /*implements AudioListener*/ {
+public class AudioDocument /* implements AudioListener */ {
 	private Logger LOG = LogFactory.getLog(AudioDocument.class);
 
 	String fileName;
@@ -57,7 +59,6 @@ public class AudioDocument /*implements AudioListener*/ {
 	public DecrackleFilter decrackFilter = new DecrackleFilter();
 	public ClickRemovalFilter clickFilter = new ClickRemovalFilter();
 	public PreamplifierFilter preamplifer = new PreamplifierFilter(null);
-
 
 	private RMSSample[] samples = null;
 
@@ -173,7 +174,6 @@ public class AudioDocument /*implements AudioListener*/ {
 		return f;
 	}
 
-
 	public AudioFormat getFormat() {
 		return stream.getFormat();
 	}
@@ -193,7 +193,6 @@ public class AudioDocument /*implements AudioListener*/ {
 		return totalSamples;
 	}
 
-
 	/**
 	 * Get the audio samples in a chunk. Use a mapped memory to load the samples
 	 * inside the chunk.
@@ -208,19 +207,19 @@ public class AudioDocument /*implements AudioListener*/ {
 		samples = this.cache.getSamples(chunk);
 		return samples;
 	}
-	
+
 	ListenerManager<AudioChangedListener> listenerManager = new ListenerManager<AudioChangedListener>();
-	
-	public void addChangedAudioListener(AudioChangedListener listener){
+
+	public void addChangedAudioListener(AudioChangedListener listener) {
 		listenerManager.add(listener);
 	}
-	
-	public void removeChangedAudioListener(AudioChangedListener listener){
+
+	public void removeChangedAudioListener(AudioChangedListener listener) {
 		listenerManager.remove(listener);
 	}
-	
-	void addAudioChangedListener( AudioChangedListener listener ){
-		
+
+	void addAudioChangedListener(AudioChangedListener listener) {
+
 	}
 
 	/**
@@ -245,13 +244,12 @@ public class AudioDocument /*implements AudioListener*/ {
 			} catch (IOException e) {
 				LOG.error("Can not save into the cache.");
 			}
-			listenerManager.publishOnce( l -> l.audioChanged() );
+			listenerManager.publishOnce(l -> l.audioChanged());
 		}
 		stream.pause();
-		listenerManager.publish(l -> l.audioChanged() );
+		listenerManager.publish(l -> l.audioChanged());
 	}
 
-	
 	/**
 	 * Stop to play. Basically a mute but we unpatch the line out!
 	 * 
@@ -264,48 +262,90 @@ public class AudioDocument /*implements AudioListener*/ {
 		clickFilter.unpatch(preamplifer);
 		preamplifer.unpatch(lineOut);
 		LOG.info("PAUSED");
-//		for (AudioDocumentListener listener : listeners) {
-//			listener.audioPaused();
-//		}
+		// for (AudioDocumentListener listener : listeners) {
+		// listener.audioPaused();
+		// }
 	}
 
 	// The 2 following methods are for compatibility because
 	// the audio player can not be accessed directly.
-	public void addAudioPlayerListener(AudioPlayerListener listener){
+	public void addAudioPlayerListener(AudioPlayerListener listener) {
 		getDocumentPlayer().addPlayerListener(listener);
 	}
 
-	public void removeAudioPlayerListener(AudioPlayerListener listener){
+	public void removeAudioPlayerListener(AudioPlayerListener listener) {
 		getDocumentPlayer().removePlayerListener(listener);
 	}
-	
+
+	// how many samples we will generate every frame of the sketch (this will
+	// impact how quickly the file is written)
+	public static final int BUFFER_SIZE = 1024;
+	public static final int CHANNELS = 2;
+	public static final float SAMPLE_RATE = 48000;
+
+	/**
+	 * The code is inspired by
+	 * https://github.com/ddf/Minim/blob/master/examples/Advanced/OfflineRendering/OfflineRendering.pde
+	 * 
+	 * @param fileName
+	 *            the file name
+	 * @throws IOException
+	 *             in case of an exception.
+	 */
 	public synchronized void saveTo(String fileName) throws IOException {
 		AudioDocumentPlayer player = getDocumentPlayer();
 		if (player.isPlaying()) {
 			stop();
 		}
-		
-//		AudioFormat format = this.stream.getFormat();
-//		RecorderOutput recordOutout = new RecorderOutput(format);
-		if(!fileName.endsWith(".mp3") && !fileName.endsWith(".wav") && !fileName.endsWith(".aiff")){
+
+		if (!fileName.endsWith(".mp3") && !fileName.endsWith(".wav") && !fileName.endsWith(".aiff")) {
 			fileName += ".wav";
 		}
-		
-		UGenRecorder recorder = new UGenRecorder();
-		
+		WaveCleaner app = WaveCleaner.getApplication();
+
+		// we will use a SignalSplitter as our Recordable source so that we can
+		// create an AudioRecorder for writing to disk.
+		SignalSplitter out = new SignalSplitter(new AudioFormat(SAMPLE_RATE, 16, CHANNELS, true, false), BUFFER_SIZE);
+
+		// creates a recorder that will write out to a file
+		AudioRecorder recorder = app.createRecorder(out, fileName);
+
+		// create the buffer we will render into
+		MultiChannelBuffer buffer = new MultiChannelBuffer(BUFFER_SIZE, CHANNELS);
+
+		// create the summer that will render the audio
+		Summer summer = new Summer();
+		// make sure it matches our file's sample rate and channel numbers
+		summer.setSampleRate(SAMPLE_RATE);
+		summer.setChannelCount(CHANNELS);
+
 		preamplifer.setPlayer(player); // in case of...
-		player.patch(decrackFilter)
-			.patch(clickFilter)
-			.patch(preamplifer)
-			.patch(recorder);
-		//	.patch(lineOut);
-//		WaveCleaner app = WaveCleaner.getApplication();
-//		AudioRecorder rec = app.createRecorder(this.lineOut, fileName);
-//		rec.beginRecord();
+		player.patch(decrackFilter).patch(clickFilter).patch(preamplifer).patch(summer);
+
 		player.play(1000 * 100);
-		recorder.save(fileName);
+		recorder.beginRecord();
+		int renderCount = (int) (SAMPLE_RATE * 60.0) / BUFFER_SIZE + 1;
+		for (int i = 0; i < renderCount; i++) {
+			switch (CHANNELS) {
+			case 1:
+				// render a buffer
+				summer.generate(buffer.getChannel(0));
+				// push the buffer to the recorder via the SignalSplitter
+				out.samples(buffer.getChannel(0)); // <>//
+				break;
+
+			case 2:
+				// same as above, but for stereo audio
+				summer.generate(buffer.getChannel(0), buffer.getChannel(1));
+				out.samples(buffer.getChannel(0), buffer.getChannel(1));
+				break;
+			}
+		}
+		
+		recorder.endRecord();
+		recorder.save();
 	}
-	
+
 	public synchronized void play(int pos) {
 		int ms = (int) (pos * 1000.0 / this.getFormat().getSampleRate());
 		AudioDocumentPlayer player = getDocumentPlayer();
@@ -317,17 +357,14 @@ public class AudioDocument /*implements AudioListener*/ {
 
 		// this.lineOut.addListener(this);
 		preamplifer.setPlayer(player);
-		player.patch(decrackFilter)
-			.patch(clickFilter)
-			.patch(preamplifer)
-			.patch(lineOut);
-		
+		player.patch(decrackFilter).patch(clickFilter).patch(preamplifer).patch(lineOut);
+
 		player.rewind();
 		player.play();
 		player.cue(ms);
 		LOG.info("START PLAY (from sample {})", pos);
 	}
-	
+
 	/**
 	 * Play in loop.
 	 * 
@@ -342,32 +379,33 @@ public class AudioDocument /*implements AudioListener*/ {
 		player.loop();
 		// player.cue(begMs);
 	}
-	
+
 	public synchronized void endLoop() {
 		AudioDocumentPlayer player = getDocumentPlayer();
-		if( player.isLooping() ){
+		if (player.isLooping()) {
 			player.play();
 		}
 	}
 
-//	@Override
-//	public void samples(float[] samp) {
-//		samples(samp, samp);
-//	}
-//
-//	@Override
-//	public void samples(float[] sampL, float[] sampR) {
-//		int sample = (int) (this.documentPlayer.position() / 1_000.0 * this.getFormat().getSampleRate());
-//		if (sample > this.getNumberOfSamples() - 200) {
-//			/** Stop if we have heard all the file */
-//			this.stop();
-//		}
-//		for (AudioDocumentListener listener : listeners) {
-//			listener.audioPlayed(sample);
-//		}
-//	}
+	// @Override
+	// public void samples(float[] samp) {
+	// samples(samp, samp);
+	// }
+	//
+	// @Override
+	// public void samples(float[] sampL, float[] sampR) {
+	// int sample = (int) (this.documentPlayer.position() / 1_000.0 *
+	// this.getFormat().getSampleRate());
+	// if (sample > this.getNumberOfSamples() - 200) {
+	// /** Stop if we have heard all the file */
+	// this.stop();
+	// }
+	// for (AudioDocumentListener listener : listeners) {
+	// listener.audioPlayed(sample);
+	// }
+	// }
 
-	public void dispose(){
+	public void dispose() {
 		// When we detach the audio
 	}
 }
