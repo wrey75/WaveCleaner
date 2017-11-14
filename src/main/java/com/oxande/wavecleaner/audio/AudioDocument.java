@@ -14,6 +14,7 @@ import com.oxande.wavecleaner.filters.AudioPlayerListener;
 import com.oxande.wavecleaner.filters.ClickRemovalFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
+import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -85,12 +86,16 @@ public class AudioDocument /* implements AudioListener */ {
 
 	/**
 	 * Get the file player. If there was no file player, a new one is created.
+	 * Note also the filters are patched at this time up to the {@link PreamplifierFilter}.
+	 * The preamlifier will be patched to the line output or the recorder.
 	 * 
 	 * @return the file player.
 	 */
 	private AudioDocumentPlayer getDocumentPlayer() {
 		if (this.documentPlayer == null) {
 			this.documentPlayer = new AudioDocumentPlayer(stream);
+			preamplifer.setPlayer(this.documentPlayer);
+			this.documentPlayer.patch(decrackFilter).patch(clickFilter).patch(preamplifer);
 		}
 		return this.documentPlayer;
 	}
@@ -108,7 +113,34 @@ public class AudioDocument /* implements AudioListener */ {
 	public boolean isPlaying() {
 		return getDocumentPlayer().isPlaying();
 	}
-
+	
+	/**
+	 * The FFT size (always a power of 2) depending of the sample rate.
+	 * The FFT size is about 20 milliseconds of music.
+	 * 
+	 * @return the FFT size.
+	 */
+	public int fftSize(){
+		if( sampleRate < 10000 ){
+			// 8 kHz and below?!?
+			return 256;
+		} else if( sampleRate < 23000 ){
+			// 22 kHz
+			return 512;
+		} else if( sampleRate < 50000 ){
+			// 44.1KHz and 48 kHz
+			return 1024;
+		} else if( sampleRate < 100000 ){
+			// 96 kHz
+			return 2028;
+		} else if( sampleRate < 200000 ){
+			// 192 kHz
+			return 4096;
+		}
+		// Should never be the case!
+		return 8192;
+	}
+	
 	/**
 	 * Create an audio document.
 	 * 
@@ -134,24 +166,10 @@ public class AudioDocument /* implements AudioListener */ {
 		// with
 		// loading it, the function will return 0 as the sample rate.
 		this.stream = app.loadFileStream(f);
-		this.documentPlayer = new AudioDocumentPlayer(stream);
+		// this.getDocumentPlayer(); // = new AudioDocumentPlayer(stream);
 		this.sampleRate = (int) this.stream.getFormat().getSampleRate();
-		switch (sampleRate) {
-		case 44100:
-		case 48000:
-			bufferSize = 1024;
-			break;
-		case 96000:
-			bufferSize = 2048;
-			break;
-		case 192000:
-			bufferSize = 4096;
-			break;
-		default:
-			bufferSize = 512;
-		}
-		// buffer = new MultiChannelBuffer(bufferSize,
-		// stream.getFormat().getChannels());
+		this.bufferSize = fftSize(); // There is no relationship between the size of the buffer and the FFT size
+
 		nbChannels = stream.getFormat().getChannels();
 		if (nbChannels < 2) {
 			rightChannel = leftChannel = 0;
@@ -255,13 +273,19 @@ public class AudioDocument /* implements AudioListener */ {
 	 * 
 	 */
 	public synchronized void stop() {
-		this.documentPlayer.pause();
-		// lineOut.removeListener(this);
-		this.documentPlayer.unpatch(decrackFilter);
-		decrackFilter.unpatch(clickFilter);
-		clickFilter.unpatch(preamplifer);
-		preamplifer.unpatch(lineOut);
-		LOG.info("PAUSED");
+		Assert.notNull(this.documentPlayer);
+		if( this.documentPlayer.isPlaying() || this.documentPlayer.isLooping()){
+			this.documentPlayer.pause();
+			// lineOut.removeListener(this);
+			// this.documentPlayer.unpatch(decrackFilter);
+			// decrackFilter.unpatch(clickFilter);
+			// clickFilter.unpatch(preamplifer);
+			preamplifer.unpatch(lineOut);
+			LOG.info("PLAYER STOPPED.");
+		}
+		else {
+			LOG.info("Player already stopped!");
+		}
 		// for (AudioDocumentListener listener : listeners) {
 		// listener.audioPaused();
 		// }
@@ -279,9 +303,7 @@ public class AudioDocument /* implements AudioListener */ {
 
 	// how many samples we will generate every frame of the sketch (this will
 	// impact how quickly the file is written)
-	public static final int BUFFER_SIZE = 1024;
 	public static final int CHANNELS = 2;
-	public static final float SAMPLE_RATE = 48000;
 
 	/**
 	 * The code is inspired by
@@ -292,7 +314,7 @@ public class AudioDocument /* implements AudioListener */ {
 	 * @throws IOException
 	 *             in case of an exception.
 	 */
-	public synchronized void saveTo(String fileName) throws IOException {
+	public synchronized void saveTo(String fileName) /* throws IOException */ {
 		AudioDocumentPlayer player = getDocumentPlayer();
 		if (player.isPlaying()) {
 			stop();
@@ -305,27 +327,27 @@ public class AudioDocument /* implements AudioListener */ {
 
 		// we will use a SignalSplitter as our Recordable source so that we can
 		// create an AudioRecorder for writing to disk.
-		SignalSplitter out = new SignalSplitter(new AudioFormat(SAMPLE_RATE, 16, CHANNELS, true, false), BUFFER_SIZE);
+		SignalSplitter out = new SignalSplitter(new AudioFormat(this.sampleRate, 16, CHANNELS, true, false), this.bufferSize);
 
 		// creates a recorder that will write out to a file
 		AudioRecorder recorder = app.createRecorder(out, fileName);
 
 		// create the buffer we will render into
-		MultiChannelBuffer buffer = new MultiChannelBuffer(BUFFER_SIZE, CHANNELS);
+		MultiChannelBuffer buffer = new MultiChannelBuffer(this.bufferSize, CHANNELS);
 
 		// create the summer that will render the audio
 		Summer summer = new Summer();
 		// make sure it matches our file's sample rate and channel numbers
-		summer.setSampleRate(SAMPLE_RATE);
+		summer.setSampleRate(this.sampleRate);
 		summer.setChannelCount(CHANNELS);
 
-		preamplifer.setPlayer(player); // in case of...
-		player.patch(decrackFilter).patch(clickFilter).patch(preamplifer).patch(summer);
+		preamplifer.patch(summer);
 
 		player.play(1000 * 100);
 		recorder.beginRecord();
-		int renderCount = (int) (SAMPLE_RATE * 60.0) / BUFFER_SIZE + 1;
-		for (int i = 0; i < renderCount; i++) {
+		int renderCount = (int) (this.sampleRate * player.getStream().getMillisecondLength() / 1000.0) / this.bufferSize + 1;
+		boolean stopped = false;
+		for (int i = 0; i < renderCount && !(stopped = Thread.interrupted()); i++) {
 			switch (CHANNELS) {
 			case 1:
 				// render a buffer
@@ -340,10 +362,16 @@ public class AudioDocument /* implements AudioListener */ {
 				out.samples(buffer.getChannel(0), buffer.getChannel(1));
 				break;
 			}
-		}
-		
+		}		
 		recorder.endRecord();
 		recorder.save();
+		
+		if( stopped ){
+			// Delete the file created
+			new File(fileName).delete();
+		}
+		
+		summer.unpatch(preamplifer);
 	}
 
 	public synchronized void play(int pos) {
@@ -356,9 +384,7 @@ public class AudioDocument /* implements AudioListener */ {
 		}
 
 		// this.lineOut.addListener(this);
-		preamplifer.setPlayer(player);
-		player.patch(decrackFilter).patch(clickFilter).patch(preamplifer).patch(lineOut);
-
+		preamplifer.patch(lineOut);
 		player.rewind();
 		player.play();
 		player.cue(ms);

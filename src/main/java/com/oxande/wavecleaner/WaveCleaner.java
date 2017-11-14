@@ -3,6 +3,7 @@ package com.oxande.wavecleaner;
 import java.io.File;
 import java.util.Arrays;
 
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -49,6 +50,10 @@ public class WaveCleaner {
 			throw new IllegalStateException("The application MUST be created at this point.");
 		}
 		return application;
+	}
+	
+	public JFrame getMainScreen(){
+		return mainFrame;
 	}
 	
 	/**

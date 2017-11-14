@@ -17,6 +17,12 @@ final public class Assert {
 		}
 	}
 
+	public final static void notNull( Object o ){
+		if(o == null){
+			throw new IllegalArgumentException("Expected value is null.");
+		}
+	}
+	
 	public final static void isEventDispatchThread(){
 		if(!SwingUtilities.isEventDispatchThread()){
 			throw new IllegalStateException("You must run this in the AWT Thread.");

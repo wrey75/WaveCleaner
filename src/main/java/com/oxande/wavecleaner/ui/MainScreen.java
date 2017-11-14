@@ -16,6 +16,7 @@ import com.oxande.wavecleaner.WaveCleaner;
 import com.oxande.wavecleaner.audio.AudioChangedListener;
 import com.oxande.wavecleaner.audio.AudioDocument;
 import com.oxande.wavecleaner.filters.AudioPlayerListener;
+import com.oxande.wavecleaner.util.AWTUtils;
 import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -98,7 +99,8 @@ public class MainScreen extends AbstractMainScreen
 		}
 	}
 
-	protected void saveMixed() {
+	protected void saveMixed()  {
+		Assert.isEventDispatchThread();
 		JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
 		FileNameExtensionFilter aiffFilter = new FileNameExtensionFilter("Audio Interchange File", "aiff");
@@ -110,12 +112,16 @@ public class MainScreen extends AbstractMainScreen
 		int returnVal = fc.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			String name = fc.getSelectedFile().getAbsolutePath();
-			try {
-				this.audio.saveTo(name);
-			}
-			catch(IOException ex){
-				JOptionPane.showMessageDialog(this, ex.getCause().getLocalizedMessage(), "Erreur disque", JOptionPane.ERROR_MESSAGE);
-			}
+			AWTUtils.runFreely( () -> {
+//				try {
+					this.audio.saveTo(name);
+					AWTUtils.showMessage( "Your record has been saved.");
+//				}
+//				catch(IOException ex){
+//					AWTUtils.showErrorMessage(ex.getCause().getLocalizedMessage());
+//				}
+			});
+
 		}
 	}
 
