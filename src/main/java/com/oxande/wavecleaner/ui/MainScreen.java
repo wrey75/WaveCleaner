@@ -98,16 +98,26 @@ public class MainScreen extends AbstractMainScreen
 		}
 	}
 
-//	protected void saveMixed() {
-//		JFileChooser chooser = new JFileChooser();
-//		FileNameExtensionFilter filter = new FileNameExtensionFilter("Sound files", "aiff", "wav", "mp3");
-//		chooser.setFileFilter(filter);
-//		int returnVal = chooser.showOpenDialog(this);
-//		if (returnVal == JFileChooser.APPROVE_OPTION) {
-//			String name = chooser.getSelectedFile().getAbsolutePath();
-//			this.audio.saveTo(name);
-//		}
-//	}
+	protected void saveMixed() {
+		JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed(false);
+		FileNameExtensionFilter aiffFilter = new FileNameExtensionFilter("Audio Interchange File", "aiff");
+		FileNameExtensionFilter wavFilter = new FileNameExtensionFilter("Waveform Audio File", "wav");
+		FileNameExtensionFilter mp3Filter = new FileNameExtensionFilter("Format compressé", "mp3");
+		fc.addChoosableFileFilter(aiffFilter);
+		fc.addChoosableFileFilter(wavFilter);
+		fc.addChoosableFileFilter(mp3Filter);
+		int returnVal = fc.showSaveDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			String name = fc.getSelectedFile().getAbsolutePath();
+			try {
+				this.audio.saveTo(name);
+			}
+			catch(IOException ex){
+				JOptionPane.showMessageDialog(this, ex.getCause().getLocalizedMessage(), "Erreur disque", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
 
 	/**
 	 * Load the file sound specified.

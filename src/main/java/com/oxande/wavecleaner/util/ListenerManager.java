@@ -1,7 +1,6 @@
 package com.oxande.wavecleaner.util;
 
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -14,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 
-public class ListenerManager<T extends EventListener> {
+public class ListenerManager<T> {
 	private static Logger LOG = LogFactory.getLog(ListenerManager.class);
 	private List<ListenerInfo<T>> listenerInfos = new ArrayList<>();
 	
@@ -23,7 +22,7 @@ public class ListenerManager<T extends EventListener> {
 	 *
 	 *
 	 */
-	private static class ListenerInfo<T extends EventListener>  {
+	private static class ListenerInfo<T>  {
 		
 		AtomicInteger mutex = new AtomicInteger(0);
 		T listener;
@@ -103,6 +102,17 @@ public class ListenerManager<T extends EventListener> {
 		}
 	}
 
+	/**
+	 * Send directly on the current thread.
+	 * 
+	 * @param function the code to call.
+	 */
+	public void send(final Consumer<T> function){
+		for(ListenerInfo<T> infos : this.listenerInfos){
+			function.accept(infos.getListener());
+		}
+	}
+	
 	public void add(T listener ) {
 		synchronized(this.listenerInfos){
 			ListenerInfo<T> infos = new ListenerInfo<T>(listener);

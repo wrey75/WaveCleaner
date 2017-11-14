@@ -14,14 +14,12 @@ import com.oxande.wavecleaner.filters.AudioPlayerListener;
 import com.oxande.wavecleaner.filters.ClickRemovalFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
-import com.oxande.wavecleaner.filters.RecorderOutput;
+import com.oxande.wavecleaner.filters.UGenRecorder;
 import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 import ddf.minim.AudioOutput;
-import ddf.minim.AudioRecorder;
 import ddf.minim.MultiChannelBuffer;
-import ddf.minim.UGen;
 import ddf.minim.spi.AudioRecordingStream;
 
 /**
@@ -195,24 +193,6 @@ public class AudioDocument /*implements AudioListener*/ {
 		return totalSamples;
 	}
 
-	// /**
-	// * Start to listen.
-	// *
-	// * @return the buffer where data will be stored.
-	// */
-	// protected MultiChannelBuffer start(){
-	// stream.play();
-	// MultiChannelBuffer buf = new MultiChannelBuffer(bufferSize,
-	// stream.getFormat().getChannels());
-	// return buf;
-	// }
-	//
-	// protected WaveSample nextSample(MultiChannelBuffer buf){
-	// stream.read(buf);
-	// float left[] = buf.getChannel(leftChannel);
-	// float right[] = buf.getChannel(rightChannel);
-	// return WaveSample.create(left, right);
-	// }
 
 	/**
 	 * Get the audio samples in a chunk. Use a mapped memory to load the samples
@@ -271,6 +251,7 @@ public class AudioDocument /*implements AudioListener*/ {
 		listenerManager.publish(l -> l.audioChanged() );
 	}
 
+	
 	/**
 	 * Stop to play. Basically a mute but we unpatch the line out!
 	 * 
@@ -298,23 +279,31 @@ public class AudioDocument /*implements AudioListener*/ {
 		getDocumentPlayer().removePlayerListener(listener);
 	}
 	
-	public synchronized void saveTo(String fileName){
+	public synchronized void saveTo(String fileName) throws IOException {
 		AudioDocumentPlayer player = getDocumentPlayer();
 		if (player.isPlaying()) {
 			stop();
 		}
-		AudioFormat format = player.getStream().getFormat();
-		RecorderOutput out = new RecorderOutput(format);
+		
+//		AudioFormat format = this.stream.getFormat();
+//		RecorderOutput recordOutout = new RecorderOutput(format);
 		if(!fileName.endsWith(".mp3") && !fileName.endsWith(".wav") && !fileName.endsWith(".aiff")){
 			fileName += ".wav";
 		}
+		
+		UGenRecorder recorder = new UGenRecorder();
+		
+		preamplifer.setPlayer(player); // in case of...
 		player.patch(decrackFilter)
 			.patch(clickFilter)
-			//.patch(preamplifer)
-			.patch(out);
-		AudioRecorder rec = WaveCleaner.getApplication().createRecorder(out, fileName);
-		rec.beginRecord();
-		player.play(0);
+			.patch(preamplifer)
+			.patch(recorder);
+		//	.patch(lineOut);
+//		WaveCleaner app = WaveCleaner.getApplication();
+//		AudioRecorder rec = app.createRecorder(this.lineOut, fileName);
+//		rec.beginRecord();
+		player.play(1000 * 100);
+		recorder.save(fileName);
 	}
 	
 	public synchronized void play(int pos) {

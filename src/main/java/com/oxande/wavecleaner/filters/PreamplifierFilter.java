@@ -109,7 +109,7 @@ public class PreamplifierFilter extends AudioFilter {
 //				LOG.debug("SIGNAL at {} HAS CHANGED A LOT: {} => {} (delay = {})", i, original, source, player.getDelay() );
 //			}
 
-			switch( mode ){
+			switch (mode) {
 			case NORMAL:
 				sample = source;
 				break;
@@ -120,10 +120,10 @@ public class PreamplifierFilter extends AudioFilter {
 				sample[0] = source[0] - original[0];
 				sample[1] = source[1] - original[1];
 				break;
-			case 3:
+			case LEFT_RIGHT:
 				// Channels are monaural to avoid a bad interpretation.
-				sample[0] = (source[0] + source[1] ) / 2.0f;
-				sample[1] = (original[0] + original[1] ) / 2.0f;
+				sample[0] = (source[0] + source[1]) / 2.0f;
+				sample[1] = (original[0] + original[1]) / 2.0f;
 				break;
 			}
 				

@@ -2,7 +2,6 @@ package com.oxande.wavecleaner;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Properties;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -138,7 +137,8 @@ public class WaveCleaner {
 		AudioRecordingStream stream = this.minim.loadFileStream(filename);
 		return stream;
 	}
-	
+
+
 	/**
 	 * Retrieve an audio recorder.
 	 * 
@@ -151,7 +151,8 @@ public class WaveCleaner {
 		AudioRecorder stream = minim.createRecorder(in, f.getAbsolutePath());
 		return stream;
 	}
-	
+
+
 	/**
 	 * Check for old temporary files created by other instances. If found, they are deleted.
 	 * Note the deletion works only if the file is not locked (then 2 instances can run 
