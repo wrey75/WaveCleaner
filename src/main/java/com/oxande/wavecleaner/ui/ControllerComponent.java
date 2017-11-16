@@ -1,34 +1,48 @@
 package com.oxande.wavecleaner.ui;
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.swing.JMeter;
+import com.oxande.wavecleaner.WaveCleaner;
 import com.oxande.wavecleaner.filters.AudioFilter;
 import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
 import com.oxande.wavecleaner.filters.ClickRemovalFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.util.Assert;
+import com.oxande.wavecleaner.util.WaveUtils;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 @SuppressWarnings("serial")
-public class ControllerComponent extends AbstractControllerComponent implements ItemListener, ChangeListener {
+public class ControllerComponent extends AbstractControllerComponent implements ItemListener, ChangeListener, ActionListener {
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
 //	BufferedImage background;
 	private DecrackleFilter decrackleFilter;
 	private ClickRemovalFilter clickFilter;
 	private PreamplifierFilter preamplifierFilter;
+	
+	public static final String MIXED = "MIXED";
+	public static final String ORIGINAL = "ORIGINAL";
+	public static final String DIFF = "DIFF";
+	public static final String LEFT_RIGHT = "L/R";
 	
 	public long samplesToMicroseconds(int nbSamples ){
 		return (long)(nbSamples * 1000000 / preamplifierFilter.sampleRate());
@@ -141,8 +155,14 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		});
 		this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
 		
-
+		output.setButtons(MIXED, ORIGINAL, DIFF, LEFT_RIGHT);
+		output.addActionListener(this);
 		refreshValues();
+		
+		TitledBorder titleBorder;
+		titleBorder = BorderFactory.createTitledBorder("Decrakling");
+		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 12 );
+		this.panelCrackle.setBorder(titleBorder);
 	}
 
 	
@@ -180,32 +200,30 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	
 	// ------------------------------------------
 	
-	private void setSource( JToggleButton btn, int source ){
-		Assert.isTrue( SwingUtilities.isEventDispatchThread() );
-		if( btn.isSelected() ){
-			preamplifierFilter.setControl(PreamplifierFilter.SOURCE, source);
-			if( source != 0 ) finalOutput.setSelected(false);
-			if( source != 1 ) originalOutput.setSelected(false);
-			if( source != 2 ) diffOutput.setSelected(false);
-			if( source != 3 ) leftRightOutput.setSelected(false);
+
+	@Override
+	public void actionPerformed(ActionEvent evt) {
+		Assert.isEventDispatchThread();
+		Component btn = (Component)evt.getSource();
+		switch(btn.getName()){
+			case MIXED:
+				preamplifierFilter.setControl(PreamplifierFilter.SOURCE, PreamplifierFilter.NORMAL);
+				break;
+			case ORIGINAL:
+				preamplifierFilter.setControl(PreamplifierFilter.SOURCE, PreamplifierFilter.ORIGINAL);
+				break;
+			case DIFF:
+				preamplifierFilter.setControl(PreamplifierFilter.SOURCE, PreamplifierFilter.DIFF);
+				break;	
+			case LEFT_RIGHT:
+				preamplifierFilter.setControl(PreamplifierFilter.SOURCE, PreamplifierFilter.LEFT_RIGHT);
+				break;	
+			default:
+				throw new IllegalArgumentException("Unexpected value '" + btn.getName() + "'.");
 		}
 	}
 	
-	protected void onOriginalOutput(){
-		setSource(originalOutput, 1);
-	}
 	
-	protected void onFinalOutput() {
-		setSource(finalOutput, 0);
-	}
-	
-	protected void onDiffOutput(){
-		setSource(diffOutput, 2);
-	}
-	
-	protected void onLeftRightOutput(){
-		setSource(leftRightOutput, 3);
-	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -219,6 +237,8 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		}
 		refreshValues();		
 	}
+
+
 	
 //	protected void paintComponent(Graphics g0) {
 //		Graphics2D g = (Graphics2D) g0;

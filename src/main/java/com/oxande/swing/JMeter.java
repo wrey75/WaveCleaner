@@ -194,7 +194,7 @@ public class JMeter extends JPanel {
 	 * @param max
 	 *            the maximum value
 	 * @param value
-	 *            the tep used
+	 *            the step used
 	 */
 	public JMeter(float min, float max, float value, float step) {
 		super();
@@ -216,21 +216,14 @@ public class JMeter extends JPanel {
 		});
 
 		FlowLayout layout = new FlowLayout(FlowLayout.CENTER);
-		// layout.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		layout.setHgap(2);
 		setLayout(layout);
 		labelValue.setMinimumSize(new Dimension(60,30));
 		labelValue.setPreferredSize(new Dimension(60,30));		
-//		add(minusBtn, BorderLayout.WEST);
-//		add(plusBtn, BorderLayout.EAST);
-//		add(labelValue, BorderLayout.CENTER);
-
 		add(minusBtn);
 		add(labelValue);
 		add(plusBtn);
 
-
-		
 		this.validate();
 		forceValue(value);
 		this.repaint();
