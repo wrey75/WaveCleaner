@@ -1,12 +1,9 @@
 package com.oxande.swing;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -20,7 +17,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -28,7 +24,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -38,9 +33,14 @@ import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 /**
- * A replacement for the {@link JSlider} wich is not perfect for what we want.
+ * A replacement for the {@link JSlider} which is not perfect for what we want.
+ * Basically, we need a precise value using steps like a incrementing value but
+ * it is not perfect in terms of user interface. I opted for a "-"/"+" interface.
+ * Buttons are replaced by {@link JLabel} for a better control. The user has to use
+ * the mouse to change the values. Using a shortcut could be possible in the future
+ * versions.
  * 
- * @author wrey
+ * @author wrey75
  *
  */
 @SuppressWarnings("serial")
@@ -61,6 +61,8 @@ public class JMeter extends JPanel {
 		DecimalFormat formatter = new DecimalFormat(this.pattern);
 		return formatter.format(v);
 	};
+	
+	
 	
 	public static final int BTN_SIZE = 15;
 

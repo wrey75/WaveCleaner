@@ -9,9 +9,10 @@
 					<JCheckBox id="crackle" text="Decrackling" action="onToggleCrackling"
 						focusable="false">Decrackle
 					</JCheckBox>
-					<JSlider minsize="100,50" id="crackle_factor" onChange="crackleFactorChanged"
+					<!--  JSlider minsize="100,50" id="crackle_factor" onChange="crackleFactorChanged"
 						minimum="1" maximum="100" orientation="horizontal" value="2">Factor
-					</JSlider>
+					</JSlider -->
+					<component id="crackleFactor" class="com.oxande.swing.JMeter" />
 					<JSlider minsize="100,50" id="crackle_average" onChange="crackleAverageChanged"
 						minimum="0" maximum="100" orientation="horizontal" value="3">Average
 					</JSlider>
@@ -22,7 +23,7 @@
 		</tr>
 		<tr>
 			<td>
-				<JLabel property="crackleFactorLabel" align="center"></JLabel>
+				<!--  JLabel property="crackleFactorLabel" align="center"></JLabel -->
 			</td>
 			<td>
 				<JLabel property="crackleAverageLabel" align="center"></JLabel>
@@ -37,12 +38,12 @@
 					focusable="false">Remove clicks
 				</JCheckBox>
 			</td>
-			<td fill="horizontal">
+			<td>
 				<JSlider minsize="100,50" id="thresold_factor" onChange="clickThresoldChanged"
 					minimum="0" maximum="900" orientation="horizontal" value="200">Factor
 				</JSlider>
 			</td>
-			<td fill="horizontal">
+			<td>
 				<JSlider minsize="100,50" id="declick_window" onChange="clickWindowChanged"
 					minimum="0" maximum="40" orientation="horizontal" value="20">Average
 				</JSlider>
@@ -50,17 +51,10 @@
 		</tr>
 
 		<tr>
-			<td>OUTPUT SELECTOR</td>
-			<td colspan="2" fill="horizontal" hgap="0">
+			<td colspan="3">
+				<JPanel id="preampPanel"></JPanel>
 				<JComponent id="output" class="com.oxande.swing.JToggleSelect"></JComponent>
-				<!-- <JToggleButton id="finalOutput" action="onFinalOutput" group="audioOut">NORMAL</JToggleButton> 
-					<JToggleButton id="originalOutput" action="onOriginalOutput" group="audioOut">ORIGIN</JToggleButton> 
-					<JToggleButton id="diffOutput" action="onDiffOutput" group="audioOut">DIFF</JToggleButton> 
-					<JToggleButton id="leftRightOutput" action="onLeftRightOutput" group="audioOut">L/R</JToggleButton> -->
-			</td>
-			<td>
-				<JPanel class="com.oxande.swing.JMeter" id="volume">Volume
-				</JPanel>
+				<JPanel class="com.oxande.swing.JMeter" id="volume">Volume</JPanel>
 			</td>
 		</tr>
 	</table>

@@ -63,16 +63,11 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	 * 
 	 */
 	protected final void refreshValues(){
-		setCrackleFactorLabel("Factor: " + decrackleFilter.getControl(DecrackleFilter.FACTOR));
+		// setCrackleFactorLabel("Factor: " + decrackleFilter.getControl(DecrackleFilter.FACTOR));
 		// setCrackleWindowLabel("Window: " + samplesToMilliseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + "ms.");
 		setCrackleAverageLabel("Average: " + decrackleFilter.getIntControl(DecrackleFilter.AVERAGE));
 	}
 	
-	@Override
-	protected void crackleFactorChanged(){
-		decrackleFilter.setControl(DecrackleFilter.FACTOR, crackle_factor.getValue() / 10.0f);
-		refreshValues();
-	}
 
 //	@Override
 //	protected void crackleWindowChanged(){
@@ -122,6 +117,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		i.setValue(p.getValue());
 		i.addChangeListener(this);
 	}
+	
 	/**
 	 * Set the filter driven by this controller.
 	 * 
@@ -133,15 +129,24 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		this.crackle.setSelected(this.decrackleFilter.isEnabled());
 		this.clickFilter = filter2;
 		this.click.setSelected(this.clickFilter.isEnabled());
-		this.initValue(crackle_factor, this.decrackleFilter, DecrackleFilter.FACTOR);
 
 		this.preamplifierFilter = lastFilter;
 		this.preamplifierFilter.setControl(PreamplifierFilter.GAIN, +6.0f);
 		
+		crackleFactor.setTitle("Factor");
+		Parameter p0 = decrackleFilter.getParameter(DecrackleFilter.FACTOR);
+		setFrom(p0, crackleFactor);
+		crackleFactor.setFormatter((e) -> {
+			DecimalFormat formatter = new DecimalFormat("0.0");
+			return formatter.format(e);			
+		});
+		// this.initValue(crackleFactor, this.decrackleFilter, DecrackleFilter.FACTOR);
+		
+		
 		// this.initValue(crackle_window, this.decrackleFilter, DecrackleFilter.WINDOW);
-		Parameter p = decrackleFilter.getParameter(DecrackleFilter.WINDOW);
+		Parameter p1 = decrackleFilter.getParameter(DecrackleFilter.WINDOW);
 		crackle_window.setTitle("Window");
-		crackle_window.setMinimumValue((int)(p.getMinimum() * p.getFactor()));
+		crackle_window.setMinimumValue((int)(p1.getMinimum() * p1.getFactor()));
 		crackle_window.addChangeListener(this);
 		crackle_window.setFormatter((e) -> {
 			return samplesToMicroseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + " \u00B5s";			
@@ -232,6 +237,8 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 			decrackleFilter.setControl(DecrackleFilter.WINDOW, crackle_window.getValue());
 		} else if( e.getSource() == volume ){
 			preamplifierFilter.setControl(PreamplifierFilter.GAIN, volume.getValue());
+		} else if(e.getSource() == crackleFactor ){
+			decrackleFilter.setControl(DecrackleFilter.FACTOR, crackleFactor.getValue() / 10.0f);
 		} else {
 			LOG.error("Source {} not found?!?", e.getSource());
 		}
