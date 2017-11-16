@@ -3,6 +3,7 @@ package com.oxande.wavecleaner.filters;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.ui.VUMeterComponent;
+import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.ConvertUtils;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -57,9 +58,12 @@ public class PreamplifierFilter extends AudioFilter {
 	
 	public PreamplifierFilter( AudioDocumentPlayer player){
 		super();
-		this.player = player;
 		this.addParameter(GAIN, FLOAT_PARAM, -24.0f, +24.0f, 0.0f);
 		this.addParameter(SOURCE, INT_PARAM, 0, 3, 0);
+		this.setSampleRate(48000f); // Force a default sample rate (overriden by the player)
+		if( player != null ){
+			this.setPlayer(player);
+		}
 	}
 	
 	public void setEnabled(boolean b){
@@ -71,8 +75,11 @@ public class PreamplifierFilter extends AudioFilter {
 	}
 	
 	public void setPlayer(AudioDocumentPlayer player){
+		Assert.notNull(player);
+		Assert.isTrue( player.sampleRate() > 0 );
 		LOG.debug("New player is now {}", player);
-		this.player = player;	
+		this.player = player;
+		this.setSampleRate(player.sampleRate()); // Use the player sample rate
 	}
 
 	public void setVUMeter(VUMeterComponent vumeter){

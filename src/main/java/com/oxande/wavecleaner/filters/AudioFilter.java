@@ -50,7 +50,7 @@ public class AudioFilter extends UGen {
 	
 	public static final int INT_PARAM = 1;
 	public static final int FLOAT_PARAM = 2;
-	public static final int BOOLEAN_PARAM = 2;
+	public static final int BOOLEAN_PARAM = 3;
 			
 	
 
@@ -196,15 +196,32 @@ public class AudioFilter extends UGen {
 		private float max;
 		private UGenInput input;
 		private float factor;
+		private float step = 0.1f;
 		
 		Parameter(String name, int type, float min, float max, float defaultValue ){
 			this.name = name;
 			this.type = type;
 			this.min = min;
 			this.max = max;
+			switch(type){
+				case BOOLEAN_PARAM:
+					this.step = 1.0f;
+					this.min = 0;
+					this.max = 1;
+					break;
+					
+				case INT_PARAM:
+					this.step = 1.0f;
+					break;
+			}
+
 			this.input = new UGenInput(InputType.CONTROL);
 			this.setValue(defaultValue);
 			this.factor = 1.0f;
+		}
+		
+		public float getStep(){
+			return this.step;
 		}
 		
 		void setValue( float v ){

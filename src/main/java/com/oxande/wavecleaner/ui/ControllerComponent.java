@@ -3,13 +3,17 @@ package com.oxande.wavecleaner.ui;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.DecimalFormat;
 
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.swing.JMeter;
 import com.oxande.wavecleaner.filters.AudioFilter;
 import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
 import com.oxande.wavecleaner.filters.ClickRemovalFilter;
@@ -19,15 +23,15 @@ import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 @SuppressWarnings("serial")
-public class ControllerComponent extends AbstractControllerComponent implements ItemListener {
+public class ControllerComponent extends AbstractControllerComponent implements ItemListener, ChangeListener {
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
 //	BufferedImage background;
-	DecrackleFilter decrackleFilter;
-	ClickRemovalFilter clickFilter;
-	PreamplifierFilter controlFilter;
+	private DecrackleFilter decrackleFilter;
+	private ClickRemovalFilter clickFilter;
+	private PreamplifierFilter preamplifierFilter;
 	
-	public long samplesToMilliseconds(int nbSamples ){
-		return (long)(nbSamples * 1000 / 48000.0);
+	public long samplesToMicroseconds(int nbSamples ){
+		return (long)(nbSamples * 1000000 / preamplifierFilter.sampleRate());
 	}
 
 	public ControllerComponent() {
@@ -40,11 +44,14 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		this.click.addItemListener(this);
 	}
 	
+	/**
+	 * Used to refresh all the values.
+	 * 
+	 */
 	protected final void refreshValues(){
 		setCrackleFactorLabel("Factor: " + decrackleFilter.getControl(DecrackleFilter.FACTOR));
-		setCrackleWindowLabel("Window: " + samplesToMilliseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + "ms.");
+		// setCrackleWindowLabel("Window: " + samplesToMilliseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + "ms.");
 		setCrackleAverageLabel("Average: " + decrackleFilter.getIntControl(DecrackleFilter.AVERAGE));
-		
 	}
 	
 	@Override
@@ -53,11 +60,11 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		refreshValues();
 	}
 
-	@Override
-	protected void crackleWindowChanged(){
-		decrackleFilter.setControl(DecrackleFilter.WINDOW, crackle_window.getValue());
-		refreshValues();
-	}
+//	@Override
+//	protected void crackleWindowChanged(){
+//		decrackleFilter.setControl(DecrackleFilter.WINDOW, crackle_window.getValue());
+//		refreshValues();
+//	}
 	
 	@Override
 	protected void crackleAverageChanged(){
@@ -77,11 +84,6 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		refreshValues();
 	}
 
-	@Override
-	protected void volumeChanged(){
-		controlFilter.setControl(PreamplifierFilter.GAIN, volume.getValue());
-		refreshValues();
-	}
 	
 	public void initComponents() {
 //		URL url = getClass().getClassLoader().getResource("images/sono.png");
@@ -99,6 +101,12 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		this.setVisible(true);
 	}
 
+	private void setFrom(Parameter p, JMeter i){
+		i.setMinimumValue( p.getMinimum() );
+		i.setMaximumValue( p.getMaximum() );
+		i.setStepValue(p.getStep());
+		i.setValue(p.getValue());
+	}
 	/**
 	 * Set the filter driven by this controller.
 	 * 
@@ -111,11 +119,28 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		this.clickFilter = filter2;
 		this.click.setSelected(this.clickFilter.isEnabled());
 		this.initValue(crackle_factor, this.decrackleFilter, DecrackleFilter.FACTOR);
-		this.initValue(crackle_window, this.decrackleFilter, DecrackleFilter.WINDOW);
+
+		this.preamplifierFilter = lastFilter;
+		this.preamplifierFilter.setControl(PreamplifierFilter.GAIN, +6.0f);
+		
+		// this.initValue(crackle_window, this.decrackleFilter, DecrackleFilter.WINDOW);
+		Parameter p = decrackleFilter.getParameter(DecrackleFilter.WINDOW);
+		crackle_window.setTitle("Window");
+		crackle_window.setMinimumValue((int)(p.getMinimum() * p.getFactor()));
+		crackle_window.addChangeListener(this);
+		crackle_window.setFormatter((e) -> {
+			return samplesToMicroseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + "\u00B5s.";			
+		});
+
+		volume.setTitle("Volume");
+		setFrom(preamplifierFilter.getParameter(PreamplifierFilter.GAIN), volume);
+		volume.setFormatter((e) -> {
+			DecimalFormat formatter = new DecimalFormat("0.0");
+			return formatter.format(e) + " dB";			
+		});
 		this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
 		
-		this.controlFilter = lastFilter;
-		this.controlFilter.setControl(PreamplifierFilter.GAIN, +6.0f);
+
 		refreshValues();
 	}
 
@@ -157,7 +182,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	private void setSource( JToggleButton btn, int source ){
 		Assert.isTrue( SwingUtilities.isEventDispatchThread() );
 		if( btn.isSelected() ){
-			controlFilter.setControl(PreamplifierFilter.SOURCE, source);
+			preamplifierFilter.setControl(PreamplifierFilter.SOURCE, source);
 			if( source != 0 ) finalOutput.setSelected(false);
 			if( source != 1 ) originalOutput.setSelected(false);
 			if( source != 2 ) diffOutput.setSelected(false);
@@ -179,6 +204,19 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	
 	protected void onLeftRightOutput(){
 		setSource(leftRightOutput, 3);
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		Assert.notNull(e);
+		if( e.getSource() == crackle_window ){
+			decrackleFilter.setControl(DecrackleFilter.WINDOW, crackle_window.getValue());
+		} else if( e.getSource() == volume ){
+			preamplifierFilter.setControl(PreamplifierFilter.GAIN, volume.getValue());
+		} else {
+			LOG.error("Source {} not found?!?", e.getSource());
+		}
+		refreshValues();		
 	}
 	
 //	protected void paintComponent(Graphics g0) {

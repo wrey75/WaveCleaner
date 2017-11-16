@@ -181,8 +181,7 @@ public class UIParser {
 		main.addCall( "appl.setDefaultCloseOperation", "DISPOSE_ON_CLOSE" );
 		main.addCall( "appl.setVisible", JavaCode.toParam(true) );
 		jclass.addMethod( main );
-		
-		
+	
 		return jclass;
 	}
 

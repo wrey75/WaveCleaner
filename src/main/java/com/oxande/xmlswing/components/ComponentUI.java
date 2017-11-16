@@ -87,7 +87,7 @@ public class ComponentUI implements IComponent {
 		if( tagName.equals("split") || tagName.equals("splitpane") ){
 			component = new JSplitPaneUI();
 		}
-		else if( tagName.equals("component") ){
+		else if( tagName.equals("component") || tagName.equals("JComponent") ){
 			component = new JComponentUI();
 		}
 		else if( tagName.equals("JSlider") ){

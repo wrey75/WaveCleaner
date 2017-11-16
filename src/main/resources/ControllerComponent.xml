@@ -20,9 +20,7 @@
 				</JSlider>
 			</td>
 			<td fill="horizontal">
-				<JSlider minsize="100,50" id="crackle_window" onChange="crackleWindowChanged"
-					minimum="1" maximum="20000" orientation="horizontal" value="2000">Window
-				</JSlider>
+				<JPanel class="com.oxande.swing.JMeter" id="crackle_window" >Window</JPanel>
 			</td>
 		</tr>
 		<tr>
@@ -33,7 +31,7 @@
 				<JLabel property="crackleAverageLabel" align="center"></JLabel>
 			</td>
 			<td>
-				<JLabel property="crackleWindowLabel" align="center"></JLabel>
+				<!--  JLabel property="crackleWindowLabel" align="center"></JLabel -->
 			</td>
 		</tr>
 		<tr>
@@ -57,16 +55,8 @@
 		</tr>
 
 		<tr>
-			<td>Volume</td>
-			<td colspan="3" fill="horizontal">
-				<JSlider minsize="100,50" id="volume" onChange="volumeChanged"
-					minimum="-24" maximum="+24" orientation="horizontal" value="0">Window
-				</JSlider>
-			</td>
-		</tr>
-		<tr>
 			<td>OUTPUT SELECTOR</td>
-			<td colspan="3" fill="horizontal" hgap="0">
+			<td colspan="2" fill="horizontal" hgap="0">
 				<JToggleButton id="finalOutput" action="onFinalOutput"
 					group="audioOut">NORMAL</JToggleButton>
 				<JToggleButton id="originalOutput" action="onOriginalOutput"
@@ -75,6 +65,9 @@
 					group="audioOut">DIFF</JToggleButton>
 				<JToggleButton id="leftRightOutput" action="onLeftRightOutput"
 					group="audioOut">L/R</JToggleButton>
+			</td>
+			<td>
+			<JPanel class="com.oxande.swing.JMeter" id="volume" >Volume</JPanel>
 			</td>
 		</tr>
 	</table>

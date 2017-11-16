@@ -31,7 +31,7 @@ public class AbstractControllerComponent extends JPanel {
    protected JCheckBox crackle = new JCheckBox();
    protected JSlider crackle_factor = new JSlider();
    protected JSlider crackle_average = new JSlider();
-   protected JSlider crackle_window = new JSlider();
+   protected com.oxande.swing.JMeter crackle_window = new com.oxande.swing.JMeter();
    private JLabel jlabel1 = new JLabel();
    private JLabel jlabel2 = new JLabel();
    private JLabel jlabel3 = new JLabel();
@@ -40,8 +40,6 @@ public class AbstractControllerComponent extends JPanel {
    protected JSlider declick_window = new JSlider();
    private JLabel jlabel4 = new JLabel();
    private JLabel jlabel5 = new JLabel();
-   protected JSlider volume = new JSlider();
-   private JLabel jlabel6 = new JLabel();
    private JPanel jpanel2 = new JPanel();
    private FlowLayout flowlayout1 = new FlowLayout();
    protected JToggleButton finalOutput = new JToggleButton();
@@ -49,6 +47,7 @@ public class AbstractControllerComponent extends JPanel {
    protected JToggleButton originalOutput = new JToggleButton();
    protected JToggleButton diffOutput = new JToggleButton();
    protected JToggleButton leftRightOutput = new JToggleButton();
+   protected com.oxande.swing.JMeter volume = new com.oxande.swing.JMeter();
 public class ChangeListener1 implements javax.swing.event.ChangeListener {
 
       public void stateChanged(ChangeEvent e)
@@ -65,25 +64,11 @@ public class ChangeListener2 implements javax.swing.event.ChangeListener {
       }
 }
 
-private class SetCrackleWindowLabelClass implements Runnable {
-      private String input;
-
-      public  SetCrackleWindowLabelClass(String input)
-      {
-         this.input = input;
-      }
-
-      public void run()
-      {
-         jlabel3.setText(String.valueOf(input));
-      }
-}
-
 public class ChangeListener3 implements javax.swing.event.ChangeListener {
 
       public void stateChanged(ChangeEvent e)
       {
-         crackleWindowChanged();
+         clickThresoldChanged();
       }
 }
 
@@ -119,23 +104,7 @@ public class ChangeListener4 implements javax.swing.event.ChangeListener {
 
       public void stateChanged(ChangeEvent e)
       {
-         clickThresoldChanged();
-      }
-}
-
-public class ChangeListener5 implements javax.swing.event.ChangeListener {
-
-      public void stateChanged(ChangeEvent e)
-      {
          clickWindowChanged();
-      }
-}
-
-public class ChangeListener6 implements javax.swing.event.ChangeListener {
-
-      public void stateChanged(ChangeEvent e)
-      {
-         volumeChanged();
       }
 }
 
@@ -222,12 +191,6 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
       layout1.setConstraints(crackle_average, c1);
       jpanel1.add(crackle_average);
       
-      crackle_window.setMinimumSize(new java.awt.Dimension(100,50));
-      crackle_window.setMaximum(20000);
-      crackle_window.setMinimum(1);
-      crackle_window.setOrientation(JSlider.HORIZONTAL);
-      crackle_window.setValue(2000);
-      crackle_window.addChangeListener(new ChangeListener3());
       c1.gridy = 0;
       c1.gridx = 3;
       c1.gridheight = 1;
@@ -260,7 +223,6 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
       layout1.setConstraints(jlabel2, c1);
       jpanel1.add(jlabel2);
       
-      jlabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
       c1.gridy = 1;
       c1.gridx = 3;
       c1.gridheight = 1;
@@ -288,7 +250,7 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
       thresold_factor.setMinimum(0);
       thresold_factor.setOrientation(JSlider.HORIZONTAL);
       thresold_factor.setValue(200);
-      thresold_factor.addChangeListener(new ChangeListener4());
+      thresold_factor.addChangeListener(new ChangeListener3());
       c1.gridy = 2;
       c1.gridx = 1;
       c1.gridheight = 1;
@@ -304,7 +266,7 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
       declick_window.setMinimum(0);
       declick_window.setOrientation(JSlider.HORIZONTAL);
       declick_window.setValue(20);
-      declick_window.addChangeListener(new ChangeListener5());
+      declick_window.addChangeListener(new ChangeListener4());
       c1.gridy = 2;
       c1.gridx = 2;
       c1.gridheight = 1;
@@ -325,7 +287,7 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
       layout1.setConstraints(jlabel4, c1);
       jpanel1.add(jlabel4);
       
-      jlabel5.setText("Volume");
+      jlabel5.setText("OUTPUT SELECTOR");
       c1.gridy = 3;
       c1.gridx = 0;
       c1.gridheight = 1;
@@ -335,33 +297,6 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
       c1.weightx = 1;
       layout1.setConstraints(jlabel5, c1);
       jpanel1.add(jlabel5);
-      
-      volume.setMinimumSize(new java.awt.Dimension(100,50));
-      volume.setMaximum(24);
-      volume.setMinimum(-24);
-      volume.setOrientation(JSlider.HORIZONTAL);
-      volume.setValue(0);
-      volume.addChangeListener(new ChangeListener6());
-      c1.gridy = 3;
-      c1.gridx = 1;
-      c1.gridheight = 1;
-      c1.gridwidth = 3;
-      c1.anchor = GridBagConstraints.WEST;
-      c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 3;
-      layout1.setConstraints(volume, c1);
-      jpanel1.add(volume);
-      
-      jlabel6.setText("OUTPUT SELECTOR");
-      c1.gridy = 4;
-      c1.gridx = 0;
-      c1.gridheight = 1;
-      c1.gridwidth = 1;
-      c1.anchor = GridBagConstraints.WEST;
-      c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 1;
-      layout1.setConstraints(jlabel6, c1);
-      jpanel1.add(jlabel6);
       
       flowlayout1.setHgap(0);
       jpanel2.setLayout(flowlayout1);
@@ -413,15 +348,25 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
 
 );
       jpanel2.add(leftRightOutput);
-      c1.gridy = 4;
+      c1.gridy = 3;
       c1.gridx = 1;
       c1.gridheight = 1;
-      c1.gridwidth = 3;
+      c1.gridwidth = 2;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 3;
+      c1.weightx = 2;
       layout1.setConstraints(jpanel2, c1);
       jpanel1.add(jpanel2);
+      
+      c1.gridy = 3;
+      c1.gridx = 3;
+      c1.gridheight = 1;
+      c1.gridwidth = 1;
+      c1.anchor = GridBagConstraints.WEST;
+      c1.fill = GridBagConstraints.NONE;
+      c1.weightx = 1;
+      layout1.setConstraints(volume, c1);
+      jpanel1.add(volume);
       this.add(jpanel1, BorderLayout.CENTER);
       this.setPreferredSize(new java.awt.Dimension(600,400));
       this.setName("com.oxande.wavecleaner.ui.AbstractControllerComponent");
@@ -430,16 +375,6 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
    public void setCrackleFactorLabel(String in)
    {
       SwingUtilities.invokeLater(new SetCrackleFactorLabelClass(in));
-   }
-
-   public void setCrackleWindowLabel(String in)
-   {
-      SwingUtilities.invokeLater(new SetCrackleWindowLabelClass(in));
-   }
-
-   protected void volumeChanged()
-   {
-      throw new UnsupportedOperationException("Not implemented");
    }
 
    /**
@@ -463,17 +398,7 @@ public class ChangeListener6 implements javax.swing.event.ChangeListener {
       throw new UnsupportedOperationException("Not implemented");
    }
 
-   public String getCrackleWindowLabel()
-   {
-      return jlabel3.getText();
-   }
-
    protected void clickWindowChanged()
-   {
-      throw new UnsupportedOperationException("Not implemented");
-   }
-
-   protected void crackleWindowChanged()
    {
       throw new UnsupportedOperationException("Not implemented");
    }

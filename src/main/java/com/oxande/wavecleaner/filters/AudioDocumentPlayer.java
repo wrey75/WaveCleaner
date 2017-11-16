@@ -91,6 +91,7 @@ public class AudioDocumentPlayer extends FilePlayer {
 	public AudioDocumentPlayer(AudioRecordingStream iFileStream) {
 		super(iFileStream);
 		this.queue = new float[100];
+		this.setSampleRate(iFileStream.getFormat().getSampleRate());
 	}
 	
 	public int playHead(){

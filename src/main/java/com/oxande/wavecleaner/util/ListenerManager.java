@@ -23,7 +23,6 @@ public class ListenerManager<T> {
 	 *
 	 */
 	private static class ListenerInfo<T>  {
-		
 		AtomicInteger mutex = new AtomicInteger(0);
 		T listener;
 		int skipped = 0;
@@ -32,7 +31,6 @@ public class ListenerManager<T> {
 		public ListenerInfo(T listener){
 			this.listener = listener;
 		}
-		
 		
 		/**
 		 * We invoke the listener but only if a call is not already
@@ -113,13 +111,25 @@ public class ListenerManager<T> {
 		}
 	}
 	
+	/**
+	 * Add a new listener for this manager. If the listener was already there,
+	 * it is replaced.
+	 * 
+	 * @param listener the listener to add.
+	 */
 	public void add(T listener ) {
 		synchronized(this.listenerInfos){
+			this.listenerInfos.remove(listener); // in case already there!
 			ListenerInfo<T> infos = new ListenerInfo<T>(listener);
 			this.listenerInfos.add(infos);
 		}
 	}
 	
+	/**
+	 * Remove the specified listener.
+	 * 
+	 * @param listener
+	 */
 	public void remove(T listener ) {
 		synchronized(this.listenerInfos){
 			this.listenerInfos.remove(listener);
