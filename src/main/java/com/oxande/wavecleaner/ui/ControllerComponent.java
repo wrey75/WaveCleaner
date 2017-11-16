@@ -106,6 +106,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		i.setMaximumValue( p.getMaximum() );
 		i.setStepValue(p.getStep());
 		i.setValue(p.getValue());
+		i.addChangeListener(this);
 	}
 	/**
 	 * Set the filter driven by this controller.
@@ -129,7 +130,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		crackle_window.setMinimumValue((int)(p.getMinimum() * p.getFactor()));
 		crackle_window.addChangeListener(this);
 		crackle_window.setFormatter((e) -> {
-			return samplesToMicroseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + "\u00B5s.";			
+			return samplesToMicroseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + " \u00B5s";			
 		});
 
 		volume.setTitle("Volume");

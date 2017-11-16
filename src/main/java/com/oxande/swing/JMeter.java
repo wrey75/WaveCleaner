@@ -4,8 +4,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -48,8 +46,8 @@ public class JMeter extends JPanel {
 	private float minValue;
 	private float value;
 	private float step;
-	private JButton minusBtn;
-	private JButton plusBtn;
+	private JLabel minusBtn;
+	private JLabel plusBtn;
 	private JLabel labelValue = new JLabel();
 	private String pattern = "0.0";
 	ListenerManager<ChangeListener> manager = new ListenerManager<>();
@@ -58,7 +56,7 @@ public class JMeter extends JPanel {
 		return formatter.format(v);
 	};
 	
-	public static final int MIN_SIZE = 32;
+	public static final int BTN_SIZE = 15;
 
 	public void addChangeListener(ChangeListener listener) {
 		manager.add(listener);
@@ -88,29 +86,32 @@ public class JMeter extends JPanel {
 	 * @return the new {@link JButton} created.
 	 * 
 	 */
-	public JButton newButton(String imgFile, String label, Consumer<ActionEvent> function) {
-		JButton btn = new JButton();
+	public JLabel newButton(String imgFile, String label, Consumer<MouseEvent> function) {
+		JLabel btn = new JLabel();
 		btn.setOpaque(false);
-		btn.setContentAreaFilled(false);
-		btn.setBorderPainted(false);
+//		btn.setContentAreaFilled(false);
+//		btn.setBorderPainted(false);
 //		btn.setMinimumSize(new Dimension(28,28));
 		URL url = getClass().getResource("/images/" + imgFile);
 		try {
 			BufferedImage img = ImageIO.read(url);
-			Image tmp = img.getScaledInstance(24, 24, Image.SCALE_SMOOTH);
+			Image tmp = img.getScaledInstance(BTN_SIZE, BTN_SIZE, Image.SCALE_SMOOTH);
 			ImageIcon icon = new ImageIcon(tmp);
 			btn.setIcon(icon);
+			Dimension dimension = new Dimension(BTN_SIZE+2, BTN_SIZE+2);
+			btn.setMinimumSize(dimension);
+			btn.setMaximumSize(dimension);
 		} catch (IOException ex) {
 			LOG.error("Can not load {}", imgFile);
 			btn.setText(label); // use label instead
 		}
-		btn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				function.accept(e);
-			}
-		});
-		btn.setActionCommand(label);
+//		btn.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				function.accept(e);
+//			}
+//		});
+//		btn.setActionCommand(label);
 		btn.addMouseListener(new MouseListener() {
 			Timer mouseTimer;
 			
@@ -129,31 +130,28 @@ public class JMeter extends JPanel {
 					this.mouseTimer.cancel();
 				}
 				this.mouseTimer = new Timer();
+				int scale = 1000 / (int)((maxValue - minValue) / step);
 				mouseTimer.schedule(new TimerTask() {
 					@Override
 					public void run() {
-						btn.doClick();
+						mouseClicked(e);
 					}
-				}, 1000, 20);
+				}, 1000, scale);
 			}
 			
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				function.accept(e);
 			}
+			
 		});
 		return btn;
 	}
@@ -206,6 +204,10 @@ public class JMeter extends JPanel {
 //		setPreferredSize(new Dimension(75, 200));
 //		setMaximumSize(new Dimension(100, 500));
 		// BorderLayout borderLayout = new BorderLayout();
+		this.step = step;
+		setMinimumValue(min);
+		setMaximumValue(max);
+		
 		minusBtn = newButton("minus.png", "<", (e) -> {
 			decrementValue();
 		});
@@ -227,9 +229,7 @@ public class JMeter extends JPanel {
 		add(labelValue);
 		add(plusBtn);
 
-		this.step = step;
-		setMinimumValue(min);
-		setMaximumValue(max);
+
 		
 		this.validate();
 		forceValue(value);
