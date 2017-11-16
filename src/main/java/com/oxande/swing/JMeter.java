@@ -1,8 +1,12 @@
 package com.oxande.swing;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -17,6 +21,7 @@ import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -49,6 +54,7 @@ public class JMeter extends JPanel {
 	private JLabel minusBtn;
 	private JLabel plusBtn;
 	private JLabel labelValue = new JLabel();
+	private JLabel titleLabel = new JLabel();
 	private String pattern = "0.0";
 	ListenerManager<ChangeListener> manager = new ListenerManager<>();
 	private Function<Float, String> formatter = (v) -> {
@@ -89,6 +95,7 @@ public class JMeter extends JPanel {
 	public JLabel newButton(String imgFile, String label, Consumer<MouseEvent> function) {
 		JLabel btn = new JLabel();
 		btn.setOpaque(false);
+		btn.setAlignmentY(Component.CENTER_ALIGNMENT);
 //		btn.setContentAreaFilled(false);
 //		btn.setBorderPainted(false);
 //		btn.setMinimumSize(new Dimension(28,28));
@@ -98,7 +105,7 @@ public class JMeter extends JPanel {
 			Image tmp = img.getScaledInstance(BTN_SIZE, BTN_SIZE, Image.SCALE_SMOOTH);
 			ImageIcon icon = new ImageIcon(tmp);
 			btn.setIcon(icon);
-			Dimension dimension = new Dimension(BTN_SIZE+2, BTN_SIZE+2);
+			Dimension dimension = new Dimension(BTN_SIZE+2, 10);
 			btn.setMinimumSize(dimension);
 			btn.setMaximumSize(dimension);
 		} catch (IOException ex) {
@@ -198,7 +205,10 @@ public class JMeter extends JPanel {
 	 */
 	public JMeter(float min, float max, float value, float step) {
 		super();
+		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10 );
+		titleLabel.setFont(font);
 		labelValue.setHorizontalAlignment(JLabel.CENTER);
+		labelValue.setOpaque(true);
 //		labelValue.setMinimumSize(new Dimension(40,28));
 //		setMinimumSize(new Dimension(50, 100));
 //		setPreferredSize(new Dimension(75, 200));
@@ -216,12 +226,22 @@ public class JMeter extends JPanel {
 		});
 
 		FlowLayout layout = new FlowLayout(FlowLayout.CENTER);
+		// BorderLayout layout = new BorderLayout();
 		layout.setHgap(2);
 		setLayout(layout);
-		labelValue.setMinimumSize(new Dimension(60,30));
-		labelValue.setPreferredSize(new Dimension(60,30));		
 		add(minusBtn);
-		add(labelValue);
+		JPanel centerPanel = new JPanel();
+		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+		titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		titleLabel.setHorizontalTextPosition(JLabel.CENTER);
+		centerPanel.add(titleLabel);
+		labelValue.setMinimumSize(new Dimension(60,3));
+		// labelValue.setPreferredSize(new Dimension(60,3));		
+		labelValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+		font = new Font(Font.SANS_SERIF, Font.BOLD, 12);
+		labelValue.setFont(font);
+		centerPanel.add(labelValue);
+		add(centerPanel);
 		add(plusBtn);
 
 		this.validate();
@@ -238,11 +258,9 @@ public class JMeter extends JPanel {
 	}
 	
 	public void setTitle(String title){
-		TitledBorder titleBorder;
-		titleBorder = BorderFactory.createTitledBorder(title);
-		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10 );
-		titleBorder.setTitleFont(font);
-		this.setBorder(titleBorder);
+		SwingUtilities.invokeLater(() -> {
+			titleLabel.setText(title);
+		});
 	}
 
 	protected void forceValue(float newValue) {
