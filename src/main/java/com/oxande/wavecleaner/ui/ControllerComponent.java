@@ -42,7 +42,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
 	BufferedImage background;
 	private DecrackleFilter decrackleFilter;
-	private ClickRemovalFilter clickFilter;
+	private ClickRemovalFilter declickFilter;
 	private PreamplifierFilter preamplifierFilter;
 	
 	public static final String MIXED = "MIXED";
@@ -80,16 +80,16 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 //		decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
 //		refreshValues();
 //	}
-	
-	@Override
-	protected void clickThresoldChanged(){
-		clickFilter.setControl(ClickRemovalFilter.THRESHOLD, thresold_factor.getValue());
-		refreshValues();
-	}
+//	
+//	@Override
+//	protected void clickThresoldChanged(){
+//		clickFilter.setControl(ClickRemovalFilter.THRESHOLD, thresold_factor.getValue());
+//		refreshValues();
+//	}
 
 	@Override
 	protected void clickWindowChanged(){
-		clickFilter.setControl(ClickRemovalFilter.WIDTH, declick_window.getValue());
+		declickFilter.setControl(ClickRemovalFilter.WIDTH, declick_window.getValue());
 		refreshValues();
 	}
 
@@ -128,8 +128,8 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	public void setFilters(DecrackleFilter filter1, ClickRemovalFilter filter2, PreamplifierFilter lastFilter) {
 		this.decrackleFilter = filter1;
 		this.crackle.setSelected(this.decrackleFilter.isEnabled());
-		this.clickFilter = filter2;
-		this.click.setSelected(this.clickFilter.isEnabled());
+		this.declickFilter = filter2;
+		this.click.setSelected(this.declickFilter.isEnabled());
 
 		this.preamplifierFilter = lastFilter;
 		this.preamplifierFilter.setControl(PreamplifierFilter.GAIN, +6.0f);
@@ -170,6 +170,15 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		});
 		// this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
 		
+		Parameter p2 = declickFilter.getParameter(declickFilter.THRESHOLD);
+		setFrom(p2, declickThresold);
+		declickThresold.setTitle("Thresold");
+		declickThresold.setFormatter((e) -> {
+			DecimalFormat formatter = new DecimalFormat("0.0");
+			return formatter.format(e);			
+			// return samplesToMicroseconds(declickFilter.getControl(declickFilter.THRESHOLD));			
+		});
+		
 		output.setButtons(MIXED, ORIGINAL, DIFF, LEFT_RIGHT);
 		output.addActionListener(this);
 		refreshValues();
@@ -202,7 +211,7 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 			this.decrackleFilter.setEnable(bSelected);
 		} else if (this.click == e.getSource()) {
 			boolean bSelected = this.click.isSelected();
-			this.clickFilter.setEnable(bSelected);
+			this.declickFilter.setEnable(bSelected);
 		} else {
 			LOG.warn("Source {} unknown.", e.getSource());
 		}
@@ -251,6 +260,8 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 			decrackleFilter.setControl(DecrackleFilter.FACTOR, crackleFactor.getValue() / 10.0f);
 		} else if(e.getSource() == crackle_average ){
 			decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
+		} else if(e.getSource() == declickThresold ){
+			declickFilter.setControl(declickFilter.THRESHOLD, declickThresold.getValue());
 		} else {
 			LOG.error("Source {} not found?!?", e.getSource());
 		}

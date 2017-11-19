@@ -9,13 +9,11 @@
 					<JCheckBox id="crackle" text="Decrackling" action="onToggleCrackling"
 						focusable="false">Decrackle
 					</JCheckBox>
-					<!--  JSlider minsize="100,50" id="crackle_factor" onChange="crackleFactorChanged"
-						minimum="1" maximum="100" orientation="horizontal" value="2">Factor
-					</JSlider -->
+					<!-- JSlider minsize="100,50" id="crackle_factor" onChange="crackleFactorChanged" 
+						minimum="1" maximum="100" orientation="horizontal" value="2">Factor </JSlider -->
 					<component id="crackleFactor" class="com.oxande.swing.JMeter" />
-					<!--  JSlider minsize="100,50" id="crackle_average" onChange="crackleAverageChanged"
-						minimum="0" maximum="100" orientation="horizontal" value="3">Average
-					</JSlider -->
+					<!-- JSlider minsize="100,50" id="crackle_average" onChange="crackleAverageChanged" 
+						minimum="0" maximum="100" orientation="horizontal" value="3">Average </JSlider -->
 					<component class="com.oxande.swing.JMeter" id="crackle_average">Window
 					</component>
 					<JPanel class="com.oxande.swing.JMeter" id="crackle_window">Window
@@ -24,20 +22,21 @@
 			</td>
 		</tr>
 		<tr>
-			<td rowspan="1">
-				<JCheckBox id="click" text="Remove clicks" action="onToggleClicks"
-					focusable="false">Remove clicks
-				</JCheckBox>
-			</td>
-			<td>
-				<JSlider minsize="100,50" id="thresold_factor" onChange="clickThresoldChanged"
-					minimum="0" maximum="900" orientation="horizontal" value="200">Factor
-				</JSlider>
-			</td>
-			<td>
-				<JSlider minsize="100,50" id="declick_window" onChange="clickWindowChanged"
-					minimum="0" maximum="40" orientation="horizontal" value="20">Average
-				</JSlider>
+			<td colspan="3">
+				<JPanel id="panelDeclick">
+
+					<JCheckBox id="click" text="Remove clicks" action="onToggleClicks"
+						focusable="false">Remove clicks
+					</JCheckBox>
+					<component class="com.oxande.swing.JMeter" id="declickThresold" />
+
+						<!-- <JSlider minsize="100,50" id="thresold_factor" onChange="clickThresoldChanged" 
+							minimum="0" maximum="900" orientation="horizontal" value="200">Factor </JSlider> -->
+						<JSlider minsize="100,50" id="declick_window" onChange="clickWindowChanged"
+							minimum="0" maximum="40" orientation="horizontal" value="20">Average
+						</JSlider>
+
+				</JPanel>
 			</td>
 		</tr>
 
