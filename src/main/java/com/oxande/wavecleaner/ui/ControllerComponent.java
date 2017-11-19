@@ -3,12 +3,18 @@ package com.oxande.wavecleaner.ui;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
 import java.text.DecimalFormat;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JSlider;
@@ -34,7 +40,7 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 @SuppressWarnings("serial")
 public class ControllerComponent extends AbstractControllerComponent implements ItemListener, ChangeListener, ActionListener {
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
-//	BufferedImage background;
+	BufferedImage background;
 	private DecrackleFilter decrackleFilter;
 	private ClickRemovalFilter clickFilter;
 	private PreamplifierFilter preamplifierFilter;
@@ -65,21 +71,15 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	protected final void refreshValues(){
 		// setCrackleFactorLabel("Factor: " + decrackleFilter.getControl(DecrackleFilter.FACTOR));
 		// setCrackleWindowLabel("Window: " + samplesToMilliseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + "ms.");
-		setCrackleAverageLabel("Average: " + decrackleFilter.getIntControl(DecrackleFilter.AVERAGE));
+		// setCrackleAverageLabel("Average: " + decrackleFilter.getIntControl(DecrackleFilter.AVERAGE));
 	}
 	
-
+	
 //	@Override
-//	protected void crackleWindowChanged(){
-//		decrackleFilter.setControl(DecrackleFilter.WINDOW, crackle_window.getValue());
+//	protected void crackleAverageChanged(){
+//		decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
 //		refreshValues();
 //	}
-	
-	@Override
-	protected void crackleAverageChanged(){
-		decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
-		refreshValues();
-	}
 	
 	@Override
 	protected void clickThresoldChanged(){
@@ -95,17 +95,18 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 
 	
 	public void initComponents() {
-//		URL url = getClass().getClassLoader().getResource("images/sono.png");
-//		try {
-//			background = ImageIO.read(url);
-//			Dimension size = new Dimension(background.getWidth(), background.getHeight());
-//			this.setPreferredSize(size);
-//			this.setMinimumSize(size);
-//			this.setMaximumSize(size);
-//			this.setOpaque(false);
-//		} catch (IOException ex) {
-//			LOG.error("Can not load image: {}", ex.getMessage());
-//		}
+		URL url = getClass().getClassLoader().getResource("images/sono.png");
+		try {
+			background = ImageIO.read(url);
+			Dimension size = new Dimension(background.getWidth() / 3, background.getHeight() / 3);
+			this.setPreferredSize(size);
+			this.setMinimumSize(size);
+			this.setMaximumSize(size);
+			this.setOpaque(true);
+			this.setBackground(null);
+		} catch (IOException ex) {
+			LOG.error("Can not load image: {}", ex.getMessage());
+		}
 		super.initComponents();
 		this.setVisible(true);
 	}
@@ -158,7 +159,16 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 			DecimalFormat formatter = new DecimalFormat("0.0");
 			return formatter.format(e) + " dB";			
 		});
-		this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
+		
+		Parameter p3 = decrackleFilter.getParameter(DecrackleFilter.AVERAGE);
+		setFrom(p3, crackle_average);
+		crackle_average.setTitle("Average");
+		crackle_average.setFormatter((e) -> {
+			//DecimalFormat formatter = new DecimalFormat("0.0");
+			//return formatter.format(e);			
+			return samplesToMicroseconds(decrackleFilter.getIntControl(DecrackleFilter.AVERAGE)) + " \u00B5s";			
+		});
+		// this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
 		
 		output.setButtons(MIXED, ORIGINAL, DIFF, LEFT_RIGHT);
 		output.addActionListener(this);
@@ -239,6 +249,8 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 			preamplifierFilter.setControl(PreamplifierFilter.GAIN, volume.getValue());
 		} else if(e.getSource() == crackleFactor ){
 			decrackleFilter.setControl(DecrackleFilter.FACTOR, crackleFactor.getValue() / 10.0f);
+		} else if(e.getSource() == crackle_average ){
+			decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
 		} else {
 			LOG.error("Source {} not found?!?", e.getSource());
 		}
@@ -247,13 +259,13 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 
 
 	
-//	protected void paintComponent(Graphics g0) {
-//		Graphics2D g = (Graphics2D) g0;
-//		super.paintComponent(g);
-//		if (background != null) {
-//			g.drawImage(background, 0, 0, getWidth(), getHeight(), 0, 0, background.getWidth(), background.getHeight(),
-//					null);
-//		}
-//
-//	}
+	protected void paintComponent(Graphics g0) {
+		Graphics2D g = (Graphics2D) g0;
+		super.paintComponent(g);
+		if (background != null) {
+			g.drawImage(background, 0, 0, getWidth(), getHeight(), 0, 0, background.getWidth(), background.getHeight(),
+					null);
+		}
+
+	}
 }

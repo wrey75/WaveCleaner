@@ -4,15 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.lang.Runnable;
 import java.lang.UnsupportedOperationException;
 
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -27,11 +24,8 @@ public class AbstractControllerComponent extends JPanel {
    protected JPanel panelCrackle = new JPanel();
    protected JCheckBox crackle = new JCheckBox();
    protected com.oxande.swing.JMeter crackleFactor = new com.oxande.swing.JMeter();
-   protected JSlider crackle_average = new JSlider();
+   protected com.oxande.swing.JMeter crackle_average = new com.oxande.swing.JMeter();
    protected com.oxande.swing.JMeter crackle_window = new com.oxande.swing.JMeter();
-   private JLabel jlabel1 = new JLabel();
-   private JLabel jlabel2 = new JLabel();
-   private JLabel jlabel3 = new JLabel();
    protected JCheckBox click = new JCheckBox();
    protected JSlider thresold_factor = new JSlider();
    protected JSlider declick_window = new JSlider();
@@ -44,7 +38,7 @@ public class ChangeListener1 implements javax.swing.event.ChangeListener {
 
       public void stateChanged(ChangeEvent e)
       {
-         crackleAverageChanged();
+         clickThresoldChanged();
       }
 }
 
@@ -52,29 +46,7 @@ public class ChangeListener2 implements javax.swing.event.ChangeListener {
 
       public void stateChanged(ChangeEvent e)
       {
-         clickThresoldChanged();
-      }
-}
-
-public class ChangeListener3 implements javax.swing.event.ChangeListener {
-
-      public void stateChanged(ChangeEvent e)
-      {
          clickWindowChanged();
-      }
-}
-
-private class SetCrackleAverageLabelClass implements Runnable {
-      private String input;
-
-      public void run()
-      {
-         jlabel2.setText(String.valueOf(input));
-      }
-
-      public  SetCrackleAverageLabelClass(String input)
-      {
-         this.input = input;
       }
 }
 
@@ -84,24 +56,9 @@ private class SetCrackleAverageLabelClass implements Runnable {
       throw new UnsupportedOperationException("Not implemented");
    }
 
-   public void setCrackleAverageLabel(String in)
-   {
-      SwingUtilities.invokeLater(new SetCrackleAverageLabelClass(in));
-   }
-
    protected void clickThresoldChanged()
    {
       throw new UnsupportedOperationException("Not implemented");
-   }
-
-   protected void crackleAverageChanged()
-   {
-      throw new UnsupportedOperationException("Not implemented");
-   }
-
-   public String getCrackleAverageLabel()
-   {
-      return jlabel2.getText();
    }
 
    public void initComponents()
@@ -115,12 +72,6 @@ private class SetCrackleAverageLabelClass implements Runnable {
       crackle.setFocusable(false);
       panelCrackle.add(crackle);
       panelCrackle.add(crackleFactor);
-      crackle_average.setMinimumSize(new java.awt.Dimension(100,50));
-      crackle_average.setMaximum(100);
-      crackle_average.setMinimum(0);
-      crackle_average.setOrientation(JSlider.HORIZONTAL);
-      crackle_average.setValue(3);
-      crackle_average.addChangeListener(new ChangeListener1());
       panelCrackle.add(crackle_average);
       panelCrackle.add(crackle_window);
       c1.gridy = 0;
@@ -133,40 +84,9 @@ private class SetCrackleAverageLabelClass implements Runnable {
       layout1.setConstraints(panelCrackle, c1);
       jpanel1.add(panelCrackle);
       
-      c1.gridy = 1;
-      c1.gridx = 0;
-      c1.gridheight = 1;
-      c1.gridwidth = 1;
-      c1.anchor = GridBagConstraints.WEST;
-      c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 1;
-      layout1.setConstraints(jlabel1, c1);
-      jpanel1.add(jlabel1);
-      
-      jlabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-      c1.gridy = 1;
-      c1.gridx = 1;
-      c1.gridheight = 1;
-      c1.gridwidth = 1;
-      c1.anchor = GridBagConstraints.WEST;
-      c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 1;
-      layout1.setConstraints(jlabel2, c1);
-      jpanel1.add(jlabel2);
-      
-      c1.gridy = 1;
-      c1.gridx = 2;
-      c1.gridheight = 1;
-      c1.gridwidth = 1;
-      c1.anchor = GridBagConstraints.WEST;
-      c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 1;
-      layout1.setConstraints(jlabel3, c1);
-      jpanel1.add(jlabel3);
-      
       click.setText("Remove clicks");
       click.setFocusable(false);
-      c1.gridy = 2;
+      c1.gridy = 1;
       c1.gridx = 0;
       c1.gridheight = 1;
       c1.gridwidth = 1;
@@ -181,8 +101,8 @@ private class SetCrackleAverageLabelClass implements Runnable {
       thresold_factor.setMinimum(0);
       thresold_factor.setOrientation(JSlider.HORIZONTAL);
       thresold_factor.setValue(200);
-      thresold_factor.addChangeListener(new ChangeListener2());
-      c1.gridy = 2;
+      thresold_factor.addChangeListener(new ChangeListener1());
+      c1.gridy = 1;
       c1.gridx = 1;
       c1.gridheight = 1;
       c1.gridwidth = 1;
@@ -197,8 +117,8 @@ private class SetCrackleAverageLabelClass implements Runnable {
       declick_window.setMinimum(0);
       declick_window.setOrientation(JSlider.HORIZONTAL);
       declick_window.setValue(20);
-      declick_window.addChangeListener(new ChangeListener3());
-      c1.gridy = 2;
+      declick_window.addChangeListener(new ChangeListener2());
+      c1.gridy = 1;
       c1.gridx = 2;
       c1.gridheight = 1;
       c1.gridwidth = 1;
@@ -212,7 +132,7 @@ private class SetCrackleAverageLabelClass implements Runnable {
       jpanel2.add(preampPanel);
       jpanel2.add(output);
       jpanel2.add(volume);
-      c1.gridy = 3;
+      c1.gridy = 2;
       c1.gridx = 0;
       c1.gridheight = 1;
       c1.gridwidth = 3;

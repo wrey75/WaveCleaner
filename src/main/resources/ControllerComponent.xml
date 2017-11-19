@@ -13,23 +13,14 @@
 						minimum="1" maximum="100" orientation="horizontal" value="2">Factor
 					</JSlider -->
 					<component id="crackleFactor" class="com.oxande.swing.JMeter" />
-					<JSlider minsize="100,50" id="crackle_average" onChange="crackleAverageChanged"
+					<!--  JSlider minsize="100,50" id="crackle_average" onChange="crackleAverageChanged"
 						minimum="0" maximum="100" orientation="horizontal" value="3">Average
-					</JSlider>
+					</JSlider -->
+					<component class="com.oxande.swing.JMeter" id="crackle_average">Window
+					</component>
 					<JPanel class="com.oxande.swing.JMeter" id="crackle_window">Window
 					</JPanel>
 				</JPanel>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<!--  JLabel property="crackleFactorLabel" align="center"></JLabel -->
-			</td>
-			<td>
-				<JLabel property="crackleAverageLabel" align="center"></JLabel>
-			</td>
-			<td>
-				<!-- JLabel property="crackleWindowLabel" align="center"></JLabel -->
 			</td>
 		</tr>
 		<tr>

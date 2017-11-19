@@ -2,6 +2,7 @@ package com.oxande.swing;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -69,6 +70,9 @@ public class JToggleSelect extends JPanel implements MouseListener {
 			btn.setOpaque(true);
 			btn.addMouseListener(this);
 			btn.setHorizontalAlignment(JLabel.CENTER);
+			btn.setAlignmentY(JLabel.CENTER_ALIGNMENT);
+			Dimension min = btn.getMinimumSize();
+			btn.setPreferredSize(new Dimension((int)( min.getWidth() + 10), (int)(min.getHeight() + 10)));
 			renderSelected(btn, first);
 			if(first){
 				this.selected = btn;
