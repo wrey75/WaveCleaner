@@ -2,7 +2,7 @@ package com.oxande.swing;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -40,8 +40,7 @@ public class JToggleSelect extends JPanel implements MouseListener {
 	
 
 	public JToggleSelect() {
-		GridLayout layout = new GridLayout();
-		layout.setHgap(10);
+		FlowLayout layout = new FlowLayout(FlowLayout.CENTER, 10, 10);
 		this.setLayout(layout);
 		btnOn = WaveUtils.loadIcon("btn-on.png", 20);
 		btnOff = WaveUtils.loadIcon("btn-off.png", 20);
@@ -60,7 +59,8 @@ public class JToggleSelect extends JPanel implements MouseListener {
 	}
 
 	public void setButtons(List<String> buttons) {
-		this.setLayout(new GridLayout(1, buttons.size()));
+		FlowLayout layout = new FlowLayout(FlowLayout.CENTER, 10, 10);
+		this.setLayout(/* new GridLayout(1, buttons.size())*/ layout);
 
 		removeAll();
 		boolean first = true;
@@ -96,6 +96,7 @@ public class JToggleSelect extends JPanel implements MouseListener {
 
 		if( btnOn != null && btnOff != null ){
 			component.setIcon(selected ? btnOn : btnOff);
+			component.setForeground(selected ? Color.BLACK : Color.DARK_GRAY);
 		}
 		else {
 			component.setBackground(selected ? Color.DARK_GRAY : Color.LIGHT_GRAY);
