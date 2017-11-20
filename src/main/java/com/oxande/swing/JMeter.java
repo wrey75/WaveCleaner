@@ -4,21 +4,16 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -30,6 +25,7 @@ import javax.swing.event.ChangeListener;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.util.ListenerManager;
+import com.oxande.wavecleaner.util.WaveUtils;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
 /**
@@ -51,6 +47,7 @@ public class JMeter extends JPanel {
 	private float minValue;
 	private float value;
 	private float step;
+	private JPanel mainPanel;
 	private JLabel minusBtn;
 	private JLabel plusBtn;
 	private JLabel labelValue = new JLabel();
@@ -98,29 +95,18 @@ public class JMeter extends JPanel {
 		JLabel btn = new JLabel();
 		btn.setOpaque(false);
 		btn.setAlignmentY(Component.CENTER_ALIGNMENT);
-//		btn.setContentAreaFilled(false);
-//		btn.setBorderPainted(false);
-//		btn.setMinimumSize(new Dimension(28,28));
-		URL url = getClass().getResource("/images/" + imgFile);
-		try {
-			BufferedImage img = ImageIO.read(url);
-			Image tmp = img.getScaledInstance(BTN_SIZE, BTN_SIZE, Image.SCALE_SMOOTH);
-			ImageIcon icon = new ImageIcon(tmp);
+
+		Icon icon = WaveUtils.loadIcon(imgFile, BTN_SIZE);
+		if( icon != null ){
 			btn.setIcon(icon);
-			Dimension dimension = new Dimension(BTN_SIZE+2, 10);
+			Dimension dimension = new Dimension(BTN_SIZE+2, 30);
 			btn.setMinimumSize(dimension);
 			btn.setMaximumSize(dimension);
-		} catch (IOException ex) {
+		} else {
 			LOG.error("Can not load {}", imgFile);
 			btn.setText(label); // use label instead
 		}
-//		btn.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				function.accept(e);
-//			}
-//		});
-//		btn.setActionCommand(label);
+
 		btn.addMouseListener(new MouseListener() {
 			Timer mouseTimer;
 			
@@ -211,11 +197,6 @@ public class JMeter extends JPanel {
 		titleLabel.setFont(font);
 		labelValue.setHorizontalAlignment(JLabel.CENTER);
 		labelValue.setOpaque(true);
-//		labelValue.setMinimumSize(new Dimension(40,28));
-//		setMinimumSize(new Dimension(50, 100));
-//		setPreferredSize(new Dimension(75, 200));
-//		setMaximumSize(new Dimension(100, 500));
-		// BorderLayout borderLayout = new BorderLayout();
 		this.step = step;
 		setMinimumValue(min);
 		setMaximumValue(max);
@@ -237,7 +218,8 @@ public class JMeter extends JPanel {
 		titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		titleLabel.setHorizontalTextPosition(JLabel.CENTER);
 		centerPanel.add(titleLabel);
-		labelValue.setMinimumSize(new Dimension(60,3));
+		this.setMinimumSize(new Dimension(100,BTN_SIZE * 2));
+		this.setPreferredSize(new Dimension(100,BTN_SIZE * 2));
 		// labelValue.setPreferredSize(new Dimension(60,3));		
 		labelValue.setAlignmentX(Component.CENTER_ALIGNMENT);
 		font = new Font(Font.SANS_SERIF, Font.BOLD, 12);
