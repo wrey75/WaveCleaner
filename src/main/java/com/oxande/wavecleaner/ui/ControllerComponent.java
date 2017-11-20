@@ -87,11 +87,11 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 //		refreshValues();
 //	}
 
-	@Override
-	protected void clickWindowChanged(){
-		declickFilter.setControl(ClickRemovalFilter.WIDTH, declick_window.getValue());
-		refreshValues();
-	}
+//	@Override
+//	protected void clickWindowChanged(){
+//		declickFilter.setControl(ClickRemovalFilter.WIDTH, declick_window.getValue());
+//		refreshValues();
+//	}
 
 	
 	public void initComponents() {
@@ -179,6 +179,16 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 			// return samplesToMicroseconds(declickFilter.getControl(declickFilter.THRESHOLD));			
 		});
 		
+		Parameter p4 = declickFilter.getParameter(declickFilter.WIDTH);
+		setFrom(p2, declickWindow);
+		declickWindow.setTitle("Width");
+		declickWindow.setFormatter((e) -> {
+			// DecimalFormat formatter = new DecimalFormat("0.0");
+			// return formatter.format(e);			
+			return samplesToMicroseconds(declickFilter.getIntControl(ClickRemovalFilter.WIDTH)) + "";			
+		});
+		
+		
 		output.setButtons(MIXED, ORIGINAL, DIFF, LEFT_RIGHT);
 		output.addActionListener(this);
 		refreshValues();
@@ -262,7 +272,9 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 			decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
 		} else if(e.getSource() == declickThresold ){
 			declickFilter.setControl(declickFilter.THRESHOLD, declickThresold.getValue());
-		} else {
+		} else if(e.getSource() == declickWindow ){
+			declickFilter.setControl(declickFilter.WIDTH, declickWindow.getValue());
+		}else {
 			LOG.error("Source {} not found?!?", e.getSource());
 		}
 		refreshValues();		

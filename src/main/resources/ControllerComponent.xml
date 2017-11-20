@@ -29,13 +29,14 @@
 						focusable="false">Remove clicks
 					</JCheckBox>
 					<component class="com.oxande.swing.JMeter" id="declickThresold" />
+					<component class="com.oxande.swing.JMeter" id="declickWindow" />
 
 						<!-- <JSlider minsize="100,50" id="thresold_factor" onChange="clickThresoldChanged" 
-							minimum="0" maximum="900" orientation="horizontal" value="200">Factor </JSlider> -->
+							minimum="0" maximum="900" orientation="horizontal" value="200">Factor </JSlider>
 						<JSlider minsize="100,50" id="declick_window" onChange="clickWindowChanged"
 							minimum="0" maximum="40" orientation="horizontal" value="20">Average
 						</JSlider>
-
+ 						-->
 				</JPanel>
 			</td>
 		</tr>

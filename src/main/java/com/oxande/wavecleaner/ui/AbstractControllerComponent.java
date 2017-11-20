@@ -4,14 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.lang.UnsupportedOperationException;
 
 import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 /**
  * Class created automatically -- DO NOT UPDATE MANUALLY.
@@ -29,25 +24,12 @@ public class AbstractControllerComponent extends JPanel {
    protected JPanel panelDeclick = new JPanel();
    protected JCheckBox click = new JCheckBox();
    protected com.oxande.swing.JMeter declickThresold = new com.oxande.swing.JMeter();
-   protected JSlider declick_window = new JSlider();
+   protected com.oxande.swing.JMeter declickWindow = new com.oxande.swing.JMeter();
    private JPanel jpanel2 = new JPanel();
    private FlowLayout flowlayout1 = new FlowLayout();
    protected JPanel preampPanel = new JPanel();
    protected com.oxande.swing.JToggleSelect output = new com.oxande.swing.JToggleSelect();
    protected com.oxande.swing.JMeter volume = new com.oxande.swing.JMeter();
-public class ChangeListener1 implements javax.swing.event.ChangeListener {
-
-      public void stateChanged(ChangeEvent e)
-      {
-         clickWindowChanged();
-      }
-}
-
-
-   protected void clickWindowChanged()
-   {
-      throw new UnsupportedOperationException("Not implemented");
-   }
 
    public void initComponents()
    {
@@ -76,13 +58,7 @@ public class ChangeListener1 implements javax.swing.event.ChangeListener {
       click.setFocusable(false);
       panelDeclick.add(click);
       panelDeclick.add(declickThresold);
-      declick_window.setMinimumSize(new java.awt.Dimension(100,50));
-      declick_window.setMaximum(40);
-      declick_window.setMinimum(0);
-      declick_window.setOrientation(JSlider.HORIZONTAL);
-      declick_window.setValue(20);
-      declick_window.addChangeListener(new ChangeListener1());
-      panelDeclick.add(declick_window);
+      panelDeclick.add(declickWindow);
       c1.gridy = 1;
       c1.gridx = 0;
       c1.gridheight = 1;
