@@ -2,6 +2,7 @@ package com.oxande.swing;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,6 +32,8 @@ public class JToggleSelect extends JPanel implements MouseListener {
 
 	private Icon btnOn;
 	private Icon btnOff;
+	private boolean alone = false;
+	private boolean isOn = false;
 	
 	/**
 	 * The selected component.
@@ -42,8 +45,6 @@ public class JToggleSelect extends JPanel implements MouseListener {
 	public JToggleSelect() {
 		FlowLayout layout = new FlowLayout(FlowLayout.CENTER, 10, 10);
 		this.setLayout(layout);
-		btnOn = WaveUtils.loadIcon("btn-on.png", 20);
-		btnOff = WaveUtils.loadIcon("btn-off.png", 20);
 	}
 
 	public void addActionListener(ActionListener e) {
@@ -61,6 +62,18 @@ public class JToggleSelect extends JPanel implements MouseListener {
 	public void setButtons(List<String> buttons) {
 		FlowLayout layout = new FlowLayout(FlowLayout.CENTER, 10, 10);
 		this.setLayout(/* new GridLayout(1, buttons.size())*/ layout);
+		
+		if(buttons.size() == 1){
+			btnOn = WaveUtils.loadIcon("btn-on.png", 12);
+			btnOff = WaveUtils.loadIcon("btn-off.png", 12);
+			alone = true;
+
+		}
+		else {
+			btnOn = WaveUtils.loadIcon("btn-on.png", 20);
+			btnOff = WaveUtils.loadIcon("btn-off.png", 20);
+			alone = false;
+		}
 
 		removeAll();
 		boolean first = true;
@@ -86,6 +99,10 @@ public class JToggleSelect extends JPanel implements MouseListener {
 			if(first){
 				this.selected = btn;
 			}
+			if(alone){
+				btn.setMinimumSize(new Dimension(60,24));
+				btn.setPreferredSize(new Dimension(60,24));
+			}
 			first = false;
 		}
 		invalidate();
@@ -102,6 +119,10 @@ public class JToggleSelect extends JPanel implements MouseListener {
 			component.setBackground(selected ? Color.DARK_GRAY : Color.LIGHT_GRAY);
 			component.setForeground(selected ? Color.WHITE : Color.BLACK);
 		}
+		if( this.alone ){
+			component.setText(selected ? "ON" : "OFF");
+			isOn = selected;
+		}
 	}
 
 	@Override
@@ -116,6 +137,15 @@ public class JToggleSelect extends JPanel implements MouseListener {
 			listenerManager.send((listener) -> {
 				this.selected = abstractButton;
 				ActionEvent evt = new ActionEvent(abstractButton, 0, "SELECTED");
+				listener.actionPerformed(evt);
+			});
+		} else if( alone ){
+			for (Component button : getComponents()) {
+				renderSelected((JLabel)button, !isOn);
+			}
+			listenerManager.send((listener) -> {
+				this.selected = abstractButton;
+				ActionEvent evt = new ActionEvent(abstractButton, 0, (isOn ? "ON" : "OFF"));
 				listener.actionPerformed(evt);
 			});
 		}

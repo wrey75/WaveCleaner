@@ -18,6 +18,9 @@
 *******************************************************************************/
 package com.oxande.wavecleaner.filters;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +48,7 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 public class DecrackleFilter extends AudioFilter {
 	private static Logger LOG = LogFactory.getLog(DecrackleFilter.class);
 
-	public static final String WINDOW = "window";
+	public static final int WINDOW_SIZE = 2000;
 	public static final String AVERAGE = "average";
 	public static final String FACTOR = "factor";
 	
@@ -57,9 +60,14 @@ public class DecrackleFilter extends AudioFilter {
 	 */
 	public DecrackleFilter() {
 		super();
-		this.addParameter(WINDOW, INT_PARAM, 3, 10000, 2000);
-		this.addParameter(FACTOR, FLOAT_PARAM, 0.01f, 1.0f, 0.2f).setFactor(10.0f);
-		this.addParameter(AVERAGE, INT_PARAM, 1, 10, 3);
+		this.addParameter(FACTOR, 0.01f, 1.0f, 0.5f, 0.2f, v -> {
+			NumberFormat formatter = new DecimalFormat("0.0");
+			return formatter.format(v);
+		});
+		this.addParameter(AVERAGE, 1, 10, 3, 1, v -> {
+			NumberFormat formatter = new DecimalFormat("0");
+			return formatter.format(v);
+		});
 	}
 
 
@@ -75,7 +83,7 @@ public class DecrackleFilter extends AudioFilter {
 	public float[][] nextSamples() {
 		// Load control values
 		int width = Math.max(1, (int)this.getControl(AVERAGE));
-		int nmax = Math.max(3, (int)this.getControl(WINDOW));
+		int nmax = WINDOW_SIZE;
 		
 		int asize = nmax + old_width + width;
 		if( y_hat_tmp == null || y_hat_tmp.length < asize ){

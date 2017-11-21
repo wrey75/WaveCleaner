@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.Logger;
 
@@ -48,11 +49,9 @@ import ddf.minim.ugens.FilePlayer;
 public class AudioFilter extends UGen {
 	private static Logger LOG = LogFactory.getLog(AudioFilter.class);
 	
-	public static final int INT_PARAM = 1;
-	public static final int FLOAT_PARAM = 2;
-	public static final int BOOLEAN_PARAM = 3;
-			
-	
+//	public static final int INT_PARAM = 1;
+//	public static final int FLOAT_PARAM = 2;
+//	public static final int BOOLEAN_PARAM = 3;
 
 	private StereoSampleQueue queue;
 	private UGen audio;
@@ -69,6 +68,10 @@ public class AudioFilter extends UGen {
 	private int sampleIndex;
 	
 	private UGenInput enabled = new UGenInput(InputType.CONTROL, 1);
+	
+	private static final Function<Float, String>BOOLEAN_FORMATTER = (v) -> {
+		return (v > 0.5f ? "ON" : "OFF");
+	};
 
 	/**
 	 * Return the parameters in a list.
@@ -80,11 +83,18 @@ public class AudioFilter extends UGen {
 	}
 
 	protected Parameter addBooleanParameter(String name, boolean defaultValue ){
-		return addParameter(name, BOOLEAN_PARAM, 0.0f, 1.0f, ConvertUtils.bool2flt(defaultValue));
+		return addParameter(name, 0.0f, 1.0f, 1.0f, ConvertUtils.bool2flt(defaultValue), BOOLEAN_FORMATTER);
 	}
 
-	protected synchronized Parameter addParameter(String name, int type, float min, float max, float defaultValue ){
-		Parameter p = new Parameter(name, type, min, max, defaultValue);
+	protected synchronized Parameter addParameter(String name, float min, float max, float defaultValue, float tick, Function<Float, String>formatter ){
+		Parameter p = new Parameter(name, min, max, defaultValue, formatter);
+		p.setTick(tick);
+		this.parameters.put(name.toUpperCase(), p);
+		return p;
+	}
+
+	protected synchronized Parameter addSelectorParameter(String name, int nb ){
+		Parameter p = new Parameter(name, 1, nb, 0, v -> String.valueOf(v));
 		this.parameters.put(name.toUpperCase(), p);
 		return p;
 	}
@@ -195,33 +205,38 @@ public class AudioFilter extends UGen {
 		private float min;
 		private float max;
 		private UGenInput input;
-		private float factor;
-		private float step = 0.1f;
+		// private float factor;
+		private float tick = 0.1f;
+		private Function<Float, String>formatter;
 		
-		Parameter(String name, int type, float min, float max, float defaultValue ){
+		Parameter(String name, float min, float max, float defaultValue, Function<Float, String>formatter ){
 			this.name = name;
-			this.type = type;
+//			this.type = type;
 			this.min = min;
 			this.max = max;
-			switch(type){
-				case BOOLEAN_PARAM:
-					this.step = 1.0f;
-					this.min = 0;
-					this.max = 1;
-					break;
-					
-				case INT_PARAM:
-					this.step = 1.0f;
-					break;
-			}
+//			switch(type){
+//				case BOOLEAN_PARAM:
+//					this.step = 1.0f;
+//					this.min = 0;
+//					this.max = 1;
+//					break;
+//					
+//				case INT_PARAM:
+//					this.step = 1.0f;
+//					break;
+//			}
 
 			this.input = new UGenInput(InputType.CONTROL);
 			this.setValue(defaultValue);
-			this.factor = 1.0f;
+			this.formatter = formatter;
 		}
 		
-		public float getStep(){
-			return this.step;
+		public float getTick(){
+			return this.tick;
+		}
+
+		public void setTick(float tick){
+			this.tick = tick;
 		}
 		
 		void setValue( float v ){
@@ -245,6 +260,11 @@ public class AudioFilter extends UGen {
 			return v;
 		}
 
+		public String getFormattedValue(){
+			float v = this.input.getLastValue();
+			return this.formatter.apply(v);
+		}
+		
 		public String getName() {
 			return name;
 		}
@@ -261,14 +281,14 @@ public class AudioFilter extends UGen {
 			return max;
 		}
 
-		public float getFactor() {
-			return this.factor;
-		}
-
-		Parameter setFactor( float f ){
-			this.factor = f;
-			return this;
-		}
+//		public float getFactor() {
+//			return this.factor;
+//		}
+//
+//		Parameter setFactor( float f ){
+//			this.factor = f;
+//			return this;
+//		}
 	}
 	
 	@Override
@@ -347,16 +367,6 @@ public class AudioFilter extends UGen {
 	 *            the input stream.
 	 */
 	public AudioFilter() {
-//		int nbChannels = iStream.getFormat().getChannels();
-//		if (nbChannels != Minim.STEREO) {
-//			throw new IllegalArgumentException("The input stream must be STEREO.");
-//		}
-//		this.mStream = iStream;
-		
-//		this.input = new UGenInput(InputType.AUDIO);
-//		this.input.setChannelCount(2);
-		// this.queue = new StereoSampleQueue(stream);
-
 		// Create empty samples array
 		this.samples = new float[2][];
 		this.samples[0] = new float[0];

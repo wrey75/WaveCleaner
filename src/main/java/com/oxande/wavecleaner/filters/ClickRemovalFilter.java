@@ -1,5 +1,8 @@
 package com.oxande.wavecleaner.filters;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import ddf.minim.MultiChannelBuffer;
 
 public class ClickRemovalFilter extends AudioFilter {
@@ -18,8 +21,14 @@ public class ClickRemovalFilter extends AudioFilter {
 	 */
 	public ClickRemovalFilter() {
 		super();
-		this.addParameter(THRESHOLD, INT_PARAM, 0, 900, 200);
-		this.addParameter(WIDTH, INT_PARAM, 0, 40, 20);
+		this.addParameter(THRESHOLD, 0, 900, 200, 5, v -> {
+			NumberFormat formatter = new DecimalFormat("0");
+			return formatter.format(v);
+		});
+		this.addParameter(WIDTH, 0, 40, 20, 1, v -> {
+			NumberFormat formatter = new DecimalFormat("0");
+			return formatter.format(v);
+		});
 
 		windowSize = 8192;
 		sep = 2049;

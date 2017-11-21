@@ -1,4 +1,4 @@
-package com.oxande.swing;
+package com.oxande.wavecleaner.ui;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -6,11 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.text.DecimalFormat;
 import java.util.Timer;
-import java.util.TimerTask;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
@@ -19,11 +15,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.wavecleaner.filters.AudioFilter;
+import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
 import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.WaveUtils;
 import com.oxande.wavecleaner.util.logging.LogFactory;
@@ -40,34 +36,44 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  *
  */
 @SuppressWarnings("serial")
-public class JMeter extends JPanel {
-	private static Logger LOG = LogFactory.getLog(JMeter.class);
+public class JFilterMeter extends JPanel {
+	private static Logger LOG = LogFactory.getLog(JFilterMeter.class);
 
-	private float maxValue;
-	private float minValue;
+	private AudioFilter filter;
+	private Parameter control;
 	private float value;
-	private float step;
-	private JPanel mainPanel;
+
 	private JLabel minusBtn;
 	private JLabel plusBtn;
 	private JLabel labelValue = new JLabel();
 	private JLabel titleLabel = new JLabel();
 	private String pattern = "0.0";
-	ListenerManager<ChangeListener> manager = new ListenerManager<>();
-	private Function<Float, String> formatter = (v) -> {
-		DecimalFormat formatter = new DecimalFormat(this.pattern);
-		return formatter.format(v);
-	};
 	
+	ListenerManager<ValueListener> manager = new ListenerManager<>();
 	
+//	private Function<Float, String> formatter = (v) -> {
+//		DecimalFormat formatter = new DecimalFormat(this.pattern);
+//		return formatter.format(v);
+//	};
 	
+	public static interface ValueListener {
+
+		public String formattedValue();
+		
+		public void valueIncremented(JFilterMeter e);
+		
+		public void valueDecremented(JFilterMeter e);
+		
+	}
+	
+
 	public static final int BTN_SIZE = 15;
 
-	public void addChangeListener(ChangeListener listener) {
+	public void addValueListener(ValueListener listener) {
 		manager.add(listener);
 	}
 
-	public void removeChangeListener(ChangeListener listener) {
+	public void removeValueListener(ValueListener listener) {
 		manager.remove(listener);
 	}
 
@@ -91,7 +97,7 @@ public class JMeter extends JPanel {
 	 * @return the new {@link JButton} created.
 	 * 
 	 */
-	public JLabel newButton(String imgFile, String label, Consumer<MouseEvent> function) {
+	public JLabel newButton(String imgFile, int dir, String label) {
 		JLabel btn = new JLabel();
 		btn.setOpaque(false);
 		btn.setAlignmentY(Component.CENTER_ALIGNMENT);
@@ -106,9 +112,13 @@ public class JMeter extends JPanel {
 			LOG.error("Can not load {}", imgFile);
 			btn.setText(label); // use label instead
 		}
+		
+		JFilterMeter self = this;
 
 		btn.addMouseListener(new MouseListener() {
 			Timer mouseTimer;
+
+
 			
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -125,13 +135,13 @@ public class JMeter extends JPanel {
 					this.mouseTimer.cancel();
 				}
 				this.mouseTimer = new Timer();
-				int scale = 1000 / (int)((maxValue - minValue) / step);
-				mouseTimer.schedule(new TimerTask() {
-					@Override
-					public void run() {
-						mouseClicked(e);
-					}
-				}, 1000, scale);
+//				int scale = 1000 / (int)((maxValue - minValue) / step);
+//				mouseTimer.schedule(new TimerTask() {
+//					@Override
+//					public void run() {
+//						mouseClicked(e);
+//					}
+//				}, 1000, scale);
 			}
 			
 			@Override
@@ -144,19 +154,19 @@ public class JMeter extends JPanel {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				function.accept(e);
+				manager.publish(l -> {
+					String v;
+					if( dir < 0 ){
+						l.valueDecremented(self);
+					} else {
+						l.valueIncremented(self);
+					}
+					self.labelValue.setText(l.formattedValue());
+				});
 			}
 			
 		});
 		return btn;
-	}
-
-	public void setMinimumValue(float min) {
-		this.minValue = min;
-	}
-
-	public void setMaximumValue(float max) {
-		this.maxValue = max;
 	}
 
 	/**
@@ -165,24 +175,11 @@ public class JMeter extends JPanel {
 	 * @return the current value
 	 */
 	public float getValue() {
-		return this.value;
+		return this.control.getValue();
 	}
 	
-	public void setStepValue(float v) {
-		if (v < 0.1) {
-			this.pattern = "0.00";
-		} else if (v < 1) {
-			this.pattern = "0.0";
-		} else {
-			this.pattern = "0";
-		}
-		this.step = v;
-		setValue(this.value);
-	}
-
-
 	/**
-	 * Create a {@link JMeter} with all the value.
+	 * Create a {@link JFilterMeter} with all the value.
 	 * 
 	 * @param min
 	 *            the minimum value
@@ -191,22 +188,20 @@ public class JMeter extends JPanel {
 	 * @param value
 	 *            the step used
 	 */
-	public JMeter(float min, float max, float value, float step) {
+	public JFilterMeter(AudioFilter filter, String control, String label) {
 		super();
+		this.filter = filter;
+		Parameter p = this.filter.getParameter(control);
+		this.control = p;
+		setTitle(label);
+		
 		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10 );
 		titleLabel.setFont(font);
 		labelValue.setHorizontalAlignment(JLabel.CENTER);
 		labelValue.setOpaque(true);
-		this.step = step;
-		setMinimumValue(min);
-		setMaximumValue(max);
-		
-		minusBtn = newButton("minus.png", "<", (e) -> {
-			decrementValue();
-		});
-		plusBtn = newButton("plus.png", ">", (e) -> {
-			incrementValue();
-		});
+
+		minusBtn = newButton("minus.png", -1, "<");
+		plusBtn = newButton("plus.png", +1, ">");
 
 		FlowLayout layout = new FlowLayout(FlowLayout.CENTER);
 		// BorderLayout layout = new BorderLayout();
@@ -228,50 +223,43 @@ public class JMeter extends JPanel {
 		add(centerPanel);
 		add(plusBtn);
 
+		this.labelValue.setText( p.getFormattedValue() );
 		this.validate();
-		forceValue(value);
+//		forceValue(value);
 		this.repaint();
 	}
 
-	public JMeter(float min, float max, float value) {
-		this(min, max, value, (max - min) / 10.0f);
-	}
-
-	public JMeter() {
-		this(0, 100, 0, 10);
-	}
-	
 	public void setTitle(String title){
 		SwingUtilities.invokeLater(() -> {
 			titleLabel.setText(title);
 		});
 	}
 
-	protected void forceValue(float newValue) {
-		if (newValue < minValue) {
-			this.value = minValue;
-		} else if (newValue > maxValue) {
-			this.value = maxValue;
-		} else {
-			this.value = newValue;
-		}
-		SwingUtilities.invokeLater(() -> {
-			manager.send((listener) -> {
-				listener.stateChanged(new ChangeEvent(this));
-			});
-			String s = this.formatter.apply(this.value);
-			labelValue.setText(s);
-		});
-	}
+//	protected void forceValue(float newValue) {
+//		if (newValue < minValue) {
+//			this.value = minValue;
+//		} else if (newValue > maxValue) {
+//			this.value = maxValue;
+//		} else {
+//			this.value = newValue;
+//		}
+//		SwingUtilities.invokeLater(() -> {
+//			manager.send((listener) -> {
+//				listener.stateChanged(new ChangeEvent(this));
+//			});
+//			String s = this.formatter.apply(this.value);
+//			labelValue.setText(s);
+//		});
+//	}
 	
-	/**
-	 * Set a dedicated formatter for this component.
-	 * 
-	 * @param formatter a functional to convert {@link Float} to {@link String}.
-	 */
-	public void setFormatter( Function<Float, String> formatter ){
-		this.formatter = formatter;
-	}
+//	/**
+//	 * Set a dedicated formatter for this component.
+//	 * 
+//	 * @param formatter a functional to convert {@link Float} to {@link String}.
+//	 */
+//	public void setFormatter( Function<Float, String> formatter ){
+//		this.formatter = formatter;
+//	}
 	
 	/**
 	 * Set the new value. If the new value is near of the current one (less than one step),
@@ -280,8 +268,8 @@ public class JMeter extends JPanel {
 	 * @param newValue the new value
 	 */
 	public void setValue(float newValue) {
-		if (Math.abs(newValue - this.value) > this.step / 2.0f) {
-			this.forceValue(newValue);
+		if (newValue != this.value) {
+			this.filter.setControl(this.control.getName(), newValue);
 		}
 	}
 
@@ -295,12 +283,12 @@ public class JMeter extends JPanel {
 //		super.paintComponent(g);
 //	}
 
-	protected void incrementValue() {
-		setValue(this.value + this.step);
-	}
-
-	protected void decrementValue() {
-		setValue(this.value - this.step);
-	}
+//	protected void incrementValue() {
+//		setValue(this.value + this.tickSpacing);
+//	}
+//
+//	protected void decrementValue() {
+//		setValue(this.value - this.tickSpacing);
+//	}
 
 }

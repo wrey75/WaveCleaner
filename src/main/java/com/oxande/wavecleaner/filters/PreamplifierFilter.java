@@ -1,5 +1,8 @@
 package com.oxande.wavecleaner.filters;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.ui.VUMeterComponent;
@@ -58,8 +61,11 @@ public class PreamplifierFilter extends AudioFilter {
 	
 	public PreamplifierFilter( AudioDocumentPlayer player){
 		super();
-		this.addParameter(GAIN, FLOAT_PARAM, -24.0f, +24.0f, 0.0f);
-		this.addParameter(SOURCE, INT_PARAM, 0, 3, 0);
+		this.addParameter(GAIN, -24.0f, +24.0f, 3.0f, 0.1f, (v) -> {
+			NumberFormat formatter = new DecimalFormat("0.0 dB");
+			return formatter.format(v);
+		});
+		this.addSelectorParameter(SOURCE, 3);
 		this.setSampleRate(48000f); // Force a default sample rate (overriden by the player)
 		if( player != null ){
 			this.setPlayer(player);

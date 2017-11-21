@@ -1,11 +1,9 @@
 package com.oxande.wavecleaner.ui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
-import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 /**
@@ -17,19 +15,9 @@ import javax.swing.JPanel;
 public class AbstractControllerComponent extends JPanel {
    private JPanel jpanel1 = new JPanel();
    protected JPanel panelCrackle = new JPanel();
-   protected JCheckBox crackle = new JCheckBox();
-   protected com.oxande.swing.JMeter crackleFactor = new com.oxande.swing.JMeter();
-   protected com.oxande.swing.JMeter crackle_average = new com.oxande.swing.JMeter();
-   protected com.oxande.swing.JMeter crackle_window = new com.oxande.swing.JMeter();
    protected JPanel panelDeclick = new JPanel();
-   protected JCheckBox click = new JCheckBox();
-   protected com.oxande.swing.JMeter declickThresold = new com.oxande.swing.JMeter();
-   protected com.oxande.swing.JMeter declickWindow = new com.oxande.swing.JMeter();
-   private JPanel jpanel2 = new JPanel();
-   private FlowLayout flowlayout1 = new FlowLayout();
    protected JPanel preampPanel = new JPanel();
    protected com.oxande.swing.JToggleSelect output = new com.oxande.swing.JToggleSelect();
-   protected com.oxande.swing.JMeter volume = new com.oxande.swing.JMeter();
 
    public void initComponents()
    {
@@ -38,50 +26,36 @@ public class AbstractControllerComponent extends JPanel {
       GridBagConstraints c1 = new GridBagConstraints();
       jpanel1.setLayout(layout1);
       
-      crackle.setText("Decrackle");
-      crackle.setFocusable(false);
-      panelCrackle.add(crackle);
-      panelCrackle.add(crackleFactor);
-      panelCrackle.add(crackle_average);
-      panelCrackle.add(crackle_window);
       c1.gridy = 0;
       c1.gridx = 0;
       c1.gridheight = 1;
-      c1.gridwidth = 3;
+      c1.gridwidth = 1;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 3;
+      c1.weightx = 1;
       layout1.setConstraints(panelCrackle, c1);
       jpanel1.add(panelCrackle);
       
-      click.setText("Remove clicks");
-      click.setFocusable(false);
-      panelDeclick.add(click);
-      panelDeclick.add(declickThresold);
-      panelDeclick.add(declickWindow);
       c1.gridy = 1;
       c1.gridx = 0;
       c1.gridheight = 1;
-      c1.gridwidth = 3;
+      c1.gridwidth = 1;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 3;
+      c1.weightx = 1;
       layout1.setConstraints(panelDeclick, c1);
       jpanel1.add(panelDeclick);
       
-      jpanel2.setLayout(flowlayout1);
-      jpanel2.add(preampPanel);
-      jpanel2.add(output);
-      jpanel2.add(volume);
+      preampPanel.add(output);
       c1.gridy = 2;
       c1.gridx = 0;
       c1.gridheight = 1;
-      c1.gridwidth = 3;
+      c1.gridwidth = 1;
       c1.anchor = GridBagConstraints.WEST;
       c1.fill = GridBagConstraints.NONE;
-      c1.weightx = 3;
-      layout1.setConstraints(jpanel2, c1);
-      jpanel1.add(jpanel2);
+      c1.weightx = 1;
+      layout1.setConstraints(preampPanel, c1);
+      jpanel1.add(preampPanel);
       this.add(jpanel1, BorderLayout.CENTER);
       this.setPreferredSize(new java.awt.Dimension(600,400));
       this.setName("com.oxande.wavecleaner.ui.AbstractControllerComponent");
