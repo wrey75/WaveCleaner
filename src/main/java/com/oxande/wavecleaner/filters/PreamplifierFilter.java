@@ -61,7 +61,7 @@ public class PreamplifierFilter extends AudioFilter {
 	
 	public PreamplifierFilter( AudioDocumentPlayer player){
 		super();
-		this.addParameter(GAIN, -24.0f, +24.0f, 3.0f, 0.1f, (v) -> {
+		this.addParameter(GAIN, -24.0f, +12.0f, 3.0f, 0.1f, (v) -> {
 			NumberFormat formatter = new DecimalFormat("0.0 dB");
 			return formatter.format(v);
 		});

@@ -1,19 +1,21 @@
 package com.oxande.wavecleaner.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Timer;
+import java.util.TimerTask;
 
-import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.Logger;
@@ -47,14 +49,8 @@ public class JFilterMeter extends JPanel {
 	private JLabel plusBtn;
 	private JLabel labelValue = new JLabel();
 	private JLabel titleLabel = new JLabel();
-	private String pattern = "0.0";
 	
 	ListenerManager<ValueListener> manager = new ListenerManager<>();
-	
-//	private Function<Float, String> formatter = (v) -> {
-//		DecimalFormat formatter = new DecimalFormat(this.pattern);
-//		return formatter.format(v);
-//	};
 	
 	public static interface ValueListener {
 
@@ -67,7 +63,7 @@ public class JFilterMeter extends JPanel {
 	}
 	
 
-	public static final int BTN_SIZE = 15;
+	public static final int BTN_SIZE = 20;
 
 	public void addValueListener(ValueListener listener) {
 		manager.add(listener);
@@ -77,16 +73,6 @@ public class JFilterMeter extends JPanel {
 		manager.remove(listener);
 	}
 
-//	public Dimension getMinimumSize(){
-//		int wBorderSize = 0;
-//		int hBorderSize = 0;
-//		if( this.getBorder() != null){
-//			Insets insets = this.getBorder().getBorderInsets(this);
-//			hBorderSize = insets.bottom + insets.top;
-//			wBorderSize = insets.left + insets.right;
-//		}
-//		return new Dimension( Math.max( 120, MIN_SIZE * 3) + wBorderSize, MIN_SIZE + hBorderSize);
-//	}
 	
 	/**
 	 * Create a button for "+" and "-".
@@ -112,13 +98,10 @@ public class JFilterMeter extends JPanel {
 			LOG.error("Can not load {}", imgFile);
 			btn.setText(label); // use label instead
 		}
-		
 		JFilterMeter self = this;
 
 		btn.addMouseListener(new MouseListener() {
 			Timer mouseTimer;
-
-
 			
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -135,13 +118,14 @@ public class JFilterMeter extends JPanel {
 					this.mouseTimer.cancel();
 				}
 				this.mouseTimer = new Timer();
-//				int scale = 1000 / (int)((maxValue - minValue) / step);
-//				mouseTimer.schedule(new TimerTask() {
-//					@Override
-//					public void run() {
-//						mouseClicked(e);
-//					}
-//				}, 1000, scale);
+				Parameter p = self.control;
+				int scale = (int)( 10000.0 * p.getTick() / (p.getMaximum() - p.getMinimum()) );
+				mouseTimer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						mouseClicked(e);
+					}
+				}, 1000, scale);
 			}
 			
 			@Override
@@ -178,6 +162,7 @@ public class JFilterMeter extends JPanel {
 		return this.control.getValue();
 	}
 	
+
 	/**
 	 * Create a {@link JFilterMeter} with all the value.
 	 * 
@@ -190,42 +175,38 @@ public class JFilterMeter extends JPanel {
 	 */
 	public JFilterMeter(AudioFilter filter, String control, String label) {
 		super();
+		this.setOpaque(false);
+		
 		this.filter = filter;
 		Parameter p = this.filter.getParameter(control);
 		this.control = p;
 		setTitle(label);
 		
+		// this.setBorder( BorderFactory.createRaisedBevelBorder());
 		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10 );
 		titleLabel.setFont(font);
 		labelValue.setHorizontalAlignment(JLabel.CENTER);
-		labelValue.setOpaque(true);
 
-		minusBtn = newButton("minus.png", -1, "<");
-		plusBtn = newButton("plus.png", +1, ">");
+		minusBtn = newButton("less-than.png", -1, "<");
+		plusBtn = newButton("greater-than.png", +1, ">");
 
-		FlowLayout layout = new FlowLayout(FlowLayout.CENTER);
+		BorderLayout layout = new BorderLayout();
 		// BorderLayout layout = new BorderLayout();
 		layout.setHgap(2);
 		setLayout(layout);
-		add(minusBtn);
-		JPanel centerPanel = new JPanel();
-		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-		titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		titleLabel.setHorizontalTextPosition(JLabel.CENTER);
-		centerPanel.add(titleLabel);
-		this.setMinimumSize(new Dimension(100,BTN_SIZE * 2));
-		this.setPreferredSize(new Dimension(100,BTN_SIZE * 2));
-		// labelValue.setPreferredSize(new Dimension(60,3));		
+		add(minusBtn, BorderLayout.WEST);
+		titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		labelValue.setPreferredSize(new Dimension(60,BTN_SIZE));		
 		labelValue.setAlignmentX(Component.CENTER_ALIGNMENT);
 		font = new Font(Font.SANS_SERIF, Font.BOLD, 12);
 		labelValue.setFont(font);
-		centerPanel.add(labelValue);
-		add(centerPanel);
-		add(plusBtn);
+		add(labelValue, BorderLayout.CENTER);
+		add(titleLabel, BorderLayout.SOUTH);
+		add(plusBtn, BorderLayout.EAST);
 
 		this.labelValue.setText( p.getFormattedValue() );
+		this.setBorder(BorderFactory.createEmptyBorder(2, 10, 2, 10));
 		this.validate();
-//		forceValue(value);
 		this.repaint();
 	}
 
@@ -235,31 +216,6 @@ public class JFilterMeter extends JPanel {
 		});
 	}
 
-//	protected void forceValue(float newValue) {
-//		if (newValue < minValue) {
-//			this.value = minValue;
-//		} else if (newValue > maxValue) {
-//			this.value = maxValue;
-//		} else {
-//			this.value = newValue;
-//		}
-//		SwingUtilities.invokeLater(() -> {
-//			manager.send((listener) -> {
-//				listener.stateChanged(new ChangeEvent(this));
-//			});
-//			String s = this.formatter.apply(this.value);
-//			labelValue.setText(s);
-//		});
-//	}
-	
-//	/**
-//	 * Set a dedicated formatter for this component.
-//	 * 
-//	 * @param formatter a functional to convert {@link Float} to {@link String}.
-//	 */
-//	public void setFormatter( Function<Float, String> formatter ){
-//		this.formatter = formatter;
-//	}
 	
 	/**
 	 * Set the new value. If the new value is near of the current one (less than one step),
@@ -272,23 +228,5 @@ public class JFilterMeter extends JPanel {
 			this.filter.setControl(this.control.getName(), newValue);
 		}
 	}
-
-//	@Override
-//	public void paintComponent(Graphics g0) {
-//		// int width = getWidth();
-//		// int height = getHeight();
-//		// int iconSize = Math.min( width / 3, height );
-//
-//		Graphics2D g = (Graphics2D) g0;
-//		super.paintComponent(g);
-//	}
-
-//	protected void incrementValue() {
-//		setValue(this.value + this.tickSpacing);
-//	}
-//
-//	protected void decrementValue() {
-//		setValue(this.value - this.tickSpacing);
-//	}
 
 }

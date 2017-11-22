@@ -2,6 +2,7 @@ package com.oxande.wavecleaner.ui;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -15,12 +16,15 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.swing.JToggleSelect;
+import com.oxande.swing.JVerticalSeparator;
 import com.oxande.wavecleaner.filters.AudioFilter;
 import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
 import com.oxande.wavecleaner.filters.ClickRemovalFilter;
@@ -30,14 +34,28 @@ import com.oxande.wavecleaner.ui.JFilterMeter.ValueListener;
 import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
+/**
+ * The controller is quite complex in term of creating subcomponents. That's why we construct it
+ * manually rather than relying on Xml4Swing.
+ * 
+ * @author wrey75
+ *
+ */
 @SuppressWarnings("serial")
-public class ControllerComponent extends AbstractControllerComponent implements /* ItemListener,  ChangeListener, */ ActionListener {
+public class ControllerComponent extends JPanel implements ActionListener {
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
-	BufferedImage background;
-	private DecrackleFilter decrackleFilter;
-	private ClickRemovalFilter declickFilter;
+	private BufferedImage sono_up;
+	private BufferedImage sono_middle;
+	private BufferedImage sono_down;
+	private static final int SCALE = 2;
+	private static final int REPEAT = 10;
+	private int finalWidth;
+	
+//	private DecrackleFilter decrackleFilter;
+//	private ClickRemovalFilter declickFilter;
 	private PreamplifierFilter preamplifierFilter;
 	private List<JFilterMeter> meterList = new ArrayList<>();
+	private JToggleSelect output = new JToggleSelect();
 	
 	public static final String MIXED = "MIXED";
 	public static final String ORIGINAL = "ORIGINAL";
@@ -48,6 +66,18 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 		return (long)(nbSamples * 1000000 / preamplifierFilter.sampleRate());
 	}
 
+	private void addToPanel(JPanel panel, JComponent comp){
+		if( panel.getComponents().length > 0){
+			JComponent sep = new JVerticalSeparator();
+			sep.setMinimumSize(new Dimension( 10, 15));
+			sep.setPreferredSize(new Dimension( 10, 15));
+			panel.add(sep);
+		}
+		panel.add(comp);
+		// panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+	}
+	
 	private void addSwith(JPanel panel, AudioFilter filter){
 		JToggleSelect comp = new JToggleSelect();
 		comp.setButtons( "SWITCH" );
@@ -59,16 +89,21 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 				filter.setEnable(active);
 			}
 		});
-		panel.add(comp);
+		addToPanel(panel, comp);
 	}
 	
-	private void setPanelTitle(String title, JPanel panel){
-		// Add title
+	private JPanel createPanel(String title){
+		JPanel panel = new JPanel();
+		panel.setOpaque(false);
 		TitledBorder titleBorder;
 		titleBorder = BorderFactory.createTitledBorder(title);
 		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 12 );
 		titleBorder.setTitleFont(font);
 		panel.setBorder(titleBorder);
+		BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.X_AXIS);
+		panel.setLayout(boxLayout);
+		this.add(panel); // Add to the current panel
+		return panel;
 	}
 	
 	private void addMeter( JPanel panel, AudioFilter filter, String name, String label ){
@@ -97,33 +132,36 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 				updateValue(e, -1);
 			}
 		});
-		panel.add(m);
+		addToPanel(panel, m);
 		meterList.add(m);
 	}
 	
 
 	public ControllerComponent() {
 		super();
-		initComponents();
-	}
-	
-	public void initComponents() {
-		super.initComponents();
-		URL url = getClass().getClassLoader().getResource("images/sono.png");
+		URL url1 = getClass().getClassLoader().getResource("images/preamp/up.png");
+		URL url2 = getClass().getClassLoader().getResource("images/preamp/middle.png");
+		URL url3 = getClass().getClassLoader().getResource("images/preamp/down.png");
 		try {
-			background = ImageIO.read(url);
-			Dimension size = new Dimension(background.getWidth() / 3, background.getHeight() / 3);
+			sono_up = ImageIO.read(url1);
+			sono_middle = ImageIO.read(url2);
+			sono_down = ImageIO.read(url3);
+			finalWidth = sono_middle.getWidth() / SCALE;
+			Dimension size = new Dimension(finalWidth, (sono_middle.getHeight() * REPEAT + sono_down.getHeight() + sono_middle.getHeight()) / SCALE);
 			this.setPreferredSize(size);
+
 			this.setMinimumSize(size);
 			this.setMaximumSize(size);
-			this.setOpaque(true);
-			this.setBackground(null);
+			// this.setOpaque(false);
+			// this.setBackground(Color.RED);
 		} catch (IOException ex) {
 			LOG.error("Can not load image: {}", ex.getMessage());
 		}
 
-		this.invalidate();
-		this.setVisible(true);
+		// this.invalidate();
+		// this.setVisible(true);
+		this.setLayout(new FlowLayout( FlowLayout.CENTER));
+		revalidate();
 	}
 
 
@@ -134,96 +172,29 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	 *            the {@link DecrackleFilter} filter.
 	 */
 	public void setFilters(DecrackleFilter filter1, ClickRemovalFilter filter2, PreamplifierFilter lastFilter) {
-	
-		setPanelTitle("Preamplifier", preampPanel );
+		JPanel preampPanel = createPanel("Preamplifier" );
 		this.preamplifierFilter = lastFilter;
-		this.preamplifierFilter.setControl(PreamplifierFilter.GAIN, +6.0f);
+		this.preamplifierFilter.setControl(PreamplifierFilter.GAIN, +2.0f);
 		output.setButtons(MIXED, ORIGINAL, DIFF, LEFT_RIGHT);
 		output.addActionListener(this);
-		addMeter(output, lastFilter, PreamplifierFilter.GAIN, "Volume" );
+		preampPanel.add(output);
+		addMeter(preampPanel, lastFilter, PreamplifierFilter.GAIN, "Volume" );
 		
-		this.decrackleFilter = filter1;
-		setPanelTitle("Decrackling", panelCrackle);
+//		this.decrackleFilter = filter1;
+		JPanel panelCrackle = createPanel("Decrackling");
 		addSwith(panelCrackle, filter1);
 		addMeter(panelCrackle, filter1, DecrackleFilter.FACTOR, "Factor" );
 		addMeter(panelCrackle, filter1, DecrackleFilter.AVERAGE, "Average" );
 		
-		this.declickFilter = filter2;
-		setPanelTitle("Click Removal", panelDeclick);
+//		this.declickFilter = filter2;
+		JPanel panelDeclick = createPanel("Click Removal" );
 		addSwith(panelDeclick, filter2);
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.THRESHOLD, "Thresold" );
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.WIDTH, "Width" );
 		
-//		crackleFactor.setTitle("Factor");
-//		Parameter p0 = decrackleFilter.getParameter(DecrackleFilter.FACTOR);
-//		setFrom(p0, crackleFactor);
-//		crackleFactor.setFormatter((e) -> {
-//			DecimalFormat formatter = new DecimalFormat("0.0");
-//			return formatter.format(e);			
-//		});
-//		// this.initValue(crackleFactor, this.decrackleFilter, DecrackleFilter.FACTOR);
-//		
-//		
-//		// this.initValue(crackle_window, this.decrackleFilter, DecrackleFilter.WINDOW);
-//		Parameter p1 = decrackleFilter.getParameter(DecrackleFilter.WINDOW);
-//		crackle_window.setTitle("Window");
-//		crackle_window.setMinimumValue((int)(p1.getMinimum() * p1.getFactor()));
-//		crackle_window.addChangeListener(this);
-//		crackle_window.setFormatter((e) -> {
-//			return samplesToMicroseconds(decrackleFilter.getIntControl(DecrackleFilter.WINDOW)) + " \u00B5s";			
-//		});
-//
-//		volume.setTitle("Volume");
-//		setFrom(preamplifierFilter.getParameter(PreamplifierFilter.GAIN), volume);
-//		volume.setFormatter((e) -> {
-//			DecimalFormat formatter = new DecimalFormat("0.0");
-//			return formatter.format(e) + " dB";			
-//		});
-//		
-//		Parameter p3 = decrackleFilter.getParameter(DecrackleFilter.AVERAGE);
-//		setFrom(p3, crackle_average);
-//		crackle_average.setTitle("Average");
-//		crackle_average.setFormatter((e) -> {
-//			//DecimalFormat formatter = new DecimalFormat("0.0");
-//			//return formatter.format(e);			
-//			return samplesToMicroseconds(decrackleFilter.getIntControl(DecrackleFilter.AVERAGE)) + " \u00B5s";			
-//		});
-//		// this.initValue(crackle_average, this.decrackleFilter, DecrackleFilter.AVERAGE);
-//		
-//		Parameter p2 = declickFilter.getParameter(declickFilter.THRESHOLD);
-//		setFrom(p2, declickThresold);
-//		declickThresold.setTitle("Thresold");
-//		declickThresold.setFormatter((e) -> {
-//			DecimalFormat formatter = new DecimalFormat("0.0");
-//			return formatter.format(e);			
-//			// return samplesToMicroseconds(declickFilter.getControl(declickFilter.THRESHOLD));			
-//		});
-//		
-//		Parameter p4 = declickFilter.getParameter(declickFilter.WIDTH);
-//		setFrom(p2, declickWindow);
-//		declickWindow.setTitle("Width");
-//		declickWindow.setFormatter((e) -> {
-//			// DecimalFormat formatter = new DecimalFormat("0.0");
-//			// return formatter.format(e);			
-//			return samplesToMicroseconds(declickFilter.getIntControl(ClickRemovalFilter.WIDTH)) + "";			
-//		});
-
 		this.invalidate();
 	}
 
-	
-//	@Override
-//	public void itemStateChanged(ItemEvent e) {
-//		if (this.crackle == e.getSource()) {
-//			boolean bSelected = this.crackle.isSelected();
-//			this.decrackleFilter.setEnable(bSelected);
-//		} else if (this.click == e.getSource()) {
-//			boolean bSelected = this.click.isSelected();
-//			this.declickFilter.setEnable(bSelected);
-//		} else {
-//			LOG.warn("Source {} unknown.", e.getSource());
-//		}
-//	}
 	
 	@Override public Dimension getPreferredSize()
 	{
@@ -256,36 +227,23 @@ public class ControllerComponent extends AbstractControllerComponent implements 
 	}
 	
 	
-
-//	@Override
-//	public void stateChanged(ChangeEvent e) {
-//		Assert.notNull(e);
-//		if( e.getSource() == crackle_window ){
-//			decrackleFilter.setControl(DecrackleFilter.WINDOW, crackle_window.getValue());
-//		} else if( e.getSource() == volume ){
-//			preamplifierFilter.setControl(PreamplifierFilter.GAIN, volume.getValue());
-//		} else if(e.getSource() == crackleFactor ){
-//			decrackleFilter.setControl(DecrackleFilter.FACTOR, crackleFactor.getValue() / 10.0f);
-//		} else if(e.getSource() == crackle_average ){
-//			decrackleFilter.setControl(DecrackleFilter.AVERAGE, crackle_average.getValue());
-//		} else if(e.getSource() == declickThresold ){
-//			declickFilter.setControl(declickFilter.THRESHOLD, declickThresold.getValue());
-//		} else if(e.getSource() == declickWindow ){
-//			declickFilter.setControl(declickFilter.WIDTH, declickWindow.getValue());
-//		}else {
-//			LOG.error("Source {} not found?!?", e.getSource());
-//		}
-//		refreshValues();		
-//	}
-
-
-	
 	protected void paintComponent(Graphics g0) {
 		Graphics2D g = (Graphics2D) g0;
 		super.paintComponent(g);
-		if (background != null) {
-			g.drawImage(background, 0, 0, getWidth(), getHeight(), 0, 0, background.getWidth(), background.getHeight(),
-					null);
+		if (sono_up != null) {
+			int y = 0;
+			int w = sono_up.getWidth();
+			int h = sono_up.getHeight();
+			g.drawImage(sono_up, 0, y, w / SCALE, y + h / SCALE, 0, 0, w, h, null);
+			y += h / SCALE;
+					
+			for(int i = 0; i < REPEAT; i++){
+				g.drawImage(sono_middle, 0, y, w / SCALE, y + (sono_middle.getHeight() / SCALE), 0, 0, w, h, null);
+				y += (sono_middle.getHeight() / SCALE);
+			}
+			
+			h = sono_down.getHeight();
+			g.drawImage(sono_down, 0, y, w / SCALE, y + (sono_down.getHeight() / SCALE), 0, 0, w, h, null);
 		}
 
 	}

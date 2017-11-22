@@ -45,6 +45,7 @@ public class JToggleSelect extends JPanel implements MouseListener {
 	public JToggleSelect() {
 		FlowLayout layout = new FlowLayout(FlowLayout.CENTER, 10, 10);
 		this.setLayout(layout);
+		this.setOpaque(false);
 	}
 
 	public void addActionListener(ActionListener e) {
@@ -67,7 +68,6 @@ public class JToggleSelect extends JPanel implements MouseListener {
 			btnOn = WaveUtils.loadIcon("btn-on.png", 12);
 			btnOff = WaveUtils.loadIcon("btn-off.png", 12);
 			alone = true;
-
 		}
 		else {
 			btnOn = WaveUtils.loadIcon("btn-on.png", 20);
@@ -79,12 +79,10 @@ public class JToggleSelect extends JPanel implements MouseListener {
 		boolean first = true;
 		for (String str : buttons) {
 			JLabel btn = new JLabel(str);
+			btn.setOpaque(false);
 			this.add(btn);
-			// btn.setSelected(first);
-			// btn.setActionCommand(str);
 			btn.setFocusable(false);
 			btn.setName(str);
-			btn.setOpaque(true);
 			btn.addMouseListener(this);
 			if( btnOn != null && btnOff != null ){
 				btn.setHorizontalAlignment(JLabel.LEFT);
@@ -93,8 +91,6 @@ public class JToggleSelect extends JPanel implements MouseListener {
 				btn.setHorizontalAlignment(JLabel.CENTER);
 			}
 			btn.setAlignmentY(JLabel.CENTER_ALIGNMENT);
-//			Dimension min = btn.getMinimumSize();
-//			btn.setPreferredSize(new Dimension((int)( min.getWidth() + 10), (int)(min.getHeight() + 10)));
 			renderSelected(btn, first);
 			if(first){
 				this.selected = btn;
@@ -128,7 +124,17 @@ public class JToggleSelect extends JPanel implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		JComponent abstractButton = (JComponent) e.getSource();
-		if(abstractButton != this.selected){
+		if( alone ){
+			for (Component button : getComponents()) {
+				renderSelected((JLabel)button, !isOn);
+			}
+			listenerManager.send((listener) -> {
+				this.selected = abstractButton;
+				ActionEvent evt = new ActionEvent(abstractButton, 0, (isOn ? "ON" : "OFF"));
+				listener.actionPerformed(evt);
+			});
+		}
+		else if(abstractButton != this.selected){
 			// Another button has been selected
 			for (Component button : getComponents()) {
 				renderSelected((JLabel)button, (button == abstractButton));
@@ -139,17 +145,7 @@ public class JToggleSelect extends JPanel implements MouseListener {
 				ActionEvent evt = new ActionEvent(abstractButton, 0, "SELECTED");
 				listener.actionPerformed(evt);
 			});
-		} else if( alone ){
-			for (Component button : getComponents()) {
-				renderSelected((JLabel)button, !isOn);
-			}
-			listenerManager.send((listener) -> {
-				this.selected = abstractButton;
-				ActionEvent evt = new ActionEvent(abstractButton, 0, (isOn ? "ON" : "OFF"));
-				listener.actionPerformed(evt);
-			});
 		}
-		
 	}
 
 	@Override
