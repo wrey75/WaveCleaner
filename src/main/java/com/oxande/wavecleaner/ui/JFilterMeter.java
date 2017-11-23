@@ -2,6 +2,7 @@ package com.oxande.wavecleaner.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
@@ -87,13 +88,14 @@ public class JFilterMeter extends JPanel {
 		JLabel btn = new JLabel();
 		btn.setOpaque(false);
 		btn.setAlignmentY(Component.CENTER_ALIGNMENT);
+		btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
 		Icon icon = WaveUtils.loadIcon(imgFile, BTN_SIZE);
 		if( icon != null ){
 			btn.setIcon(icon);
 			Dimension dimension = new Dimension(BTN_SIZE+2, 30);
-			btn.setMinimumSize(dimension);
-			btn.setMaximumSize(dimension);
+//			btn.setMinimumSize(dimension);
+//			btn.setMaximumSize(dimension);
 		} else {
 			LOG.error("Can not load {}", imgFile);
 			btn.setText(label); // use label instead
@@ -185,20 +187,23 @@ public class JFilterMeter extends JPanel {
 		// this.setBorder( BorderFactory.createRaisedBevelBorder());
 		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10 );
 		titleLabel.setFont(font);
-		labelValue.setHorizontalAlignment(JLabel.CENTER);
+		titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
 		minusBtn = newButton("less-than.png", -1, "<");
 		plusBtn = newButton("greater-than.png", +1, ">");
 
 		BorderLayout layout = new BorderLayout();
-		// BorderLayout layout = new BorderLayout();
 		layout.setHgap(2);
 		setLayout(layout);
+//		setMaximumSize(new Dimension(100 + BTN_SIZE * 2,BTN_SIZE * 3)); // sure?
+//		setPreferredSize(new Dimension(90 + BTN_SIZE * 2,BTN_SIZE * 2)); // sure?
+//		setMinimumSize(new Dimension(60 + BTN_SIZE * 2,BTN_SIZE * 2)); // sure?
 		add(minusBtn, BorderLayout.WEST);
-		titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		labelValue.setPreferredSize(new Dimension(60,BTN_SIZE));		
-		labelValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+		
 		font = new Font(Font.SANS_SERIF, Font.BOLD, 12);
+		labelValue.setPreferredSize(new Dimension(80,BTN_SIZE));		
+		labelValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+		labelValue.setHorizontalAlignment(JLabel.CENTER);
 		labelValue.setFont(font);
 		add(labelValue, BorderLayout.CENTER);
 		add(titleLabel, BorderLayout.SOUTH);

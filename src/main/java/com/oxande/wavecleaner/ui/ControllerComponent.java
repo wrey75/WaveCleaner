@@ -2,10 +2,10 @@ package com.oxande.wavecleaner.ui;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -77,6 +77,13 @@ public class ControllerComponent extends JPanel implements ActionListener {
 		// panel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 	}
+
+	private void addFiller(JPanel panel){
+		Dimension minSize = new Dimension(5, 100);
+		Dimension prefSize = new Dimension(5, 100);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 100);
+//		panel.add(new Box.Filler(minSize, prefSize, maxSize));
+	}
 	
 	private void addSwith(JPanel panel, AudioFilter filter){
 		JToggleSelect comp = new JToggleSelect();
@@ -102,6 +109,7 @@ public class ControllerComponent extends JPanel implements ActionListener {
 		panel.setBorder(titleBorder);
 		BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.X_AXIS);
 		panel.setLayout(boxLayout);
+		// panel.add(Box.createHorizontalGlue());
 		this.add(panel); // Add to the current panel
 		return panel;
 	}
@@ -152,15 +160,13 @@ public class ControllerComponent extends JPanel implements ActionListener {
 
 			this.setMinimumSize(size);
 			this.setMaximumSize(size);
-			// this.setOpaque(false);
-			// this.setBackground(Color.RED);
 		} catch (IOException ex) {
 			LOG.error("Can not load image: {}", ex.getMessage());
 		}
 
-		// this.invalidate();
-		// this.setVisible(true);
-		this.setLayout(new FlowLayout( FlowLayout.CENTER));
+		this.setLayout(new BoxLayout( this, BoxLayout.PAGE_AXIS));
+		this.setLayout(new GridLayout(3,1));
+		this.setBorder(BorderFactory.createEmptyBorder(25, 10, 25, 10));
 		revalidate();
 	}
 
@@ -179,18 +185,21 @@ public class ControllerComponent extends JPanel implements ActionListener {
 		output.addActionListener(this);
 		preampPanel.add(output);
 		addMeter(preampPanel, lastFilter, PreamplifierFilter.GAIN, "Volume" );
+		addFiller(preampPanel);
 		
 //		this.decrackleFilter = filter1;
 		JPanel panelCrackle = createPanel("Decrackling");
 		addSwith(panelCrackle, filter1);
 		addMeter(panelCrackle, filter1, DecrackleFilter.FACTOR, "Factor" );
 		addMeter(panelCrackle, filter1, DecrackleFilter.AVERAGE, "Average" );
+		addFiller(panelCrackle);
 		
 //		this.declickFilter = filter2;
 		JPanel panelDeclick = createPanel("Click Removal" );
 		addSwith(panelDeclick, filter2);
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.THRESHOLD, "Thresold" );
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.WIDTH, "Width" );
+		addFiller(panelDeclick);
 		
 		this.invalidate();
 	}
@@ -234,16 +243,28 @@ public class ControllerComponent extends JPanel implements ActionListener {
 			int y = 0;
 			int w = sono_up.getWidth();
 			int h = sono_up.getHeight();
-			g.drawImage(sono_up, 0, y, w / SCALE, y + h / SCALE, 0, 0, w, h, null);
-			y += h / SCALE;
-					
-			for(int i = 0; i < REPEAT; i++){
-				g.drawImage(sono_middle, 0, y, w / SCALE, y + (sono_middle.getHeight() / SCALE), 0, 0, w, h, null);
-				y += (sono_middle.getHeight() / SCALE);
+//			g.drawImage(sono_up, 0, y, w / SCALE, y + h / SCALE, 0, 0, w, h, null);
+//			y += h / SCALE;
+//					
+//			for(int i = 0; i < REPEAT; i++){
+//				g.drawImage(sono_middle, 0, y, w / SCALE, y + (sono_middle.getHeight() / SCALE), 0, 0, w, h, null);
+//				y += (sono_middle.getHeight() / SCALE);
+//			}
+//			
+//			h = sono_down.getHeight();
+//			g.drawImage(sono_down, 0, y, w / SCALE, y + (sono_down.getHeight() / SCALE), 0, 0, w, h, null);
+			
+			g.drawImage(sono_up, 0, 0, getWidth(), h, 0, 0, w, h, null);
+			y += h;
+			
+			h = sono_middle.getHeight();
+			while(y < getHeight()){
+				g.drawImage(sono_middle, 0, y - 1, getWidth(), y + h, 0, 0, w, h, null);
+				y += h;
 			}
 			
 			h = sono_down.getHeight();
-			g.drawImage(sono_down, 0, y, w / SCALE, y + (sono_down.getHeight() / SCALE), 0, 0, w, h, null);
+			g.drawImage(sono_down, 0, getHeight() - h, getWidth(), getHeight(), 0, 0, w, h, null);
 		}
 
 	}
