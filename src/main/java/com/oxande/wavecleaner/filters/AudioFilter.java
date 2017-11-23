@@ -9,6 +9,7 @@ import java.util.function.Function;
 import org.apache.logging.log4j.Logger;
 
 import com.oxande.wavecleaner.util.ConvertUtils;
+import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.StereoSampleQueue;
 import com.oxande.wavecleaner.util.logging.LogFactory;
 
@@ -49,10 +50,38 @@ import ddf.minim.ugens.FilePlayer;
 public class AudioFilter extends UGen {
 	private static Logger LOG = LogFactory.getLog(AudioFilter.class);
 	
-//	public static final int INT_PARAM = 1;
-//	public static final int FLOAT_PARAM = 2;
-//	public static final int BOOLEAN_PARAM = 3;
-
+	/**
+	 * The enabled switch. This switch is NOT listed in the parameters because
+	 * it is accessed by setEnabled(). But the change can be listened though
+	 * the classic listener.
+	 * 
+	 */
+	public static final String ENABLE = "enable";
+	
+	/**
+	 * Listener to be informed when a value of a control has changed.
+	 * Used mainly by the controller component to react when a value
+	 * has been changed. This avoid to update the value when the user
+	 * changed it and it is also very cool in case of the preamplifier
+	 * where the AUTO-LIMITER will change its gain automatically!
+	 *   
+	 * @author wrey75
+	 *
+	 */
+	public static interface ControlListener {
+		/**
+		 * When a control has its value changed, you are informed. Note
+		 * a way to do is to call the parameter to get the formatted value 
+		 * rather than the basic floating one.
+		 * 
+		 * @param filter the filter who generates the change
+		 * @param name the name of the control
+		 * @param val the value of the control (expressed as a float).
+		 */
+		public void controlChanged(AudioFilter filter, String name, float val);
+	}
+	
+	private ListenerManager<ControlListener> listenerManager = new ListenerManager<>();
 	private StereoSampleQueue queue;
 	private UGen audio;
 	protected Map<String,Parameter> parameters = new HashMap<>();
@@ -82,6 +111,19 @@ public class AudioFilter extends UGen {
 		return new ArrayList<Parameter>( parameters.values() );
 	}
 
+	/**
+	 * Add the listener for callback when a control change.
+	 * 
+	 * @param listener the listener to call when a control is changed.
+	 */
+	public void addListener(ControlListener listener){
+		listenerManager.add(listener);
+	}
+	
+	public void removeListener(ControlListener listener){
+		listenerManager.remove(listener);
+	}
+	
 	protected Parameter addBooleanParameter(String name, boolean defaultValue ){
 		return addParameter(name, 0.0f, 1.0f, 1.0f, ConvertUtils.bool2flt(defaultValue), BOOLEAN_FORMATTER);
 	}
@@ -166,6 +208,9 @@ public class AudioFilter extends UGen {
 	 */
 	public void setEnable(boolean b){
 		this.enabled.setLastValue(b ? 1 : 0);
+		listenerManager.publish(listener -> {
+			listener.controlChanged(this, ENABLE, this.enabled.getLastValue());
+		});
 		LOG.info("Filter {} {}", this.getClass().getSimpleName(), (b ? "enabled" : "disabled"));
 	}
 	
@@ -240,17 +285,24 @@ public class AudioFilter extends UGen {
 		}
 		
 		void setValue( float v ){
+			float val; // Needed to be final
 			if( v < min ){
 				LOG.warn("Parameter '{}' set to minimum {} instead of {}", name, min, v);
-				v = min;
+				val = min;
 			}
-			if( v > max ){
+			else if( v > max ){
 				LOG.warn("Parameter '{}' set to maximum {} instead of {}", name, max, v);
-				v = max;
+				val = max;
 			}
-			if( v != this.input.getLastValue() ){
-				LOG.debug("Parameter '{}' set to {}", name, v);
-				this.input.setLastValue(v);
+			else {
+				val = v;
+			}
+			if( val != this.input.getLastValue() ){
+				LOG.debug("Parameter '{}' set to {}", name, val);
+				this.input.setLastValue(val);
+				listenerManager.publish((listener) -> {
+					listener.controlChanged(AudioFilter.this, getName(), val);
+				});
 			}
 		}
 		

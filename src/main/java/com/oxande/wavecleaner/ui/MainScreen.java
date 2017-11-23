@@ -59,7 +59,6 @@ public class MainScreen extends AbstractMainScreen
 	 * @param audio
 	 */
 	public void setWaveForm(AudioDocument audio) {
-
 		this.lineOut = this.app.minim.getLineOut(Minim.STEREO, 512, 48000f, 16);
 		audio.attachLineOut(lineOut);
 		this.audio = audio;
@@ -67,7 +66,6 @@ public class MainScreen extends AbstractMainScreen
 		this.instant.setAudioDocument(audio);
 		this.audio.addChangedAudioListener(this);
 		this.audio.addAudioPlayerListener(this);
-		// this.infos.setAudioDocument(audio);
 
 		// Initialize the controller component
 		this.audio.preamplifer.setVUMeter(this.vuMeter);

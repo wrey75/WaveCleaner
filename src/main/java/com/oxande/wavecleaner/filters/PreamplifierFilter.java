@@ -33,6 +33,7 @@ public class PreamplifierFilter extends AudioFilter {
 	
 	public static final String GAIN = "gain";
 	public static final String SOURCE = "source";
+	public static final String LIMITER = "limiter";
 	
 	/**
 	 * Source for normal sound (through the filters).
@@ -66,6 +67,7 @@ public class PreamplifierFilter extends AudioFilter {
 			return formatter.format(v);
 		});
 		this.addSelectorParameter(SOURCE, 3);
+		this.addBooleanParameter(LIMITER, true);
 		this.setSampleRate(48000f); // Force a default sample rate (overriden by the player)
 		if( player != null ){
 			this.setPlayer(player);
@@ -116,6 +118,7 @@ public class PreamplifierFilter extends AudioFilter {
 		for(int i = 0; i < len; i++ ){
 			source[0] = buff.getSample(0, i);
 			source[1] = buff.getSample(1, i);
+				
 			player.pop(original);
 			
 //			if( Math.abs(source[0] - original[0]) > 0.1 || Math.abs(source[1] - original[1]) > 0.1) {
@@ -145,6 +148,15 @@ public class PreamplifierFilter extends AudioFilter {
 				buff.setSample(ch, i, sample[ch]);
 			}
 			
+
+			float maxVol = Math.max(Math.abs(sample[0]), Math.abs(sample[1]));
+			if( maxVol > 0.90f ){
+				if(ConvertUtils.flt2bool(getControl(LIMITER))){
+					dBvalue = this.getControl(GAIN) / (maxVol + 0.1f);
+					this.setControl(GAIN, dBvalue);
+					mValue = (float)Math.pow(10.0, (0.05 * dBvalue));
+				}
+			}
 			if( vumeter != null ){
 				vumeter.push(sample);
 			}

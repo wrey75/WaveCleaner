@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import com.oxande.swing.JToggleSelect;
 import com.oxande.swing.JVerticalSeparator;
 import com.oxande.wavecleaner.filters.AudioFilter;
+import com.oxande.wavecleaner.filters.AudioFilter.ControlListener;
 import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
 import com.oxande.wavecleaner.filters.ClickRemovalFilter;
 import com.oxande.wavecleaner.filters.DecrackleFilter;
@@ -42,7 +43,7 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  *
  */
 @SuppressWarnings("serial")
-public class ControllerComponent extends JPanel implements ActionListener {
+public class ControllerComponent extends JPanel implements ActionListener, ControlListener {
 	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
 	private BufferedImage sono_up;
 	private BufferedImage sono_middle;
@@ -51,9 +52,15 @@ public class ControllerComponent extends JPanel implements ActionListener {
 	private static final int REPEAT = 10;
 	private int finalWidth;
 	
-//	private DecrackleFilter decrackleFilter;
-//	private ClickRemovalFilter declickFilter;
 	private PreamplifierFilter preamplifierFilter;
+	private JPanel preampPanel;
+	
+	private DecrackleFilter crackleFilter;
+	private JPanel panelCrackle;
+	
+	private JPanel panelDeclick;
+	private ClickRemovalFilter declickFilter;
+	
 	private List<JFilterMeter> meterList = new ArrayList<>();
 	private JToggleSelect output = new JToggleSelect();
 	
@@ -84,10 +91,10 @@ public class ControllerComponent extends JPanel implements ActionListener {
 		Dimension maxSize = new Dimension(Short.MAX_VALUE, 100);
 //		panel.add(new Box.Filler(minSize, prefSize, maxSize));
 	}
-	
-	private void addSwith(JPanel panel, AudioFilter filter){
+
+	private void addSwitch(JPanel panel, AudioFilter filter){
 		JToggleSelect comp = new JToggleSelect();
-		comp.setButtons( "SWITCH" );
+		comp.setButtons( AudioFilter.ENABLE );
 		comp.addActionListener(new ActionListener() {
 			
 			@Override
@@ -98,7 +105,23 @@ public class ControllerComponent extends JPanel implements ActionListener {
 		});
 		addToPanel(panel, comp);
 	}
-	
+
+	private void addSwitch(JPanel panel, AudioFilter filter, String name, String label){
+		JToggleSelect comp = new JToggleSelect();
+		comp.setName(name);
+		comp.setLabels(label, label);
+		comp.setButtons( name );
+		comp.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean active = e.getActionCommand().equals("ON");
+				filter.setControl(name, active ? 1 : 0);
+			}
+		});
+		addToPanel(panel, comp);
+	}
+
 	private JPanel createPanel(String title){
 		JPanel panel = new JPanel();
 		panel.setOpaque(false);
@@ -116,12 +139,13 @@ public class ControllerComponent extends JPanel implements ActionListener {
 	
 	private void addMeter( JPanel panel, AudioFilter filter, String name, String label ){
 		JFilterMeter m = new JFilterMeter(filter, name, label);
+		m.setName(name);
 		m.addValueListener(new ValueListener() {
 			
-			public String formattedValue(){
-				Parameter p = filter.getParameter(name);
-				return p.getFormattedValue();
-			}
+//			public String formattedValue(){
+//				Parameter p = filter.getParameter(name);
+//				return p.getFormattedValue();
+//			}
 			
 			private void updateValue(JFilterMeter e, int direction) {
 				float value = filter.getControl(name);
@@ -178,25 +202,29 @@ public class ControllerComponent extends JPanel implements ActionListener {
 	 *            the {@link DecrackleFilter} filter.
 	 */
 	public void setFilters(DecrackleFilter filter1, ClickRemovalFilter filter2, PreamplifierFilter lastFilter) {
-		JPanel preampPanel = createPanel("Preamplifier" );
+		preampPanel = createPanel("Preamplifier" );
 		this.preamplifierFilter = lastFilter;
+		this.preamplifierFilter.addListener(this);
 		this.preamplifierFilter.setControl(PreamplifierFilter.GAIN, +2.0f);
 		output.setButtons(MIXED, ORIGINAL, DIFF, LEFT_RIGHT);
 		output.addActionListener(this);
 		preampPanel.add(output);
 		addMeter(preampPanel, lastFilter, PreamplifierFilter.GAIN, "Volume" );
+		addSwitch(preampPanel, preamplifierFilter, PreamplifierFilter.LIMITER, "AutoLimit" );
 		addFiller(preampPanel);
 		
-//		this.decrackleFilter = filter1;
-		JPanel panelCrackle = createPanel("Decrackling");
-		addSwith(panelCrackle, filter1);
+		this.crackleFilter = filter1;
+		this.crackleFilter.addListener(this);
+		panelCrackle = createPanel("Decrackling");
+		addSwitch(panelCrackle, filter1);
 		addMeter(panelCrackle, filter1, DecrackleFilter.FACTOR, "Factor" );
 		addMeter(panelCrackle, filter1, DecrackleFilter.AVERAGE, "Average" );
 		addFiller(panelCrackle);
 		
-//		this.declickFilter = filter2;
-		JPanel panelDeclick = createPanel("Click Removal" );
-		addSwith(panelDeclick, filter2);
+		this.declickFilter = filter2;
+		this.declickFilter.addListener(this);
+		panelDeclick = createPanel("Click Removal" );
+		addSwitch(panelDeclick, filter2);
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.THRESHOLD, "Thresold" );
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.WIDTH, "Width" );
 		addFiller(panelDeclick);
@@ -266,6 +294,42 @@ public class ControllerComponent extends JPanel implements ActionListener {
 			h = sono_down.getHeight();
 			g.drawImage(sono_down, 0, getHeight() - h, getWidth(), getHeight(), 0, 0, w, h, null);
 		}
+	}
 
+	private void updateValue(JPanel p, String name, String value){
+		for(Component c : p.getComponents()){
+			if(name.equals(c.getName())){
+				if(c instanceof JFilterMeter ){
+					((JFilterMeter)c).setValue(value);
+				}
+				else if( c instanceof JToggleSelect ){
+					((JToggleSelect)c).setSelected(value);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void controlChanged(AudioFilter filter, String name, float val) {
+		String strValue = val + "";
+		if(name.equals(AudioFilter.ENABLE)){
+			strValue = (filter.isEnabled() ? "ON" : "OFF");
+		}
+		else {
+			Parameter p = filter.getParameter(name);
+			strValue = p.getFormattedValue();
+		}
+		if(filter == preamplifierFilter){
+			updateValue(preampPanel, name, strValue);
+		}
+		else if(filter == crackleFilter){
+			updateValue(panelCrackle, name, strValue);
+		}
+		else if(filter == declickFilter){
+			updateValue(panelDeclick, name, strValue);
+		}
+		else {
+			LOG.error("Filter {} not found?!?", filter);
+		}
 	}
 }

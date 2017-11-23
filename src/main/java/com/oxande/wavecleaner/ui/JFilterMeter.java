@@ -48,14 +48,14 @@ public class JFilterMeter extends JPanel {
 
 	private JLabel minusBtn;
 	private JLabel plusBtn;
-	private JLabel labelValue = new JLabel();
+	private JLabel valueLabel = new JLabel();
 	private JLabel titleLabel = new JLabel();
 	
 	ListenerManager<ValueListener> manager = new ListenerManager<>();
 	
 	public static interface ValueListener {
 
-		public String formattedValue();
+//		public String formattedValue();
 		
 		public void valueIncremented(JFilterMeter e);
 		
@@ -147,7 +147,6 @@ public class JFilterMeter extends JPanel {
 					} else {
 						l.valueIncremented(self);
 					}
-					self.labelValue.setText(l.formattedValue());
 				});
 			}
 			
@@ -201,18 +200,29 @@ public class JFilterMeter extends JPanel {
 		add(minusBtn, BorderLayout.WEST);
 		
 		font = new Font(Font.SANS_SERIF, Font.BOLD, 12);
-		labelValue.setPreferredSize(new Dimension(80,BTN_SIZE));		
-		labelValue.setAlignmentX(Component.CENTER_ALIGNMENT);
-		labelValue.setHorizontalAlignment(JLabel.CENTER);
-		labelValue.setFont(font);
-		add(labelValue, BorderLayout.CENTER);
+		valueLabel.setPreferredSize(new Dimension(80,BTN_SIZE));		
+		valueLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		valueLabel.setHorizontalAlignment(JLabel.CENTER);
+		valueLabel.setFont(font);
+		add(valueLabel, BorderLayout.CENTER);
 		add(titleLabel, BorderLayout.SOUTH);
 		add(plusBtn, BorderLayout.EAST);
 
-		this.labelValue.setText( p.getFormattedValue() );
+		this.valueLabel.setText( p.getFormattedValue() );
 		this.setBorder(BorderFactory.createEmptyBorder(2, 10, 2, 10));
 		this.validate();
 		this.repaint();
+	}
+
+	/**
+	 * Change the value of the label (usually in reaction to a click on the button).
+	 * 
+	 * @param text the new text to display.
+	 */
+	public void setValue(String text){
+		SwingUtilities.invokeLater(() -> {
+			valueLabel.setText(text);
+		});
 	}
 
 	public void setTitle(String title){

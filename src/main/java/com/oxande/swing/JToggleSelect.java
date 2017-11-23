@@ -40,12 +40,24 @@ public class JToggleSelect extends JPanel implements MouseListener {
 	 * 
 	 */
 	private JComponent selected = null;
+	private String[] labels = new String[] {"ON", "OFF"};
 	
 
 	public JToggleSelect() {
 		FlowLayout layout = new FlowLayout(FlowLayout.CENTER, 10, 10);
 		this.setLayout(layout);
 		this.setOpaque(false);
+	}
+	
+	/**
+	 * Set the labels (used only for ON/OFF values).
+	 */
+	public void setLabels(String on, String off){
+		if( off == null ){
+			off = on;
+		}
+		this.labels[0] = on;
+		this.labels[1] = off;
 	}
 
 	public void addActionListener(ActionListener e) {
@@ -116,7 +128,7 @@ public class JToggleSelect extends JPanel implements MouseListener {
 			component.setForeground(selected ? Color.WHITE : Color.BLACK);
 		}
 		if( this.alone ){
-			component.setText(selected ? "ON" : "OFF");
+			component.setText(labels[selected ? 0 : 1]);
 			isOn = selected;
 		}
 	}
@@ -162,5 +174,23 @@ public class JToggleSelect extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+	}
+	
+	/**
+	 * Select the button. A call to this method does not generate an event.
+	 * 
+	 * @param btn the button name or 
+	 */
+	public void setSelected(String btn){
+		if( alone ){
+			for (Component button : getComponents()) {
+				renderSelected((JLabel)button, btn.equalsIgnoreCase("on"));
+			}
+		}
+		else {
+			for (Component button : getComponents()) {
+				renderSelected((JLabel)button, btn.equals(button.getName()));
+			}
+		}
 	}
 }
