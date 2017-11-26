@@ -171,11 +171,8 @@ public class VUMeterComponent extends JComponent {
 		drawRectangle(1, color, start, end);
 	}
 	
-	@Override
-	public void paintComponent(Graphics g0) {
-		g = (Graphics2D) g0;
-		
-		super.paintComponent(g0);		
+	
+	private void paintVersion1(Graphics2D g) {
 		mode = (orientation == AUTO ? (width > height ? HORIZONAL : VERTICAL) : orientation);
 		width = getWidth() - 10;
 		height = getHeight() - 10;
@@ -190,7 +187,49 @@ public class VUMeterComponent extends JComponent {
 				drawRectangle(ch, Color.ORANGE, channel.peak, channel.peak);
 			}
 			if( channel.over ) drawRectangle(ch, Color.RED, 1.0f, 1.0f);
-		}
-		
+		}	
 	}
+	
+	public static int[] dBValues = {
+			-70
+			-48,
+			-24,
+			-12,
+			- 9,
+			-6,
+			-3,
+			0
+	};
+	
+	private void paintVersion2(Graphics2D g) {
+		int MARGIN = 2;
+		int w = getWidth() / NB_CHANNELS;
+		int h = getHeight() / dBValues.length;
+		
+		for(int ch = 0; ch < NB_CHANNELS; ch++ ){
+			ChannelData channel = this.data[ch];
+			for(int i = 0; i < dBValues.length; i++){
+				float v = (float)Math.pow(10.0, (0.05 * dBValues[i]));
+				Color color = Color.GREEN;
+				if( dBValues[i] >= 0 ){
+					color = Color.RED;
+				} else if( dBValues[i] >= -3 ){
+					color = Color.ORANGE;
+				}
+				g.setColor(channel.rms > v ? color : Color.DARK_GRAY);
+				g.fillRect(MARGIN + ch * w, MARGIN +(dBValues.length -1 - i) * h, w - MARGIN*2, h - MARGIN*2 );
+			}
+//			if( channel.peak > 0.0 ){
+//				drawRectangle(ch, Color.ORANGE, channel.peak, channel.peak);
+//			}
+//			if( channel.over ) drawRectangle(ch, Color.RED, 1.0f, 1.0f);
+		}	
+	}
+	
+	public void paintComponent(Graphics g) {
+		Graphics2D g2 = (Graphics2D)g;
+		super.paintComponent(g);
+		paintVersion2(g2);
+	}
+	
 }

@@ -150,12 +150,10 @@ public class PreamplifierFilter extends AudioFilter {
 			
 
 			float maxVol = Math.max(Math.abs(sample[0]), Math.abs(sample[1]));
-			if( maxVol > 0.90f ){
-				if(ConvertUtils.flt2bool(getControl(LIMITER))){
-					dBvalue = this.getControl(GAIN) / (maxVol + 0.1f);
-					this.setControl(GAIN, dBvalue);
-					mValue = (float)Math.pow(10.0, (0.05 * dBvalue));
-				}
+			if( maxVol > 0.90f && ConvertUtils.flt2bool(getControl(LIMITER))){
+				dBvalue = this.getControl(GAIN) / (maxVol + 0.1f);
+				this.setControl(GAIN, dBvalue);
+				mValue = (float)Math.pow(10.0, (0.05 * dBvalue));
 			}
 			if( vumeter != null ){
 				vumeter.push(sample);
