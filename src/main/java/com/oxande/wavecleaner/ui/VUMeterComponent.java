@@ -63,7 +63,7 @@ public class VUMeterComponent extends JComponent {
 	}
 
 	private static class ChannelData {
-		public static final float DELAY_PEAK = 2.0f;
+		public static final float DELAY_PEAK = 5.0f;
 		public boolean over = false;
 		public float peak = 0;
 		public float rms = 0;
@@ -87,7 +87,7 @@ public class VUMeterComponent extends JComponent {
 		}
 		buffCount = 0;
 	}
-	
+
 	/**
 	 * Set the sample rate.
 	 * 
@@ -122,8 +122,9 @@ public class VUMeterComponent extends JComponent {
 					channel.peakDelay -= bufferSize;
 				}
 				else {
-					channel.noPeak++;
-					channel.peak -= (channel.noPeak * channel.noPeak * 0.2) / sampleRate; // 200.0 / sampleRate;
+					channel.peak = channel.rms;
+//					channel.noPeak++;
+//					channel.peak -= (channel.noPeak * channel.noPeak * 0.2) / sampleRate; // 200.0 / sampleRate;
 				}
 			}
 		}
@@ -190,40 +191,54 @@ public class VUMeterComponent extends JComponent {
 		}	
 	}
 	
-	public static int[] dBValues = {
-			-70
-			-48,
-			-24,
-			-12,
-			- 9,
-			-6,
-			-3,
-			0
+	private static class ColorRMS {
+		public Color color;
+		public float power;
+		public ColorRMS(Color c, float rms){
+			this.color = c;
+			this.power = rms;
+		}
+	}
+	
+	static final private ColorRMS[] COLOR_VALUES = {
+		new ColorRMS(Color.GREEN, 0.0f),
+		new ColorRMS(Color.YELLOW, 0.5f),
+		new ColorRMS(Color.ORANGE, 0.7f),
+		new ColorRMS(Color.RED, 0.95f),
 	};
 	
 	private void paintVersion2(Graphics2D g) {
 		int MARGIN = 2;
 		int w = getWidth() / NB_CHANNELS;
-		int h = getHeight() / dBValues.length;
 		
 		for(int ch = 0; ch < NB_CHANNELS; ch++ ){
 			ChannelData channel = this.data[ch];
-			for(int i = 0; i < dBValues.length; i++){
-				float v = (float)Math.pow(10.0, (0.05 * dBValues[i]));
-				Color color = Color.GREEN;
-				if( dBValues[i] >= 0 ){
-					color = Color.RED;
-				} else if( dBValues[i] >= -3 ){
-					color = Color.ORANGE;
+			
+			g.setColor(Color.DARK_GRAY);
+			g.fillRect(MARGIN + ch * w, MARGIN, w - MARGIN*2, getHeight() - MARGIN * 2 );
+			
+			Color peakColor = null;
+			for( int i = 0; i < COLOR_VALUES.length; i++ ){
+				if( channel.rms > COLOR_VALUES[i].power ){
+					g.setColor(COLOR_VALUES[i].color);
+					int height = (int)((channel.rms - COLOR_VALUES[i].power) * getHeight());
+					g.fillRect(MARGIN + ch * w, (int)(MARGIN + (1.0 - COLOR_VALUES[i].power) * getHeight()) - height, w - MARGIN*2, height );
 				}
-				g.setColor(channel.rms > v ? color : Color.DARK_GRAY);
-				g.fillRect(MARGIN + ch * w, MARGIN +(dBValues.length -1 - i) * h, w - MARGIN*2, h - MARGIN*2 );
+				if( channel.peak >= COLOR_VALUES[i].power ){
+					peakColor = COLOR_VALUES[i].color;
+				}
 			}
-//			if( channel.peak > 0.0 ){
-//				drawRectangle(ch, Color.ORANGE, channel.peak, channel.peak);
-//			}
+			g.setColor( peakColor );
+			g.fillRect(MARGIN + ch * w, (int)((1.0 - Math.min(1.0, channel.peak)) * getHeight()), w - MARGIN*2, MARGIN * 2 );
+
 //			if( channel.over ) drawRectangle(ch, Color.RED, 1.0f, 1.0f);
 		}	
+		for( int db = 0; db > -90; db -= 3 ){
+			double v = Math.pow(10.0, (0.05 * db));
+			int y = (int)((1.0 - v) * getHeight()) + MARGIN;
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawLine(MARGIN /* + ch * w */, y, getWidth() - MARGIN*2, y);
+		}
 	}
 	
 	public void paintComponent(Graphics g) {
