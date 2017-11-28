@@ -74,6 +74,13 @@ public class JFilterMeter extends JPanel {
 		manager.remove(listener);
 	}
 
+	/**
+	 * Return the control parameter linked to this object.
+	 * @return
+	 */
+	public Parameter getControl(){
+		return this.control;
+	}
 	
 	/**
 	 * Create a button for "+" and "-".

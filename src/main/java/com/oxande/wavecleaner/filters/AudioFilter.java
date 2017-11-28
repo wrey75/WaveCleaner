@@ -39,9 +39,6 @@ import ddf.minim.ugens.FilePlayer;
  * <li>In inherited classes, you have to declare <code>synchronized</code> all
  * the methods which modifies a parameter of your filter. This is needed to
  * avoid issues during the processing of the buffer.</li>
- * <li>The audio filters from "gwc" are based on a selected number of samples
- * that can span all the file. In this software, we are working on "live", then
- * on buffers.</li>
  * </ul>
  * 
  * @author wrey75
@@ -49,194 +46,177 @@ import ddf.minim.ugens.FilePlayer;
  */
 public class AudioFilter extends UGen {
 	private static Logger LOG = LogFactory.getLog(AudioFilter.class);
-	
+
 	/**
 	 * The enabled switch. This switch is NOT listed in the parameters because
-	 * it is accessed by setEnabled(). But the change can be listened though
-	 * the classic listener.
+	 * it is accessed by setEnabled(). But the change can be listened though the
+	 * classic listener.
 	 * 
 	 */
 	public static final String ENABLE = "enable";
-	
+
 	/**
-	 * Listener to be informed when a value of a control has changed.
-	 * Used mainly by the controller component to react when a value
-	 * has been changed. This avoid to update the value when the user
-	 * changed it and it is also very cool in case of the preamplifier
-	 * where the AUTO-LIMITER will change its gain automatically!
-	 *   
+	 * Listener to be informed when a value of a control has changed. Used
+	 * mainly by the controller component to react when a value has been
+	 * changed. This avoid to update the value when the user changed it and it
+	 * is also very cool in case of the preamplifier where the AUTO-LIMITER will
+	 * change its gain automatically!
+	 * 
 	 * @author wrey75
 	 *
 	 */
 	public static interface ControlListener {
 		/**
-		 * When a control has its value changed, you are informed. Note
-		 * a way to do is to call the parameter to get the formatted value 
-		 * rather than the basic floating one.
+		 * When a control has its value changed, you are informed. Note a way to
+		 * do is to call the parameter to get the formatted value rather than
+		 * the basic floating one.
 		 * 
-		 * @param filter the filter who generates the change
-		 * @param name the name of the control
-		 * @param val the value of the control (expressed as a float).
+		 * @param filter
+		 *            the filter who generates the change
+		 * @param name
+		 *            the name of the control
+		 * @param val
+		 *            the value of the control (expressed as a float).
 		 */
 		public void controlChanged(AudioFilter filter, String name, float val);
 	}
-	
-	private ListenerManager<ControlListener> listenerManager = new ListenerManager<>();
+
 	private StereoSampleQueue queue;
 	private UGen audio;
-	protected Map<String,Parameter> parameters = new HashMap<>();
-	
+	protected Map<String, Parameter> parameters = new HashMap<>();
+
 	/** The original stream (not filtered) */
 	private UGen originalStream;
-	
+
 	/** buffer we use to read from the stream */
 	private MultiChannelBuffer buffer;
 
 	/** where in the buffer we should read the next sample from */
 	private float[][] samples = new float[2][];
 	private int sampleIndex;
-	
-	private UGenInput enabled = new UGenInput(InputType.CONTROL, 1);
-	
-	private static final Function<Float, String>BOOLEAN_FORMATTER = (v) -> {
+
+	// private UGenInput enabled = new UGenInput(InputType.CONTROL, 1);
+
+	private static final Function<Float, String> BOOLEAN_FORMATTER = (v) -> {
 		return (v > 0.5f ? "ON" : "OFF");
 	};
 
-	/**
-	 * Return the parameters in a list.
-	 * 
-	 * @return the control parameters for the filter.
-	 */
-	public List<Parameter> getParameters(){
-		return new ArrayList<Parameter>( parameters.values() );
-	}
-
-	/**
-	 * Add the listener for callback when a control change.
-	 * 
-	 * @param listener the listener to call when a control is changed.
-	 */
-	public void addListener(ControlListener listener){
-		listenerManager.add(listener);
-	}
-	
-	public void removeListener(ControlListener listener){
-		listenerManager.remove(listener);
-	}
-	
-	protected Parameter addBooleanParameter(String name, boolean defaultValue ){
+	protected Parameter addBooleanParameter(String name, boolean defaultValue) {
 		return addParameter(name, 0.0f, 1.0f, 1.0f, ConvertUtils.bool2flt(defaultValue), BOOLEAN_FORMATTER);
 	}
 
-	protected synchronized Parameter addParameter(String name, float min, float max, float defaultValue, float tick, Function<Float, String>formatter ){
+	protected synchronized Parameter addParameter(String name, float min, float max, float defaultValue, float tick,
+			Function<Float, String> formatter) {
 		Parameter p = new Parameter(name, min, max, defaultValue, formatter);
 		p.setTick(tick);
 		this.parameters.put(name.toUpperCase(), p);
 		return p;
 	}
 
-	protected synchronized Parameter addSelectorParameter(String name, int nb ){
-		Parameter p = new Parameter(name, 1, nb, 0, v -> String.valueOf(v));
+	protected synchronized Parameter addSelectorParameter(String name, int nb) {
+		Parameter p = new Parameter(name, 0, nb - 1, 0, v -> String.valueOf(v));
 		this.parameters.put(name.toUpperCase(), p);
 		return p;
 	}
-	
+
 	/**
 	 * Get the original stream
 	 * 
 	 * @return the original stream
 	 */
-	public UGen getOriginalStream(){
+	public UGen getOriginalStream() {
 		return this.originalStream;
 	}
 
 	/**
 	 * Set the parameter with the specified name.
 	 * 
-	 * @param name name of the parameter (case insensitive).
-	 * @param value the value.
-	 * @return the effective value set. 
+	 * @param name
+	 *            name of the parameter (case insensitive).
+	 * @param value
+	 *            the value.
+	 * @return the effective value set.
 	 */
-	public float setControl(String name, float value ){
+	public float setControl(String name, float value) {
 		Parameter p = getParameter(name);
-		if( p == null ){
+		if (p == null) {
 			LOG.error("Parameter '{}' unknown.", name);
 			return 0.0f;
 		}
 		p.setValue(value);
 		return p.getValue();
 	}
-	
+
 	/**
 	 * Get the parameter with the specified name.
 	 * 
-	 * @param name name of the parameter (case insensitive)
+	 * @param name
+	 *            name of the parameter (case insensitive)
 	 * @return the value.
 	 */
-	public float getControl(String name){
+	public float getControl(String name) {
 		Parameter p = getParameter(name);
-		if( p == null ){
+		if (p == null) {
 			LOG.error("Parameter '{}' unknown.", name);
 			return 0.0f;
 		}
 		return p.getValue();
 	}
-	
-	public int getIntControl(String name){
+
+	public int getIntControl(String name) {
 		float v = this.getControl(name);
-		return (int)v;
+		return (int) v;
 	}
-	
-	public Parameter getParameter(String name){
+
+	public Parameter getParameter(String name) {
 		String key = name.toUpperCase().trim();
 		Parameter p = this.parameters.get(key);
 		return p;
 	}
-	
+
 	/**
-	 * Enables or disables the filter. When disabled, the filter is bypassed
-	 * but these parameters are kept. The already calculated audio is played
-	 * first and when all the buffer is consumed, we just swap to the original
-	 * input. 
+	 * Enables or disables the filter. When disabled, the filter is bypassed but
+	 * these parameters are kept. The already calculated audio is played first
+	 * and when all the buffer is consumed, we just swap to the original input.
 	 * 
 	 * <p>
-	 * Due to the expected "fast" switch, we do not generate events to
-	 * inform the use the filter is now bypassed.
-	 * </p> 
+	 * Due to the expected "fast" switch, we do not generate events to inform
+	 * the use the filter is now bypassed.
+	 * </p>
 	 * 
-	 * @param b true to enable the filter (or false to bypass it).
+	 * @param b
+	 *            true to enable the filter (or false to bypass it).
 	 */
-	public void setEnable(boolean b){
-		this.enabled.setLastValue(b ? 1 : 0);
-		listenerManager.publish(listener -> {
-			listener.controlChanged(this, ENABLE, this.enabled.getLastValue());
-		});
-		LOG.info("Filter {} {}", this.getClass().getSimpleName(), (b ? "enabled" : "disabled"));
+	public void setEnable(boolean b) {
+		getParameter(ENABLE).setValue(b ? 1.0f : 0.0f);
+		LOG.info("Filter {} {}", this.getClass().getSimpleName(), (getControl(ENABLE) > 0.5f ? "enabled" : "disabled"));
 	}
-	
+
 	/**
 	 * Resize an array of floats
 	 * 
-	 * @param array the original array or null
-	 * @param newSize the new size
-	 * @return an array having the new size and the values from
-	 * the original array copied.
+	 * @param array
+	 *            the original array or null
+	 * @param newSize
+	 *            the new size
+	 * @return an array having the new size and the values from the original
+	 *         array copied.
 	 */
-	public static float[] newFloatArray(float[] array, int newSize ){
+	public static float[] newFloatArray(float[] array, int newSize) {
 		float[] newArray = new float[newSize];
-		if(array != null){
+		if (array != null) {
 			int len = Math.min(newSize, array.length);
 			System.arraycopy(array, 0, newArray, 0, len);
 		}
 		return newArray;
 	}
-	
-	public boolean isEnabled(){
-		return enabled.getLastValue() > 0.5f;
+
+	public boolean isEnabled() {
+		return getControl(ENABLE) > 0.5f;
 	}
-	
+
 	protected float[][] loadSamples(int len) {
-		return loadSamples(len,0);
+		return loadSamples(len, 0);
 	}
 
 	protected float[][] loadSamples(int len, int extra) {
@@ -250,54 +230,63 @@ public class AudioFilter extends UGen {
 		private float min;
 		private float max;
 		private UGenInput input;
-		// private float factor;
 		private float tick = 0.1f;
-		private Function<Float, String>formatter;
-		
-		Parameter(String name, float min, float max, float defaultValue, Function<Float, String>formatter ){
+		private Function<Float, String> formatter;
+
+		private ListenerManager<ControlListener> listenerManager = new ListenerManager<>();
+
+		/**
+		 * Return the parameters in a list.
+		 * 
+		 * @return the control parameters for the filter.
+		 */
+		public List<Parameter> getParameters() {
+			return new ArrayList<Parameter>(parameters.values());
+		}
+
+		Parameter(String name, float min, float max, float defaultValue, Function<Float, String> formatter) {
 			this.name = name;
-//			this.type = type;
 			this.min = min;
 			this.max = max;
-//			switch(type){
-//				case BOOLEAN_PARAM:
-//					this.step = 1.0f;
-//					this.min = 0;
-//					this.max = 1;
-//					break;
-//					
-//				case INT_PARAM:
-//					this.step = 1.0f;
-//					break;
-//			}
-
 			this.input = new UGenInput(InputType.CONTROL);
 			this.setValue(defaultValue);
 			this.formatter = formatter;
 		}
+
+		/**
+		 * Add the listener for callback when a control change.
+		 * 
+		 * @param listener
+		 *            the listener to call when a control is changed.
+		 */
+		public void addListener(ControlListener listener) {
+			listenerManager.add(listener);
+		}
+
+		public void removeListener(ControlListener listener) {
+			listenerManager.remove(listener);
+		}
 		
-		public float getTick(){
+		public float getTick() {
 			return this.tick;
 		}
 
-		public void setTick(float tick){
+		public void setTick(float tick) {
 			this.tick = tick;
 		}
-		
-		void setValue( float v ){
+
+		void setValue(float v) {
 			float val; // Needed to be final
-			if( v < min ){
+			if (v < min) {
 				LOG.warn("Parameter '{}' set to minimum {} instead of {}", name, min, v);
 				val = min;
-			}
-			else if( v > max ){
+			} else if (v > max) {
 				LOG.warn("Parameter '{}' set to maximum {} instead of {}", name, max, v);
 				val = max;
-			}
-			else {
+			} else {
 				val = v;
 			}
-			if( val != this.input.getLastValue() ){
+			if (val != this.input.getLastValue()) {
 				LOG.debug("Parameter '{}' set to {}", name, val);
 				this.input.setLastValue(val);
 				listenerManager.publish((listener) -> {
@@ -305,18 +294,18 @@ public class AudioFilter extends UGen {
 				});
 			}
 		}
-		
-		public float getValue(){
+
+		public float getValue() {
 			float v = this.input.getLastValue();
 			// LOG.warn("Parameter '{}' returns {}", name, v);
 			return v;
 		}
 
-		public String getFormattedValue(){
+		public String getFormattedValue() {
 			float v = this.input.getLastValue();
 			return this.formatter.apply(v);
 		}
-		
+
 		public String getName() {
 			return name;
 		}
@@ -332,55 +321,43 @@ public class AudioFilter extends UGen {
 		public float getMaximum() {
 			return max;
 		}
-
-//		public float getFactor() {
-//			return this.factor;
-//		}
-//
-//		Parameter setFactor( float f ){
-//			this.factor = f;
-//			return this;
-//		}
 	}
-	
+
 	@Override
 	protected void addInput(UGen input) {
 		audio = input;
-		if( audio != null ){
-			if( input instanceof AudioFilter ){
+		if (audio != null) {
+			if (input instanceof AudioFilter) {
 				LOG.info("Filter {} attached to {}", audio, this);
-				this.originalStream = ((AudioFilter)input).getOriginalStream();
-			}
-			else if( input instanceof FilePlayer){
+				this.originalStream = ((AudioFilter) input).getOriginalStream();
+			} else if (input instanceof FilePlayer) {
 				LOG.info("FilePlayer {} attached to {}", audio, this);
 				this.originalStream = audio;
 			}
 			this.queue = new StereoSampleQueue(this.audio);
 		}
 	}
-	
+
 	@Override
-	protected void removeInput(UGen input)
-	{
-		if ( audio == input )
-		{
+	protected void removeInput(UGen input) {
+		if (audio == input) {
 			audio = null;
 			this.queue = null;
 		}
 	}
-	
+
 	/**
-	 * Check if we are bypassing the filter. This method returns the
-	 * opposite value compared to isEnabled() except in a small range
-	 * of time. You should refer the usage of {@link AudioFilter#isEnabled()}
-	 * except if you need a real time (less than 20 milliseconds) information.
-	 * Note also if this is the first filter of a pipeline, the sound currently
-	 * played can be still filtered even you are already bypassing the filters.
+	 * Check if we are bypassing the filter. This method returns the opposite
+	 * value compared to isEnabled() except in a small range of time. You should
+	 * refer the usage of {@link AudioFilter#isEnabled()} except if you need a
+	 * real time (less than 20 milliseconds) information. Note also if this is
+	 * the first filter of a pipeline, the sound currently played can be still
+	 * filtered even you are already bypassing the filters.
 	 * 
 	 * @return true is the filter is bypassed.
 	 */
-	public final boolean isBypassing(){
-		if( sampleIndex > samples[0].length) {
+	public final boolean isBypassing() {
+		if (sampleIndex > samples[0].length) {
 			return true;
 		}
 		return false;
@@ -392,21 +369,20 @@ public class AudioFilter extends UGen {
 		if (sampleIndex >= samples[0].length) {
 			// We have to consume ALL the audio before switching off the filter.
 			synchronized (this) {
-				if( isEnabled() ){
+				if (isEnabled()) {
 					// We have to synchronize here because the
 					// synchronization is not inherited in JAVA
 					// (see
 					// https://stackoverflow.com/questions/15998335/is-synchronized-inherited-in-java)
 					samples = nextSamples();
-				}
-				else {
+				} else {
 					// Just load some samples
-					samples = loadSamples( 500 );
+					samples = loadSamples(500);
 				}
 				sampleIndex = 0; // Reset.
 			}
 		}
-		
+
 		channels[0] = samples[0][sampleIndex];
 		channels[1] = samples[1][sampleIndex];
 	}
@@ -425,9 +401,8 @@ public class AudioFilter extends UGen {
 		this.samples[1] = new float[0];
 		this.sampleIndex = 0;
 		this.init(1024);
+		this.addBooleanParameter(ENABLE, true);
 	}
-	
-
 
 	/**
 	 * Construct a FilePlayer that will read from iFileStream.
@@ -453,7 +428,6 @@ public class AudioFilter extends UGen {
 	final public int getBufferSize() {
 		return this.buffer.getBufferSize();
 	}
-
 
 	/**
 	 * Overwrite this method if you want to work with the current buffer. This

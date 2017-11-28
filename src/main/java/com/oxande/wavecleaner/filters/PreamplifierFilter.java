@@ -66,7 +66,7 @@ public class PreamplifierFilter extends AudioFilter {
 			NumberFormat formatter = new DecimalFormat("0.0 dB");
 			return formatter.format(v);
 		});
-		this.addSelectorParameter(SOURCE, 3);
+		this.addSelectorParameter(SOURCE, 4);
 		this.addBooleanParameter(LIMITER, true);
 		this.setSampleRate(48000f); // Force a default sample rate (overriden by the player)
 		if( player != null ){
