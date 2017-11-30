@@ -11,6 +11,8 @@ public class ClickRemovalFilter extends AudioFilter {
 	public static final String WIDTH = "width";
 	public static final String REMOVED = "removed";
 
+	private static final int SEP = 2049;
+	
 	int windowSize;
 	int sep = 2049;
 
