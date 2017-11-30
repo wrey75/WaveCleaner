@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
@@ -293,6 +294,16 @@ public class ControllerComponent extends JPanel {
 		addSwitch(panelDeclick, filter2);
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.THRESHOLD, "Thresold");
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.WIDTH, "Width");
+		
+		JLabel clickRemovedLabel = new JLabel("*removed*");
+		addToPanel(panelDeclick, clickRemovedLabel );
+		declickFilter.getParameter(ClickRemovalFilter.REMOVED).addListener(new ControlListener() {
+			
+			@Override
+			public void controlChanged(AudioFilter filter, String name, float val) {
+				clickRemovedLabel.setText(filter.getParameter(name).getFormattedValue());
+			}
+		});
 //		addFiller(panelDeclick);
 	}
 

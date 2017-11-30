@@ -9,6 +9,7 @@ public class ClickRemovalFilter extends AudioFilter {
 
 	public static final String THRESHOLD = "thresold";
 	public static final String WIDTH = "width";
+	public static final String REMOVED = "removed";
 
 	int windowSize;
 	int sep = 2049;
@@ -29,27 +30,29 @@ public class ClickRemovalFilter extends AudioFilter {
 			NumberFormat formatter = new DecimalFormat("0");
 			return formatter.format(v);
 		});
-
-		windowSize = 8192;
+		this.addParameter(REMOVED, 0, Float.MAX_VALUE, 0, 1, v -> {
+			NumberFormat formatter = new DecimalFormat("0");
+			return formatter.format(v);
+		});
+		windowSize = 4000;
 		sep = 2049;
 	}
 
 	protected MultiChannelBuffer processNext(MultiChannelBuffer buf) {
 		buf.setBufferSize(windowSize);
-		float[][] samples = loadSamples(windowSize);
+		float[][] samples = loadSamples(windowSize, 100);
+		process(samples,windowSize);
 		buf.setChannel(0, samples[0]);
 		buf.setChannel(1, samples[1]);
-		process(buf);
 		return buf;
 	}
 
-	protected void process(MultiChannelBuffer buff) {
-		int len = buff.getBufferSize();
+	protected void process(float[][] samples, int len) {
+		int nbRemoved = (int)getControl(REMOVED);
 		int mClickWidth = getIntControl(WIDTH);
 		int mThresholdLevel = getIntControl(THRESHOLD);
 		for (int ch = 0; ch < 2; ch++) {
-			boolean bResult = false;
-			float[] buffer = buff.getChannel(ch);
+			float[] buffer = samples[ch];
 			int i;
 			int j;
 			int left = 0;
@@ -80,7 +83,6 @@ public class ClickRemovalFilter extends AudioFilter {
 
 			/* Cheat by truncating sep to next-lower power of two... */
 			sep = i;
-
 			for (i = 0; i < len - sep; i++) {
 				ms_seq[i] /= sep;
 			}
@@ -106,10 +108,10 @@ public class ClickRemovalFilter extends AudioFilter {
 						}
 					} else {
 						if (left != 0 && i - left + s2 <= ww * 2) {
+							nbRemoved++;
 							float lv = buffer[left];
 							float rv = buffer[i + ww + s2];
 							for (j = left; j < i + ww + s2; j++) {
-								bResult = true;
 								buffer[j] = (rv * (j - left) + lv * (i + ww + s2 - j)) / (float) (i + ww + s2 - left);
 								b2[j] = buffer[j] * buffer[j];
 							}
@@ -121,6 +123,8 @@ public class ClickRemovalFilter extends AudioFilter {
 				}
 			}
 		}
+
+		setControl(REMOVED, nbRemoved);
 	}
 
 	// private void toto() {
