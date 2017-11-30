@@ -2,6 +2,7 @@ package com.oxande.wavecleaner.ui;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -77,8 +78,8 @@ public class ControllerComponent extends JPanel {
 	private void addToPanel(JPanel panel, JComponent comp) {
 		if (panel.getComponents().length > 0) {
 			JComponent sep = new JVerticalSeparator();
-			sep.setMinimumSize(new Dimension(10, 15));
-			sep.setPreferredSize(new Dimension(10, 15));
+			sep.setMinimumSize(new Dimension(10, 25));
+			sep.setPreferredSize(new Dimension(10, panel.getComponent(0).getPreferredSize().height));
 			panel.add(sep);
 		}
 		panel.add(comp);
@@ -86,12 +87,12 @@ public class ControllerComponent extends JPanel {
 
 	}
 
-	private void addFiller(JPanel panel) {
-		Dimension minSize = new Dimension(5, 100);
-		Dimension prefSize = new Dimension(5, 100);
-		Dimension maxSize = new Dimension(Short.MAX_VALUE, 100);
-		// panel.add(new Box.Filler(minSize, prefSize, maxSize));
-	}
+//	private void addFiller(JPanel panel) {
+//		Dimension minSize = new Dimension(5, 100);
+//		Dimension prefSize = new Dimension(5, 100);
+//		Dimension maxSize = new Dimension(Short.MAX_VALUE, 100);
+//		// panel.add(new Box.Filler(minSize, prefSize, maxSize));
+//	}
 
 	private void addSwitch(JPanel panel, AudioFilter filter) {
 		addSwitch(panel, filter, AudioFilter.ENABLE, null);
@@ -147,8 +148,10 @@ public class ControllerComponent extends JPanel {
 		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 		titleBorder.setTitleFont(font);
 		panel.setBorder(titleBorder);
-		BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.X_AXIS);
-		panel.setLayout(boxLayout);
+		// BoxLayout layout = new BoxLayout(panel, BoxLayout.X_AXIS);
+		FlowLayout layout = new FlowLayout();
+		layout.setAlignment(FlowLayout.LEFT);
+		panel.setLayout(layout);
 		// panel.add(Box.createHorizontalGlue());
 		this.add(panel); // Add to the current panel
 		return panel;
@@ -276,23 +279,21 @@ public class ControllerComponent extends JPanel {
 		preampPanel.add(output);
 		addMeter(preampPanel, lastFilter, PreamplifierFilter.GAIN, "Volume");
 		addSwitch(preampPanel, preamplifierFilter, PreamplifierFilter.LIMITER, "AutoLimit");
-		addFiller(preampPanel);
+//		addFiller(preampPanel);
 
 		this.crackleFilter = filter1;
 		panelCrackle = createPanel("Decrackling");
 		addSwitch(panelCrackle, filter1);
 		addMeter(panelCrackle, filter1, DecrackleFilter.FACTOR, "Factor");
 		addMeter(panelCrackle, filter1, DecrackleFilter.AVERAGE, "Average");
-		addFiller(panelCrackle);
+//		addFiller(panelCrackle);
 
 		this.declickFilter = filter2;
 		panelDeclick = createPanel("Click Removal");
 		addSwitch(panelDeclick, filter2);
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.THRESHOLD, "Thresold");
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.WIDTH, "Width");
-		addFiller(panelDeclick);
-
-		this.invalidate();
+//		addFiller(panelDeclick);
 	}
 
 	@Override

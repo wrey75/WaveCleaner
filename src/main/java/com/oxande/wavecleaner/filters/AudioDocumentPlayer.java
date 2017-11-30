@@ -155,14 +155,14 @@ public class AudioDocumentPlayer extends FilePlayer {
 	synchronized void push(float left, float right) {
 		if ( (last - first) + 1 > buffsize()) {
 			// Add 100 more samples
-			int newSize = (this.buffsize() + 100) * NB_CHANNELS;
+			int newSize = (int)(this.buffsize() * 1.25) * NB_CHANNELS;
 			float[] newQueue = new float[newSize];
 			// The copy below is not performant.
 			for(int i = first; i < last; i++ ){
 				int oldPos = (i % buffsize()) * NB_CHANNELS;
 				int newPos = ((i - first) % buffsize()) * NB_CHANNELS;
 				for(int ch = 0; ch < NB_CHANNELS; ch ++ ){
-					newQueue[ newPos++ ] = newQueue[ oldPos++ ]; 
+					newQueue[ newPos++ ] = queue[ oldPos++ ]; 
 				}
 			}
 			

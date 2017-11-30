@@ -11,7 +11,6 @@ import java.awt.event.MouseListener;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.oxande.wavecleaner.util.Assert;
@@ -24,12 +23,11 @@ import com.oxande.wavecleaner.util.WaveUtils;
  * @author wrey75
  *
  */
-public class JToggleSwitch extends JPanel implements MouseListener {
+public class JToggleSwitch extends JLabel implements MouseListener {
 	private ListenerManager<ActionListener> listenerManager = new ListenerManager<>();
 
 	private Icon btnOn;
 	private Icon btnOff;
-	private JLabel component;
 	private boolean isOn = false;
 	public boolean reactOnChange = false;
 	
@@ -41,8 +39,7 @@ public class JToggleSwitch extends JPanel implements MouseListener {
 	
 
 	public JToggleSwitch() {
-		FlowLayout layout = new FlowLayout(FlowLayout.CENTER, 10, 10);
-		this.setLayout(layout);
+		super();
 		this.setOpaque(false);
 		this.initComponent(true);
 	}
@@ -58,7 +55,7 @@ public class JToggleSwitch extends JPanel implements MouseListener {
 		this.labels[1] = off;
 		SwingUtilities.invokeLater(() -> {
 			renderSelected(isOn);
-		}); 
+		});
 	}
 
 	public void addActionListener(ActionListener e) {
@@ -76,37 +73,34 @@ public class JToggleSwitch extends JPanel implements MouseListener {
 		btnOn = WaveUtils.loadIcon("btn-on.png", 12);
 		btnOff = WaveUtils.loadIcon("btn-off.png", 12);
 		
-		JLabel btn = new JLabel(on ? labels[0] : labels[1]);
-		btn.setOpaque(false);
-		this.add(btn);
-		btn.setFocusable(false);
-		btn.addMouseListener(this);
+		this.setOpaque(false);
+		this.setFocusable(false);
+		this.addMouseListener(this);
 		if( btnOn != null && btnOff != null ){
-			btn.setHorizontalAlignment(JLabel.LEFT);
+			this.setHorizontalAlignment(JLabel.LEFT);
 		}
 		else {
-			btn.setHorizontalAlignment(JLabel.CENTER);
+			this.setHorizontalAlignment(JLabel.CENTER);
 		}
-		btn.setAlignmentY(JLabel.CENTER_ALIGNMENT);
-		btn.setMinimumSize(new Dimension(60,24));
-		btn.setPreferredSize(new Dimension(60,24));
-		this.component = btn;
+		this.setAlignmentY(JLabel.CENTER_ALIGNMENT);
+		this.setMinimumSize(new Dimension(60,24));
+		this.setPreferredSize(new Dimension(80,24));
 		renderSelected(on);
-		invalidate();
+		// invalidate();
 	}
 
 	void renderSelected( boolean selected ){
 		Assert.isEventDispatchThread();
 
 		if( btnOn != null && btnOff != null ){
-			component.setIcon(selected ? btnOn : btnOff);
-			component.setForeground(selected ? Color.BLACK : Color.DARK_GRAY);
+			this.setIcon(selected ? btnOn : btnOff);
+			this.setForeground(selected ? Color.BLACK : Color.DARK_GRAY);
 		}
 		else {
-			component.setBackground(selected ? Color.DARK_GRAY : Color.LIGHT_GRAY);
-			component.setForeground(selected ? Color.WHITE : Color.BLACK);
+			this.setBackground(selected ? Color.DARK_GRAY : Color.LIGHT_GRAY);
+			this.setForeground(selected ? Color.WHITE : Color.BLACK);
 		}
-		component.setText(labels[selected ? 0 : 1]);
+		this.setText(labels[selected ? 0 : 1]);
 		isOn = selected;
 	}
 
