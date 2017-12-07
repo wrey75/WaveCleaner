@@ -70,7 +70,6 @@ public class DecrackleFilter extends AudioFilter {
 		});
 	}
 
-
 	private float[][] y = new float[2][];
 	private float[][] y_hat = new float[2][];
 	private float[] y_hat_tmp = null;

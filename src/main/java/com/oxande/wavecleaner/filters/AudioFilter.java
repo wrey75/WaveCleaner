@@ -219,6 +219,16 @@ public class AudioFilter extends UGen {
 		return loadSamples(len, 0);
 	}
 
+	/** 
+	 * Load samples including an extra an extra size of
+	 * bytes.
+	 * 
+	 * @param len the length to get from the buffer
+	 * @param extra extra samples read again at the next
+	 * read.
+	 * 
+	 * @return an stereo array of the requested number of samples.
+	 */
 	protected float[][] loadSamples(int len, int extra) {
 		float[][] loaded = queue.getSamples(len, extra);
 		return loaded;
@@ -502,4 +512,24 @@ public class AudioFilter extends UGen {
 		ret[1] = this.buffer.getChannel(1);
 		return ret;
 	}
+	
+	/**
+	 * Get the next power of 2.
+	 * Algorithm from <href="https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2">Stack
+	 * Overflow</a>.
+	 * 
+	 * @param v the original value to increase.
+	 * @return the next power of two.
+	 */
+	public static int nextPower2(int v ){
+		v--;
+		v |= v >> 1;
+		v |= v >> 2;
+		v |= v >> 4;
+		v |= v >> 8;
+		v |= v >> 16;
+		v++;
+		return v;
+	}
+
 }

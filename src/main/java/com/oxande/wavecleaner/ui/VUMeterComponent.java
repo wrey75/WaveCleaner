@@ -64,20 +64,19 @@ public class VUMeterComponent extends JComponent {
 
 	private static class ChannelData {
 		public static final float DELAY_PEAK = 5.0f;
-		public boolean over = false;
+//		public boolean over = false;
 		public float peak = 0;
 		public float rms = 0;
 		public float buffer = 0;
 		public int peakDelay = 0;
-		public int noPeak = 0;
 		
 		public void reset() {
-			over = false;
+//			over = false;
 			peak = 0.0f;
 			rms = 0.0f;
 			buffer = 0.0f;
 			peakDelay = 0;
-			noPeak = 0;
+//			noPeak = 0;
 		}
 	}
 	
@@ -106,11 +105,11 @@ public class VUMeterComponent extends JComponent {
 			float level = Math.abs(samples[ch]);
 			if (level > channel.peak) {
 				channel.peak = level;
-				channel.noPeak = 0;
+//				channel.noPeak = 0;
 				channel.peakDelay = (int)(channel.DELAY_PEAK * this.sampleRate);
-				if (channel.peak > 0.99f) {
-					channel.over = true;
-				}
+//				if (channel.peak > 0.99f) {
+//					channel.over = true;
+//				}
 			}
 			channel.buffer = Math.max(channel.buffer, level);
 			if( buffCount >= bufferSize ){
@@ -164,32 +163,32 @@ public class VUMeterComponent extends JComponent {
 		g.fillRect(x0, y0, x1 - x0, y1 - y0);
 	}
 	
-	private void drawLeft( Color color, double start, double end ){
-		drawRectangle(0, color, start, end);
-	}
-
-	private void drawRight( Color color, double start, double end ){
-		drawRectangle(1, color, start, end);
-	}
-	
-	
-	private void paintVersion1(Graphics2D g) {
-		mode = (orientation == AUTO ? (width > height ? HORIZONAL : VERTICAL) : orientation);
-		width = getWidth() - 10;
-		height = getHeight() - 10;
-		
-		for(int ch = 0; ch < NB_CHANNELS; ch++ ){
-			ChannelData channel = this.data[ch];
-			if( channel.rms > 0 ){
-				drawRectangle(ch, Color.YELLOW, -0.0, channel.rms);
-				drawRectangle(ch, Color.GREEN, -0.0, Math.min(channel.rms, LEVEL_6DB));
-			}
-			if( channel.peak > 0.0 ){
-				drawRectangle(ch, Color.ORANGE, channel.peak, channel.peak);
-			}
-			if( channel.over ) drawRectangle(ch, Color.RED, 1.0f, 1.0f);
-		}	
-	}
+//	private void drawLeft( Color color, double start, double end ){
+//		drawRectangle(0, color, start, end);
+//	}
+//
+//	private void drawRight( Color color, double start, double end ){
+//		drawRectangle(1, color, start, end);
+//	}
+//	
+//	
+//	private void paintVersion1(Graphics2D g) {
+//		mode = (orientation == AUTO ? (width > height ? HORIZONAL : VERTICAL) : orientation);
+//		width = getWidth() - 10;
+//		height = getHeight() - 10;
+//		
+//		for(int ch = 0; ch < NB_CHANNELS; ch++ ){
+//			ChannelData channel = this.data[ch];
+//			if( channel.rms > 0 ){
+//				drawRectangle(ch, Color.YELLOW, -0.0, channel.rms);
+//				drawRectangle(ch, Color.GREEN, -0.0, Math.min(channel.rms, LEVEL_6DB));
+//			}
+//			if( channel.peak > 0.0 ){
+//				drawRectangle(ch, Color.ORANGE, channel.peak, channel.peak);
+//			}
+//			if( channel.over ) drawRectangle(ch, Color.RED, 1.0f, 1.0f);
+//		}	
+//	}
 	
 	private static class ColorRMS {
 		public Color color;

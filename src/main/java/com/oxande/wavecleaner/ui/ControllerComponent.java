@@ -293,7 +293,7 @@ public class ControllerComponent extends JPanel {
 		panelDeclick = createPanel("Click Removal");
 		addSwitch(panelDeclick, filter2);
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.THRESHOLD, "Thresold");
-		addMeter(panelDeclick, filter2, ClickRemovalFilter.WIDTH, "Width");
+//		addMeter(panelDeclick, filter2, ClickRemovalFilter.WIDTH, "Width");
 		
 		JLabel clickRemovedLabel = new JLabel("*removed*");
 		addToPanel(panelDeclick, clickRemovedLabel );

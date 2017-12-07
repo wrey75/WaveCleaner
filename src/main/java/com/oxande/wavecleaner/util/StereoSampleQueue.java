@@ -67,6 +67,23 @@ public class StereoSampleQueue {
         peek(out, len, extra);
         return out;
     }
+    
+    /**
+     * Load samples in the requested buffer.
+     * 
+     * @param buf the buffer
+     * @param off the offset
+     * @param len the length to read
+     * @return a complete buffer
+     */
+    public void loadSamples(float[][] buf, int off, int len){
+    	int extra = buf[0].length - len - off;
+    	peek(buf, off, len);
+        this.position += len; // Move the position in the buffer
+        if( extra > 0 ){
+        	peek(buf, off + len, extra);
+        }
+    }
 
 
     /**
