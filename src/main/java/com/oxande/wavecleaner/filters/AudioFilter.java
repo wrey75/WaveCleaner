@@ -146,6 +146,26 @@ public class AudioFilter extends UGen {
 		p.setValue(value);
 		return p.getValue();
 	}
+	
+	/**
+	 * Add a value to the control.
+	 * 
+	 * @param name the control name
+	 * @param value the value to add.
+	 */
+	public float addToControl(String name, float value) {
+		Parameter p = getParameter(name);
+		if (p == null) {
+			LOG.error("Parameter '{}' unknown.", name);
+			return 0;
+		}
+		float newValue = value;
+		synchronized(p){
+			newValue += p.getValue();
+			p.setValue(newValue);
+		}
+		return newValue;
+	}
 
 	/**
 	 * Get the parameter with the specified name.
@@ -161,6 +181,22 @@ public class AudioFilter extends UGen {
 			return 0.0f;
 		}
 		return p.getValue();
+	}
+	
+	/**
+	 * Get the number of samples for the specified value. The value is stored
+	 * as a number of seconds (usually, a fraction of second).
+	 * 
+	 * @param name the parameter name
+	 * @return the number of samples specified by the duration expressed in seconds.
+	 */
+	public int getSampleControl(String name) {
+		Parameter p = getParameter(name);
+		if (p == null) {
+			LOG.error("Parameter '{}' unknown.", name);
+			return 0;
+		}
+		return (int)(p.getValue() * sampleRate());
 	}
 
 	public int getIntControl(String name) {
@@ -285,7 +321,7 @@ public class AudioFilter extends UGen {
 			this.tick = tick;
 		}
 
-		void setValue(float v) {
+		synchronized void setValue(float v) {
 			float val; // Needed to be final
 			if (v < min) {
 				LOG.warn("Parameter '{}' set to minimum {} instead of {}", name, min, v);

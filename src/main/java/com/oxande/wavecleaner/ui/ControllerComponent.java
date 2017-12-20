@@ -19,12 +19,12 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import org.apache.logging.log4j.Logger;
 
+import com.oxande.swing.JFlashLabel;
 import com.oxande.swing.JToggleSelect;
 import com.oxande.swing.JToggleSwitch;
 import com.oxande.swing.JVerticalSeparator;
@@ -294,15 +294,17 @@ public class ControllerComponent extends JPanel {
 		panelDeclick = createPanel("Click Removal");
 		addSwitch(panelDeclick, filter2);
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.THRESHOLD, "Thresold");
-//		addMeter(panelDeclick, filter2, ClickRemovalFilter.WIDTH, "Width");
+		addMeter(panelDeclick, filter2, ClickRemovalFilter.CLICK_WIDTH, "Width");
 		
-		JLabel clickRemovedLabel = new JLabel("*removed*");
+		JFlashLabel clickRemovedLabel = new JFlashLabel("    ");
 		addToPanel(panelDeclick, clickRemovedLabel );
 		declickFilter.getParameter(ClickRemovalFilter.REMOVED).addListener(new ControlListener() {
+			long lastValue = 0;
 			
 			@Override
 			public void controlChanged(AudioFilter filter, String name, float val) {
-				clickRemovedLabel.setText(filter.getParameter(name).getFormattedValue());
+				clickRemovedLabel.fireFlash();
+				//clickRemovedLabel.setText(filter.getParameter(name).getFormattedValue());
 			}
 		});
 //		addFiller(panelDeclick);
