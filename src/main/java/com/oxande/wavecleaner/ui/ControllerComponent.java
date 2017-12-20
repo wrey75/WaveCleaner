@@ -229,6 +229,7 @@ public class ControllerComponent extends JPanel {
 	 *            the {@link DecrackleFilter} filter.
 	 */
 	public void setFilters(DecrackleFilter filter1, ClickRemovalFilter filter2, PreamplifierFilter lastFilter) {
+		this.removeAll();
 		preampPanel = createPanel("Preamplifier");
 		this.preamplifierFilter = lastFilter;
 		// this.preamplifierFilter.addListener(this);
