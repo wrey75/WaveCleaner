@@ -343,9 +343,10 @@ public class AudioDocument /* implements AudioListener */ {
 
 		preamplifer.patch(summer);
 
-		player.play(1000 * 100);
+		player.play(0);
 		recorder.beginRecord();
-		int renderCount = (int) (this.sampleRate * player.getStream().getMillisecondLength() / 1000.0) / this.bufferSize + 1;
+		int playLength = player.getStream().getMillisecondLength();
+		int renderCount = (int) ((double)this.sampleRate * playLength / 1000.0) / this.bufferSize + 1;
 		boolean stopped = false;
 		for (int i = 0; i < renderCount && !(stopped = Thread.interrupted()); i++) {
 			switch (CHANNELS) {
@@ -370,7 +371,7 @@ public class AudioDocument /* implements AudioListener */ {
 			// Delete the file created
 			new File(fileName).delete();
 		}
-		
+		stop();
 		summer.unpatch(preamplifer);
 	}
 
