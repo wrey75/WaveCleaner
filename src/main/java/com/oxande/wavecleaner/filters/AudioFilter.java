@@ -277,6 +277,7 @@ public class AudioFilter extends UGen {
 		private float max;
 		private UGenInput input;
 		private float tick = 0.1f;
+		private boolean locked = false;
 		private Function<Float, String> formatter;
 
 		private ListenerManager<ControlListener> listenerManager = new ListenerManager<>();
@@ -320,9 +321,21 @@ public class AudioFilter extends UGen {
 		public void setTick(float tick) {
 			this.tick = tick;
 		}
+		
+		public void lock(boolean b) {
+			this.locked = b;
+		}
+		
+		public boolean isLocked() {
+			return this.locked;
+		}
 
-		synchronized void setValue(float v) {
+		synchronized boolean setValue(float v) {
 			float val; // Needed to be final
+			if(this.locked){
+				LOG.warn("Parameter '{}' is currently locked.", name);
+				return false;
+			}
 			if (v < min) {
 				LOG.warn("Parameter '{}' set to minimum {} instead of {}", name, min, v);
 				val = min;
@@ -338,7 +351,9 @@ public class AudioFilter extends UGen {
 				listenerManager.publish((listener) -> {
 					listener.controlChanged(AudioFilter.this, getName(), val);
 				});
+				return true;
 			}
+			return false;
 		}
 
 		public float getValue() {
