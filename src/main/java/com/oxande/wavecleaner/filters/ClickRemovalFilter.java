@@ -230,93 +230,7 @@ public class ClickRemovalFilter extends AudioFilter {
 				y[ch] = newBuf;
 			}
 			System.arraycopy(input[ch], 0, y[ch], 0, input[ch].length);
-			
-			
-//			// Calculate average power for the sample...
-//			double avg = 0;
-//			for(int i = before_width; i < sampleWidth + before_width; i++){
-//				// Calculate average power
-//				avg += (y[ch][i] * y[ch][i]) / sampleWidth;
-//			}
-//			for(int i = before_width; i < sampleWidth + before_width; i++){
-//				// Calculate average power
-//				double instant = (y[ch][i] * y[ch][i]);
-//				if(instant > avg * factor){
-//					int first;
-//					int last;
-//					// found a click candidate...
-//					// but ensure not a real sound 
-//					int j = i - clickWidth / 2;
-//					while( j < i + clickWidth / 2 && (y[ch][j] * y[ch][j]) < avg * 15.0 ){
-//						j++;
-//					}
-//					first = j;
-//					while( j < i + clickWidth / 2 && (y[ch][j] * y[ch][j]) > avg * 10.0 && Math.abs(y[ch][j]) > 0.1 ){
-//						j++;
-//					}
-//					last = j;
-//					while( j < i + clickWidth / 2 && (y[ch][j] * y[ch][j]) < avg * 15.0 ){
-//						j++;
-//					}
-//					if( j == i + clickWidth / 2 && last > first ){
-//						LOG.info("found click at {} on {} samples", i, (last - first));
-//						// Only one pic found on the full size means not a short frequency
-//						// like a drum.
-//						nbFound++;
-//						
-////						for(int k = first; k < last; k++){
-////							y[ch][k] = 0;
-////						}
-//
-//						// START OF CLEANING
-//						
-//						int fftSize = nextPower2(last - first);
-//						if( fftSize == 1 ){
-//							// Very short cut, use average
-//							y[ch][first] = (y[ch][first - 1] + y[ch][first + 1]) / 2.0f; 
-//						}
-//						else {
-//							// Get the FFT before & after...
-//							float[] sampleBefore = new float[fftSize];
-//							System.arraycopy(y[ch], first - fftSize, sampleBefore, 0, fftSize);
-//							FFT fft_before = new FFT(fftSize, sampleRate());
-//							fft_before.forward(sampleBefore);
-//							float[] real1 = fft_before.getSpectrumReal();
-//							float[] im1 = fft_before.getSpectrumImaginary();
-//							
-//							float[] sampleAfter = new float[fftSize];
-//							System.arraycopy(y[ch], last, sampleAfter, 0, fftSize);
-//							FFT fft_after = new FFT(fftSize, sampleRate());
-//							fft_after.forward(sampleAfter);
-//							float[] real2 = fft_after.getSpectrumReal();
-//							float[] im2 = fft_after.getSpectrumImaginary();
-//							
-//							float[] im = new float[fftSize];
-//							float[] real = new float[fftSize];
-//							for (int k = 0; k < fftSize; k++){
-//								real[k] = (real1[k] + real2[k]) / 2.0f;
-//								im[k] = (im[k] + im[k]) / 2.0f;
-//							}
-//							
-//							FFT mix = new FFT(fftSize, sampleRate());
-//							float mixed[] = new float[fftSize];
-//							mix.inverse(real, im, mixed);
-//							int size = (int)((last-first) / 2);
-//							int start = (last+first) /2 - fftSize / 2;
-//							for(int k = 0; k < fftSize; k++ ){
-//								if( k + start < first) {
-//									y[ch][k+start] = (mixed[k] + input[ch][k+start]) / 2.0f;
-//								} else if( k + start > last) {
-//									y[ch][k+start] = (mixed[k] + y[ch][k+start]) / 2.0f;
-//								} else{
-//									y[ch][k+start] = mixed[k];
-//								}
-//							}
-//						}
-//						// END OF CLEANING
-//					}
-//				}
-//			}
+
 			
 			// Save results
 			removeClicks(y[ch], sampleWidth * 2);
@@ -349,7 +263,6 @@ public class ClickRemovalFilter extends AudioFilter {
 			b2[i] = buffer[i]*buffer[i];
 		}
 		
-	
 		//
 		// Shortcut for rms - multiple passes through b2,
 		// accumulating as we go.
@@ -399,7 +312,9 @@ public class ClickRemovalFilter extends AudioFilter {
 						float lv = buffer[left];
 						float rv = buffer[i + ww + s2];
 						LOG.info("Remove click...");
-						if( left < 20 || (i + ww + s2 - left) < 1 ){
+
+						
+						if( left < 20 || (i + ww + s2 - left < 1)){
 							// AUDACITY_METHOD:
 							for (int j = left; j < i + ww + s2; j++) {
 								float old = buffer[j];
@@ -409,7 +324,7 @@ public class ClickRemovalFilter extends AudioFilter {
 							}	
 						}
 						else {
-							int nb = Math.min(left, (int)(sampleRate() * 0.001f)); // use about 50 samples at 48000kHz 
+							int nb = Math.max(2, i + ww + s2 - left);
 							List<Float> xArray = new ArrayList<Float>();
 							List<Float> yArray = new ArrayList<Float>();
 							for (int j = left - nb; j < left; j++) {
@@ -438,7 +353,7 @@ public class ClickRemovalFilter extends AudioFilter {
 								buffer[j] = v2;
 								b2[j] = buffer[j] * buffer[j];
 							}	
-							LOG.info("Removed click at {} (len={}) removed from POWER {} to {} versus {}.", left,  i + ww + s2 - left, power_0, power_1, power_2);
+							LOG.info("Removed click at {} (len={}, nb={}) removed from POWER {} to {} versus {}.", left,  i + ww + s2 - left, nb, power_0, power_1, power_2);
 						}
 						
 						found++;
