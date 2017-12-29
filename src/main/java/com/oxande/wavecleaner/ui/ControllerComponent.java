@@ -17,6 +17,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -296,14 +297,29 @@ public class ControllerComponent extends JPanel {
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.THRESHOLD, "Thresold");
 		addMeter(panelDeclick, filter2, ClickRemovalFilter.CLICK_WIDTH, "Width");
 		
-		JFlashLabel clickRemovedLabel = new JFlashLabel("    ");
-		addToPanel(panelDeclick, clickRemovedLabel );
-		declickFilter.getParameter(ClickRemovalFilter.REMOVED).addListener(new ControlListener() {
+		JFlashLabel clickLeftRemoved = new JFlashLabel('L');
+		JFlashLabel clickRightRemoved = new JFlashLabel('R');
+		JPanel clickRemovePanel = new JPanel();
+		clickRemovePanel.setLayout(new BoxLayout(clickRemovePanel, BoxLayout.Y_AXIS));
+		clickRemovePanel.add(clickLeftRemoved);
+		clickRemovePanel.add(Box.createRigidArea(new Dimension(0,2)));
+		clickRemovePanel.add(clickRightRemoved);
+		addToPanel(panelDeclick, clickRemovePanel );
+		declickFilter.getParameter(ClickRemovalFilter.REMOVED_LEFT).addListener(new ControlListener() {
 			long lastValue = 0;
 			
 			@Override
 			public void controlChanged(AudioFilter filter, String name, float val) {
-				clickRemovedLabel.fireFlash();
+				clickLeftRemoved.fireFlash();
+				//clickRemovedLabel.setText(filter.getParameter(name).getFormattedValue());
+			}
+		});
+		declickFilter.getParameter(ClickRemovalFilter.REMOVED_RIGHT).addListener(new ControlListener() {
+			long lastValue = 0;
+			
+			@Override
+			public void controlChanged(AudioFilter filter, String name, float val) {
+				clickRightRemoved.fireFlash();
 				//clickRemovedLabel.setText(filter.getParameter(name).getFormattedValue());
 			}
 		});

@@ -32,9 +32,9 @@ public class ClickRemovalFilter extends AudioFilter {
 	private final static int SEP = 2049;
 	
 	public static final String THRESHOLD = "thresold";
-//	public static final String SAMPLE_WIDTH = "sampleWidth";
 	public static final String CLICK_WIDTH ="clickWidth";
-	public static final String REMOVED = "removed";
+	public static final String REMOVED_LEFT = "removed left";
+	public static final String REMOVED_RIGHT = "removed right";
 
 	/**
 	 * Performs spline interpolation given a set of control points.
@@ -193,7 +193,11 @@ public class ClickRemovalFilter extends AudioFilter {
 			NumberFormat formatter = new DecimalFormat("0.00 ms");
 			return formatter.format(v * 1000);
 		});
-		this.addParameter(REMOVED, 0, Float.MAX_VALUE, 0, 1, v -> {
+		this.addParameter(REMOVED_RIGHT, 0, Float.MAX_VALUE, 0, 1, v -> {
+			NumberFormat formatter = new DecimalFormat("0");
+			return formatter.format(v);
+		});
+		this.addParameter(REMOVED_LEFT, 0, Float.MAX_VALUE, 0, 1, v -> {
 			NumberFormat formatter = new DecimalFormat("0");
 			return formatter.format(v);
 		});
@@ -231,9 +235,12 @@ public class ClickRemovalFilter extends AudioFilter {
 			}
 			System.arraycopy(input[ch], 0, y[ch], 0, input[ch].length);
 
-			
+			// Calculate and store work done
+			int nb = removeClicks(y[ch], sampleWidth * 2);
+			if(nb > 0){
+				this.addToControl(ch == 0 ? REMOVED_LEFT : REMOVED_RIGHT, nb);
+			}
 			// Save results
-			removeClicks(y[ch], sampleWidth * 2);
 			System.arraycopy(y[ch], 0, ret[ch], 0, sampleWidth);
 			System.arraycopy(y[ch], sampleWidth, y[ch], 0, y[ch].length - sampleWidth );
 		}
@@ -248,7 +255,7 @@ public class ClickRemovalFilter extends AudioFilter {
 	 * @param buffer the buffer
 	 * @param len the length of the buffer
 	 */
-	protected void removeClicks(float[] buffer, int len ) {
+	protected int removeClicks(float[] buffer, int len ) {
 		int mClickWidth = this.getSampleControl(CLICK_WIDTH);
 		int mThresholdLevel = this.getIntControl(THRESHOLD);
 		int left = 0;
@@ -364,7 +371,7 @@ public class ClickRemovalFilter extends AudioFilter {
 				}
 			}
 		}
-		this.addToControl(REMOVED, found);
+		return found;
 	}
 
 }

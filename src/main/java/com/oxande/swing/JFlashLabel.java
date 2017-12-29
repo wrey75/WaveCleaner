@@ -2,8 +2,10 @@ package com.oxande.swing;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -16,28 +18,39 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
 @SuppressWarnings("serial")
 public class JFlashLabel extends JLabel implements ActionListener {
 	private static Logger LOG = LogFactory.getLog(JFlashLabel.class);
-	
 	long flashTime = 0;
+	private int flashDuration = 750; // in milliseconds
+	private int fullPower = 5; // keep in full power
 	
 	public JFlashLabel(){
-		super();
-		startTimer();
+		this(' ');
 	}
 		
-	public JFlashLabel(String label){
-		super(label);
-		startTimer(); 
+	public JFlashLabel(char c){
+		super(" " + c + " ");
+		initComponent();
 	}
 	
-	private void startTimer(){
-		Timer timer = new Timer(100, this);
+	public void setFlashDuration(int duration){
+		this.flashDuration = duration;
+	}
+	
+	public int getFlashDuration(){
+		return this.flashDuration;
+	}
+	
+	private synchronized void initComponent(){
+		Timer timer = new Timer(50, this);
 		timer.setInitialDelay(100);
 		timer.start();
+
+		setFont(new Font("monospaced", Font.PLAIN, 12));
+		setForeground(Color.LIGHT_GRAY);
 		this.setOpaque(true);
 	}
 	
 	public void fireFlash() {
-		this.flashTime = System.currentTimeMillis();
+		this.flashTime = System.currentTimeMillis() + fullPower;
 		if( SwingUtilities.isEventDispatchThread() ){
 			actionPerformed(null);
 		}
@@ -53,8 +66,13 @@ public class JFlashLabel extends JLabel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		long value = (e == null ? 1000 : 1000 - Math.min(1000, System.currentTimeMillis() - flashTime));
-		Color color = new Color((int)(value * 255.0 / 1000.0), 0, 0);
+		Color color = Color.BLACK;
+		long sinceFlash = Math.max(0, System.currentTimeMillis() - flashTime);
+		if( sinceFlash < flashDuration ){
+			int intensity = (int)((flashDuration - sinceFlash) * 255.0 / flashDuration );
+			//LOG.info("intensity = {}, since = {}", intensity, sinceFlash);
+			color = new Color(intensity, 0, 0);	
+		} 
 		this.setBackground(color);
 	}
 }
