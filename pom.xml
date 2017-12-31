@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.oxande</groupId>
 	<artifactId>wavecleaner</artifactId>
-	<version>0.70-SNAPSHOT</version>
+	<version>0.80</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -164,11 +164,6 @@
 			<groupId>net.compartmental.code</groupId>
 			<artifactId>minim</artifactId>
 			<version>2.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-transcoder</artifactId>
-			<version>1.9.1</version>
 		</dependency>
 	</dependencies>
 </project>
