@@ -1,15 +1,5 @@
 package com.oxande.wavecleaner.ui;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.AudioProject;
 import com.oxande.wavecleaner.ProjectListener;
 import com.oxande.wavecleaner.WaveCleaner;
@@ -18,15 +8,19 @@ import com.oxande.wavecleaner.audio.AudioDocument;
 import com.oxande.wavecleaner.filters.AudioPlayerListener;
 import com.oxande.wavecleaner.util.AWTUtils;
 import com.oxande.wavecleaner.util.Assert;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.AudioOutput;
 import ddf.minim.Minim;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+import java.io.IOException;
 
 @SuppressWarnings("serial")
+@Slf4j
 public class MainScreen extends AbstractMainScreen
 		implements AudioPlayerListener, AudioChangedListener, ProjectListener {
-	private static Logger LOG = LogFactory.getLog(MainScreen.class);
 	private WaveCleaner app;
 	private AudioDocument audio;
 	private AudioOutput lineOut;

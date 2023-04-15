@@ -1,21 +1,17 @@
 package com.oxande.wavecleaner.util;
 
-import java.awt.Image;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
-import javax.imageio.ImageIO;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
+@Slf4j
 public class WaveUtils {
-	private static Logger LOG = LogFactory.getLog(WaveUtils.class);
-	
+
 	public static Icon loadIcon(String fileName, int size){
 		Icon icon = null;
 		try {

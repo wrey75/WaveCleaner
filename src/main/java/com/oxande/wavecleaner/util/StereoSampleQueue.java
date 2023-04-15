@@ -19,20 +19,17 @@
 
 package com.oxande.wavecleaner.util;
 
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.UGen;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * This class is a queue for an audio stream.
  *
  */
+@Slf4j
 public class StereoSampleQueue {
-	private static Logger LOG = LogFactory.getLog(StereoSampleQueue.class);
-	
+
     public static int BUFFER_LEN = 1024;
     public static int MIN_BUFF = 64;
 

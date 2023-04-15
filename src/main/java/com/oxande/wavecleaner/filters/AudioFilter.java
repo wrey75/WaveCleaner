@@ -1,23 +1,20 @@
 package com.oxande.wavecleaner.filters;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.util.ConvertUtils;
 import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.StereoSampleQueue;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.Minim;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.UGen;
 import ddf.minim.spi.AudioStream;
 import ddf.minim.ugens.FilePlayer;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * This is the base for audio filters. Note the audio filter is an high-end
@@ -44,8 +41,8 @@ import ddf.minim.ugens.FilePlayer;
  * @author wrey75
  *
  */
+@Slf4j
 public class AudioFilter extends UGen {
-	private static Logger LOG = LogFactory.getLog(AudioFilter.class);
 
 	/**
 	 * The enabled switch. This switch is NOT listed in the parameters because

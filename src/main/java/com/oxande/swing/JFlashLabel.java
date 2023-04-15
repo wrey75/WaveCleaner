@@ -1,23 +1,15 @@
 package com.oxande.swing;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
-
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
 
 @SuppressWarnings("serial")
+@Slf4j
 public class JFlashLabel extends JLabel implements ActionListener {
-	private static Logger LOG = LogFactory.getLog(JFlashLabel.class);
 	long flashTime = 0;
 	private int flashDuration = 750; // in milliseconds
 	private int fullPower = 5; // keep in full power

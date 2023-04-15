@@ -1,5 +1,8 @@
 package com.oxande.wavecleaner.audio;
 
+import ddf.minim.Minim;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -7,12 +10,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.FloatBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
-import ddf.minim.Minim;
 
 
 /**
@@ -22,9 +19,9 @@ import ddf.minim.Minim;
  * charge to map the data from the file to
  *
  */
+@Slf4j
 public class AudioCache implements AutoCloseable {
-	private static Logger LOG = LogFactory.getLog(AudioCache.class);
-	
+
 	public static final String PREFIX = "wcleaner-";
 	public static final String SUFFIX = ".dat";
 	

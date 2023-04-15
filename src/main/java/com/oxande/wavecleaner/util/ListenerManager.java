@@ -1,20 +1,16 @@
 package com.oxande.wavecleaner.util;
 
+import lombok.extern.slf4j.Slf4j;
+
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.swing.SwingUtilities;
-
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
-
+@Slf4j
 public class ListenerManager<T> {
-	private static Logger LOG = LogFactory.getLog(ListenerManager.class);
 	private List<ListenerInfo<T>> listenerInfos = new ArrayList<>();
 	
 	/**

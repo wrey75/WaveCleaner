@@ -1,33 +1,22 @@
 package com.oxande.wavecleaner;
 
-import java.io.File;
-import java.util.Arrays;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.audio.AudioCache;
 import com.oxande.wavecleaner.ui.MainScreen;
 import com.oxande.wavecleaner.util.ProcessingLegacy;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
-import ddf.minim.AudioInput;
-import ddf.minim.AudioOutput;
-import ddf.minim.AudioRecorder;
-import ddf.minim.AudioSample;
-import ddf.minim.Minim;
-import ddf.minim.Recordable;
+import ddf.minim.*;
 import ddf.minim.spi.AudioRecordingStream;
+import lombok.extern.slf4j.Slf4j;
 
+import javax.swing.*;
+import java.io.File;
+import java.util.Arrays;
+
+@Slf4j
 public class WaveCleaner {
 	public static final String TITLE = "Wavecleaner"; 
 	public static String workingDir = ".";
 	
-	private static Logger LOG = LogFactory.getLog(WaveCleaner.class);
+
 	private static WaveCleaner application;
 	private MainScreen mainFrame;
 	public Minim minim;

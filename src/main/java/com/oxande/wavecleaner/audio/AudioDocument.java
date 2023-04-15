@@ -1,29 +1,21 @@
 package com.oxande.wavecleaner.audio;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.sound.sampled.AudioFormat;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.RMSSample;
 import com.oxande.wavecleaner.WaveCleaner;
-import com.oxande.wavecleaner.filters.AudioDocumentPlayer;
-import com.oxande.wavecleaner.filters.AudioPlayerListener;
-import com.oxande.wavecleaner.filters.ClickRemovalFilter;
-import com.oxande.wavecleaner.filters.DecrackleFilter;
-import com.oxande.wavecleaner.filters.PreamplifierFilter;
+import com.oxande.wavecleaner.filters.*;
 import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.ListenerManager;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.AudioOutput;
 import ddf.minim.AudioRecorder;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.SignalSplitter;
 import ddf.minim.spi.AudioRecordingStream;
 import ddf.minim.ugens.Summer;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.sound.sampled.AudioFormat;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Management of an audio file. The audio document can be seen as the "driver"
@@ -43,8 +35,8 @@ import ddf.minim.ugens.Summer;
  * @author wrey75
  *
  */
+@Slf4j
 public class AudioDocument /* implements AudioListener */ {
-	private Logger LOG = LogFactory.getLog(AudioDocument.class);
 
 	String fileName;
 	AudioRecordingStream stream;

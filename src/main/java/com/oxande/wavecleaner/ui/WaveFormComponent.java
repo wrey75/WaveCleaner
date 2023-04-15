@@ -1,23 +1,13 @@
 package com.oxande.wavecleaner.ui;
 
-import java.awt.BorderLayout;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.SwingUtilities;
-import javax.swing.event.MouseInputListener;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.audio.AudioDocument;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.AudioListener;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.swing.*;
+import javax.swing.event.MouseInputListener;
+import java.awt.*;
+import java.awt.event.*;
 
 /**
  * The waveform component is the central part of the software in terms of
@@ -50,10 +40,10 @@ import ddf.minim.AudioListener;
  * @author wrey75
  *
  */
+@Slf4j
 @SuppressWarnings("serial")
 public class WaveFormComponent extends JPanel
 		implements MouseInputListener, MouseWheelListener, AdjustmentListener {
-	private static Logger LOG = LogFactory.getLog(WaveFormComponent.class);
 	AudioDocument audio = null;
 	private JScrollBar scroll = new JScrollBar();
 	private WaveComponent wave = new WaveComponent();

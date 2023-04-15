@@ -1,18 +1,13 @@
 package com.oxande.wavecleaner.ui;
 
-import java.util.Arrays;
-
-import javax.swing.JOptionPane;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.WaveCleaner;
 import com.oxande.wavecleaner.util.Assert;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.AudioInput;
 import ddf.minim.AudioListener;
 import ddf.minim.AudioRecorder;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.swing.*;
 
 /**
  * The class which implements the recording.
@@ -21,9 +16,9 @@ import ddf.minim.AudioRecorder;
  *
  */
 @SuppressWarnings("serial")
+@Slf4j
 public class RecordScreen extends AbstractRecordScreen implements AudioListener {
 	@SuppressWarnings("unused")
-	private static Logger LOG = LogFactory.getLog(RecordScreen.class);
 	protected AudioRecorder recorder;
 	protected AudioInput lineIn;
 	protected MainScreen mainScreen = null;

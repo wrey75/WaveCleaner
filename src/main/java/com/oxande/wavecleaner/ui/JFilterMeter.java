@@ -1,31 +1,17 @@
 package com.oxande.wavecleaner.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.filters.AudioFilter;
 import com.oxande.wavecleaner.filters.AudioFilter.Parameter;
 import com.oxande.wavecleaner.util.ListenerManager;
 import com.oxande.wavecleaner.util.WaveUtils;
-import com.oxande.wavecleaner.util.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A replacement for the {@link JSlider} which is not perfect for what we want.
@@ -39,8 +25,8 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  *
  */
 @SuppressWarnings("serial")
+@Slf4j
 public class JFilterMeter extends JPanel {
-	private static Logger LOG = LogFactory.getLog(JFilterMeter.class);
 
 	private AudioFilter filter;
 	private Parameter control;

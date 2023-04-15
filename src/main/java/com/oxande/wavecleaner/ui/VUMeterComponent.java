@@ -1,14 +1,9 @@
 package com.oxande.wavecleaner.ui;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.JComponent;
-
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * A component for displaying information about the RMS and peak levels. The
@@ -26,9 +21,9 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  *
  */
 @SuppressWarnings("serial")
+@Slf4j
 public class VUMeterComponent extends JComponent {
-	private static Logger LOG = LogFactory.getLog(VUMeterComponent.class);
-	
+
 	private static final int NB_CHANNELS = 2; // STEREO
 	
 	public static final int HORIZONAL = 1;

@@ -1,13 +1,10 @@
 package com.oxande.wavecleaner.filters;
 
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.ui.WaveFormComponent;
 import com.oxande.wavecleaner.util.ListenerManager;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.spi.AudioRecordingStream;
 import ddf.minim.ugens.FilePlayer;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The audio document player is very similar to the {@link FilePlayer}
@@ -69,9 +66,9 @@ import ddf.minim.ugens.FilePlayer;
  * @author wrey75
  *
  */
+@Slf4j
 public class AudioDocumentPlayer extends FilePlayer {
-	private static Logger LOG = LogFactory.getLog(AudioDocumentPlayer.class);
-	
+
 	private static final int NB_CHANNELS = 2;
 		
 	float[] queue;

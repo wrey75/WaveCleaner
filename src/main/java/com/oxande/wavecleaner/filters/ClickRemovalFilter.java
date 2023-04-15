@@ -1,13 +1,11 @@
 package com.oxande.wavecleaner.filters;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
 
 
 /**
@@ -27,8 +25,8 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  * 
  *
  */
+@Slf4j
 public class ClickRemovalFilter extends AudioFilter {
-	private static Logger LOG = LogFactory.getLog(ClickRemovalFilter.class);
 	private final static int SEP = 2049;
 	
 	public static final String THRESHOLD = "thresold";

@@ -1,16 +1,13 @@
 package com.oxande.wavecleaner.filters;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.wavecleaner.ui.VUMeterComponent;
 import com.oxande.wavecleaner.util.Assert;
 import com.oxande.wavecleaner.util.ConvertUtils;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.MultiChannelBuffer;
+import lombok.extern.slf4j.Slf4j;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  * The preamplifier filter (aka ControllerFilter but ranamed to match the real functionality). 
@@ -28,9 +25,9 @@ import ddf.minim.MultiChannelBuffer;
  * @author wrey75
  *
  */
+@Slf4j
 public class PreamplifierFilter extends AudioFilter {
-	private Logger LOG = LogFactory.getLog(PreamplifierFilter.class);
-	
+
 	public static final String GAIN = "gain";
 	public static final String SOURCE = "source";
 	public static final String LIMITER = "limiter";

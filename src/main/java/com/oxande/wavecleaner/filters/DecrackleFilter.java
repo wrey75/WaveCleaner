@@ -18,13 +18,11 @@
 *******************************************************************************/
 package com.oxande.wavecleaner.filters;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.Validate;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
-import org.apache.commons.lang.Validate;
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
 
 /**
  * The decrackle filter comes from the <a href=
@@ -45,8 +43,8 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  * @author Jeff Welty (original author)
  *
  */
+@Slf4j
 public class DecrackleFilter extends AudioFilter {
-	private static Logger LOG = LogFactory.getLog(DecrackleFilter.class);
 
 	public static final int WINDOW_SIZE = 2000;
 	public static final String AVERAGE = "average";

@@ -1,13 +1,10 @@
 package com.oxande.wavecleaner.filters;
 
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
 import ddf.minim.AudioMetaData;
 import ddf.minim.MultiChannelBuffer;
 import ddf.minim.UGen;
 import ddf.minim.spi.AudioRecordingStream;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The monaural filter is intended as a test. DO NOT SUPPOSE IT IS WORKING.
@@ -15,8 +12,8 @@ import ddf.minim.spi.AudioRecordingStream;
  * @author wrey75
  *
  */
+@Slf4j
 public class MonauralFilter extends UGen {
-	private static Logger LOG = LogFactory.getLog(MonauralFilter.class);
 	private AudioRecordingStream mFileStream;
 	// private boolean isPaused;
 	// buffer we use to read from the stream

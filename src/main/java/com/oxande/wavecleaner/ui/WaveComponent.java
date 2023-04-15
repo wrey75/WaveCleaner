@@ -1,25 +1,15 @@
 package com.oxande.wavecleaner.ui;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Stroke;
+import com.oxande.wavecleaner.RMSSample;
+import com.oxande.wavecleaner.audio.AudioDocument;
+import ddf.minim.analysis.FFT;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JComponent;
-
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.RMSSample;
-import com.oxande.wavecleaner.audio.AudioDocument;
-import com.oxande.wavecleaner.util.logging.LogFactory;
-
-import ddf.minim.analysis.FFT;
 
 /**
  * The component which is in charge of the display.
@@ -28,6 +18,7 @@ import ddf.minim.analysis.FFT;
  *
  */
 @SuppressWarnings("serial")
+@Slf4j
 public class WaveComponent extends JComponent {
 	public static final Color LEFT_COLOR = new Color(46, 204, 113);
 	public static final Color RIGHT_COLOR = new Color(26, 188, 156);
@@ -37,7 +28,6 @@ public class WaveComponent extends JComponent {
 	static public final int CHUNK_MODE = 2;
 	static public final int FFT_MODE = 3;
 	
-	private static Logger LOG = LogFactory.getLog(WaveComponent.class);
 	private AudioDocument audio = null;
 	
 	/** mousePosition in samples */

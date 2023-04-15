@@ -1,16 +1,9 @@
 package com.oxande.wavecleaner.ui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-
-import org.apache.logging.log4j.Logger;
-
-import com.oxande.wavecleaner.util.logging.LogFactory;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * This is to display a "real time" waveform. Mainly used for recording purposes.
@@ -19,9 +12,9 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  *
  */
 @SuppressWarnings("serial")
+@Slf4j
 public class RealtimeWaveComponent  extends JComponent {
-	private static Logger LOG = LogFactory.getLog(RealtimeWaveComponent.class);
-	
+
 	protected Color rightColor = WaveComponent.RIGHT_COLOR;
 	protected Color leftColor = WaveComponent.LEFT_COLOR;
 	

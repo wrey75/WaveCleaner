@@ -1,30 +1,5 @@
 package com.oxande.wavecleaner.ui;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
-
-import org.apache.logging.log4j.Logger;
-
 import com.oxande.swing.JFlashLabel;
 import com.oxande.swing.JToggleSelect;
 import com.oxande.swing.JToggleSwitch;
@@ -37,7 +12,19 @@ import com.oxande.wavecleaner.filters.DecrackleFilter;
 import com.oxande.wavecleaner.filters.PreamplifierFilter;
 import com.oxande.wavecleaner.ui.JFilterMeter.ValueListener;
 import com.oxande.wavecleaner.util.Assert;
-import com.oxande.wavecleaner.util.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The controller is quite complex in term of creating subcomponents. That's why
@@ -47,8 +34,8 @@ import com.oxande.wavecleaner.util.logging.LogFactory;
  *
  */
 @SuppressWarnings("serial")
+@Slf4j
 public class ControllerComponent extends JPanel {
-	private static Logger LOG = LogFactory.getLog(ControllerComponent.class);
 	private BufferedImage sono_up;
 	private BufferedImage sono_middle;
 	private BufferedImage sono_down;
